@@ -1,3 +1,32 @@
+# My Project Portfolio
+
+## 🤖 AI & LLM Orchestration
+**Project Overview:** High-performance local LLM orchestration on 16GB Unified Memory. This section focuses on multimodal screen interaction and agentic workflows.
+
+*   **Key Tech:** Python, PyTorch, Local LLMs
+*   **Hardware:** 16GB Unified Memory (M-Series Mac)
+
+<video src="https://github.com" controls="controls" width="100%"></video>
+
+---
+
+## 🐕 Learning Projects: Virtual Quadruped
+**Project Overview:** Training a quad virtual dog on resolving a maze. This project explores reinforcement learning and spatial navigation.
+
+*   **Objective:** Maze solving without pre-defined paths.
+*   **Status:** Active Training.
+
+<video src="https://github.com" controls="controls" width="100%"></video>
+
+---
+
+## 📱 iPad LiDAR & Spatial Mapping
+**Project Overview:** Using iPad LiDAR sensors to capture real-world environments for multimodal AI interaction.
+
+*   **Sensor:** iPad Pro LiDAR
+*   **Goal:** Convert 3D spatial data into tokens for the AI Orchestrator.
+
+[Drop your LiDAR video or screenshots here!]
 
 
 
