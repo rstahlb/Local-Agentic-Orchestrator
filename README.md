@@ -12,5 +12,66 @@ High-performance local LLM orchestration on 16GB Unified Memory with multimodal 
 # 2019 MacBook running Ubuntu Linux Native.  Project: control trackbar and animate.
 <video src="https://github.com/user-attachments/assets/ed3673a4-a5d3-46e7-9385-63119a126987" controls="controls" width="100%"></video>
 
+# test
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bubble Simulation</title>
+    <style>
+        /* Add your CSS here */
+        body { margin: 0; overflow: hidden; background: #000; }
+        canvas { display: block; }
+        .controls { position: absolute; top: 10px; left: 10px; z-index: 10; }
+        button { padding: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <button id="addBtn">+ Add 5 Bubbles</button>
+        <button id="popAllBtn">Pop All</button>
+    </div>
+    <canvas id="bubbleCanvas"></canvas>
+
+    <script>
+        // 1. SETUP: Canvas, Context, and State
+        const canvas = document.getElementById('bubbleCanvas');
+        const ctx = canvas.getContext('2d');
+        let audioCtx = null;
+        let bubbles = [];
+
+        // 2. PHYSICS: Elastic collisions & Wall bounce
+        // Use mass = radius^2 for your collision calculations
+        function resolveCollision(b1, b2) {
+            // Your collision response logic goes here
+        }
+
+        // 3. VISUALS: Iridescence & Shimmer
+        // Use ctx.createRadialGradient for the film look
+        function drawBubble(bubble) {
+            // Your rendering logic (gradients, highlights, shimmer)
+        }
+
+        // 4. SOUND: AudioContext synthesis
+        function playPopSound() {
+            if (!audioCtx) return;
+            // Your filtered noise burst logic
+        }
+
+        // 5. INTERACTION & LOOP
+        window.addEventListener('click', () => {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        });
+
+        // 6. POP PHASE: 2-minute timer
+        setTimeout(() => {
+            // Logic to start the random popping phase
+        }, 120000);
+
+        // ... (Rest of your simulation loop and event listeners)
+    </script>
+</body>
+</html>
 
 
