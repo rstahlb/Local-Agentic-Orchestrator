@@ -13,4 +13,8 @@ High-performance local LLM orchestration on 16GB Unified Memory with multimodal 
 <video src="https://github.com/user-attachments/assets/ed3673a4-a5d3-46e7-9385-63119a126987" controls="controls" width="100%"></video>
 
 # Bubbles in html
-<iframe src="bubbles/index.html" width="100%" height="500px" style="border:none;"></iframe>
+<div style="text-align: center; margin: 20px 0;">
+    <h2>Bubble Simulation</h2>
+    <iframe src="bubbles.html" width="100%" height="300px" style="border: 1px solid #ccc; border-radius: 8px;"></iframe>
+</div>
+
