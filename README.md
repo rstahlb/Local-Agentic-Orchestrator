@@ -12,11 +12,12 @@ High-performance local LLM orchestration on 16GB Unified Memory with multimodal 
 # 2019 MacBook running Ubuntu Linux Native.  Project: control trackbar and animate.
 <video src="https://github.com/user-attachments/assets/ed3673a4-a5d3-46e7-9385-63119a126987" controls="controls" width="100%"></video>
 
-# Bubbles in html
-<div style="text-align: center; margin: 20px 0;">
-    <h2>Bubble Simulation</h2>
-    <!-- This points to the bubbles folder you created -->
-    <iframe src="bubbles/index.html" width="100%" height="500px" style="border: 2px solid #333; border-radius: 10px;"></iframe>
-</div>
+# Bubbles 
+
+<video width="100%" height="auto" controls>
+  <source src="video.mp4" type="video/mp4">
+</video>
+
+
 
 
