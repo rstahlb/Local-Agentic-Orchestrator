@@ -16,7 +16,7 @@ High-performance local LLM orchestration on 16GB Unified Memory with multimodal 
 
 <div style="text-align: center; margin: 20px 0;">
     <video width="100%" height="auto" controls autoplay muted playsinline loop>
-        <source src="visualizer.mp4" type="video/mp4">
+        <source src="output.mp4" type="video/mp4">
         Your browser does not support the video tag.
     </video>
 </div>
