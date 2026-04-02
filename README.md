@@ -1,5 +1,4 @@
 
-
 # 🚀 My Project Portfolio
 
 ### 📍 Quick Links
@@ -10,19 +9,15 @@
 ---
 
 ## 🤖 AI & LLM Orchestration
-**Project Overview:** High-performance local LLM orchestration on 16GB on MacBook M1 Pro 1 extra GPU Unified Memory. This section focuses on multimodal screen interaction and agentic workflows. I will put my thoughts and videos of build process.
+**Project Overview:** High-performance local LLM orchestration on 16GB Unified Memory. This section focuses on multimodal screen interaction and agentic workflows.
 
 ### 🐕 Virtual Quadruped Training
 Training a quad virtual dog on resolving a maze. This project explores reinforcement learning and spatial navigation.
-* **Objective:** Maze solving without pre-defined paths.
-* **Status:** Active Training.
-
 <video src="https://github.com" controls="controls" width="100%"></video>
 
 ### 🧠 Orchestrator Overview
 * **Key Tech:** Python, PyTorch, Local LLMs
 * **Hardware:** 16GB Unified Memory (M-Series Mac)
-
 <video src="https://github.com" controls="controls" width="100%"></video>
 
 [↑ Back to Menu](#-quick-links)
@@ -35,7 +30,7 @@ Training a quad virtual dog on resolving a maze. This project explores reinforce
 * **Sensor:** iPad Pro LiDAR
 * **Goal:** Convert 3D spatial data into tokens for the AI Orchestrator.
 
-> *[Place your LiDAR video link here when ready]*
+> *[Drop your LiDAR asset link here when ready!]*
 
 [↑ Back to Menu](#-quick-links)
 
@@ -46,12 +41,10 @@ A collection of experiments built to master different hardware and software envi
 
 ### 🔵 Android Bubbles & Physics
 Random balls affected by physical phone movement (shaking), featuring gravity and collision logic.
-
-<video src="https://github.com" controls="controls" width="100%" loop muted playsinline></video>
+<video src="https://github.com" controls="controls" width="100%"></video>
 
 ### 💻 Ubuntu Linux Touchbar Control
 Running native Ubuntu on a 2019 MacBook. Project focuses on controlling the Touchbar and creating custom animations.
-
 <video src="https://github.com" controls="controls" width="100%"></video>
 
 [↑ Back to Menu](#-quick-links)
