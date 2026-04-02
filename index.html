@@ -5,25 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI Project Portfolio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Geist+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #050810;
   --bg2: #080d1a;
   --bg3: #0d1425;
-  --border: #1a2540;
-  --border2: #243050;
-  --text: #c8d4f0;
-  --text-dim: #6b7fa8;
-  --text-bright: #e8eeff;
-  --accent1: #1a6fff;
-  --accent2: #00c8ff;
-  --accent3: #ff6b35;
-  --accent4: #39ff8a;
-  --yellow: #ffc840;
-  --code-bg: #0a1020;
-  --font-display: 'Syne', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --border: #1e2d4a;
+  --border2: #28385e;
+  --text: #dde6f8;
+  --text-dim: #8fa3cc;
+  --text-bright: #f0f5ff;
+  --accent1: #3d8bff;
+  --accent2: #18d4ff;
+  --accent3: #ff7a47;
+  --accent4: #3dffa0;
+  --yellow: #ffd166;
+  --code-bg: #070c18;
+  --font-display: 'Inter', sans-serif;
+  --font-mono: 'Geist Mono', 'Geist Mono Fallback', monospace;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -33,10 +34,12 @@ html { scroll-behavior: smooth; }
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: var(--font-mono);
-  font-size: 14px;
-  line-height: 1.7;
+  font-family: var(--font-display);
+  font-size: 15px;
+  line-height: 1.75;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* ── STARFIELD ── */
@@ -79,7 +82,7 @@ nav {
 .nav-brand {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 1rem;
+  font-size: 1.05rem;
   color: var(--text-bright);
   letter-spacing: -0.02em;
 }
@@ -92,11 +95,12 @@ nav {
 .nav-links a {
   color: var(--text-dim);
   text-decoration: none;
-  font-size: 0.75rem;
-  padding: 0.35rem 0.75rem;
-  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.35rem 0.85rem;
+  border-radius: 6px;
   transition: color 0.2s, background 0.2s;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.01em;
 }
 .nav-links a:hover {
   color: var(--text-bright);
@@ -141,11 +145,12 @@ nav {
   to   { transform: scale(1.12); opacity: 0.8; }
 }
 .hero-label {
-  font-size: 0.7rem;
-  letter-spacing: 0.25em;
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
   color: var(--accent2);
   text-transform: uppercase;
   margin-bottom: 1rem;
+  font-weight: 500;
 }
 .hero h1 {
   font-family: var(--font-display);
@@ -162,10 +167,11 @@ nav {
 }
 .hero-sub {
   max-width: 540px;
-  color: var(--text-dim);
-  font-size: 0.88rem;
-  line-height: 1.8;
+  color: #a8bde0;
+  font-size: 0.95rem;
+  line-height: 1.85;
   margin-bottom: 2.5rem;
+  font-weight: 400;
 }
 .badge-row {
   display: flex;
@@ -216,15 +222,15 @@ nav {
 .proj-card-icon { font-size: 1.8rem; margin-bottom: 0.75rem; }
 .proj-card h3 {
   font-family: var(--font-display);
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--text-bright);
   margin-bottom: 0.5rem;
 }
 .proj-card p {
-  color: var(--text-dim);
-  font-size: 0.78rem;
-  line-height: 1.6;
+  color: #9ab0d4;
+  font-size: 0.85rem;
+  line-height: 1.65;
 }
 .proj-card-tag {
   display: inline-block;
@@ -255,11 +261,12 @@ nav {
   margin: 0 auto;
 }
 .project-number {
-  font-size: 0.65rem;
-  letter-spacing: 0.25em;
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
   color: var(--accent2);
   text-transform: uppercase;
   margin-bottom: 0.75rem;
+  font-weight: 500;
 }
 .project-header h2 {
   font-family: var(--font-display);
@@ -272,10 +279,10 @@ nav {
 }
 .project-header h2 span { color: var(--accent1); }
 .project-desc {
-  color: var(--text-dim);
-  font-size: 0.88rem;
+  color: #a8bde0;
+  font-size: 0.92rem;
   max-width: 600px;
-  line-height: 1.8;
+  line-height: 1.85;
   border-left: 2px solid var(--accent1);
   padding-left: 1rem;
   margin-bottom: 2rem;
@@ -327,16 +334,16 @@ nav {
   gap: 0.75rem;
 }
 .chapter-num {
-  font-size: 0.65rem;
+  font-size: 0.67rem;
   color: var(--accent2);
   letter-spacing: 0.15em;
   text-transform: uppercase;
   font-family: var(--font-mono);
-  font-weight: 400;
+  font-weight: 500;
 }
 h4 {
   font-family: var(--font-display);
-  font-size: 0.95rem;
+  font-size: 0.98rem;
   font-weight: 700;
   color: var(--accent2);
   margin: 1.75rem 0 0.75rem;
@@ -344,8 +351,8 @@ h4 {
 }
 p {
   color: var(--text);
-  font-size: 0.84rem;
-  line-height: 1.85;
+  font-size: 0.9rem;
+  line-height: 1.9;
   margin-bottom: 1rem;
 }
 p strong { color: var(--text-bright); font-weight: 600; }
@@ -380,9 +387,9 @@ pre {
 }
 pre code {
   font-family: var(--font-mono);
-  font-size: 0.78rem;
-  line-height: 1.7;
-  color: #a8c0f0;
+  font-size: 0.8rem;
+  line-height: 1.75;
+  color: #b8d0f8;
 }
 .code-lang {
   position: absolute;
@@ -395,31 +402,31 @@ pre code {
 }
 code {
   font-family: var(--font-mono);
-  background: rgba(26,111,255,0.1);
-  border: 1px solid rgba(26,111,255,0.15);
-  border-radius: 3px;
+  background: rgba(61,139,255,0.1);
+  border: 1px solid rgba(61,139,255,0.18);
+  border-radius: 4px;
   padding: 0.1em 0.4em;
-  font-size: 0.8em;
-  color: #7aacff;
+  font-size: 0.82em;
+  color: #88baff;
 }
 pre code { background: none; border: none; padding: 0; font-size: inherit; color: inherit; }
 
 /* ── TABLES ── */
 .table-wrap { overflow-x: auto; margin: 1rem 0 1.5rem; border-radius: 8px; border: 1px solid var(--border); }
-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
 thead tr { background: var(--bg3); }
 th {
   padding: 0.75rem 1rem;
   text-align: left;
-  font-size: 0.65rem;
-  letter-spacing: 0.1em;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--text-dim);
+  color: #8fa3cc;
   font-weight: 600;
   border-bottom: 1px solid var(--border);
 }
 td {
-  padding: 0.65rem 1rem;
+  padding: 0.7rem 1rem;
   border-bottom: 1px solid var(--border);
   color: var(--text);
   vertical-align: top;
@@ -440,7 +447,7 @@ td code { font-size: 0.75em; }
   counter-increment: boot;
   display: flex;
   gap: 1rem;
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   color: var(--text);
   padding: 0.5rem 0.75rem;
   border-radius: 6px;
@@ -477,8 +484,8 @@ td code { font-size: 0.75em; }
 }
 .orb-item:hover { border-color: var(--accent1); }
 .orb-num { font-size: 0.6rem; color: var(--text-dim); letter-spacing: 0.1em; }
-.orb-name { font-size: 0.82rem; font-weight: 600; color: var(--text-bright); }
-.orb-desc { font-size: 0.72rem; color: var(--text-dim); line-height: 1.5; }
+.orb-name { font-size: 0.85rem; font-weight: 600; color: var(--text-bright); }
+.orb-desc { font-size: 0.75rem; color: #8fa3cc; line-height: 1.55; }
 
 /* ── REWARD TABLE COLORS ── */
 .reward-pos { color: var(--accent4); font-weight: 600; }
