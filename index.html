@@ -1372,22 +1372,39 @@ document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
 // ════════ GEORGE VIDEO PLAYER ════════
 (function(){
-  var wrap    = document.getElementById('heroWrap');
   var orb     = document.getElementById('heroOrb');
-  var vid1 = document.getElementById("vid1");
-  var vid2 = document.getElementById("vid2");
-  var vid3 = document.getElementById("vid3");
-  var vid4 = document.getElementById("vid4");
-  var vid5 = document.getElementById("vid5");
-  var vid6 = document.getElementById("vid6");
-  var vid7 = document.getElementById("vid7");
-  var vid8 = document.getElementById("vid8");
-  var vid9 = document.getElementById("vid9");
-  var vid10 = document.getElementById("vid10");
   var overlay = document.getElementById('hearOverlay');
+  var allVids = [];
+  for(var i=1; i<=10; i++){
+    allVids.push(document.getElementById('vid'+i));
+  }
 
-  var allVids = [vid1, vid2, vid3, vid4, vid5, vid6, vid7, vid8, vid9, vid10];
-  var unlocked = false;
+  var unlocked   = false;
+  var shuffled   = [];
+  var shuffleIdx = 0;
+
+  // Fisher-Yates shuffle
+  function shuffle(arr){
+    var a = arr.slice();
+    for(var i=a.length-1; i>0; i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var tmp=a[i]; a[i]=a[j]; a[j]=tmp;
+    }
+    return a;
+  }
+
+  function nextVid(){
+    if(shuffleIdx >= shuffled.length){
+      // reshuffle when we've played them all - avoid same video twice in a row at boundary
+      var last = shuffled[shuffled.length-1];
+      shuffled = shuffle(allVids);
+      if(shuffled[0] === last) {
+        shuffled.push(shuffled.shift()); // rotate first to end
+      }
+      shuffleIdx = 0;
+    }
+    return shuffled[shuffleIdx++];
+  }
 
   // ── click overlay to unlock sound ──
   overlay.addEventListener('click', function(e){
@@ -1415,23 +1432,15 @@ document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
     vid.play().catch(function(){ vid.muted=true; vid.play(); });
   }
 
-  // intro: first 2 videos x2 each, then random loop
-  function i1a(){ play(vid1, i1b); }
-  function i1b(){ play(vid1, i2a); }
-  function i2a(){ play(vid2, i2b); }
-  function i2b(){ play(vid2, function(){ showOrb(); scheduleLoop(); }); }
-
-  function scheduleLoop(){
-    setTimeout(loopPlay, 30000);
+  function playNext(){
+    play(nextVid(), function(){ playNext(); });
   }
 
-  function loopPlay(){
-    var v = allVids[Math.floor(Math.random() * allVids.length)];
-    play(v, function(){ showOrb(); scheduleLoop(); });
-  }
-
+  // ── START: init shuffle then play continuously ──
   window.addEventListener('load', function(){
-    setTimeout(i1a, 800);
+    shuffled = shuffle(allVids);
+    shuffleIdx = 0;
+    setTimeout(playNext, 800);
   });
 })();
 // ════════════════════════════════════
