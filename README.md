@@ -7,17 +7,20 @@
 
 ---
 
-## 🤖 AI & LLM Orchestration
-**Project Overview:** High-performance local LLM orchestration on Macbook Pro 16GB Unified Memory. This section focuses on Creation , multimodal screen interaction and agentic workflows.
-
-### 🐕 Virtual Quadruped Training
-Training a quad virtual dog on resolving a maze. This project explores reinforcement learning and spatial navigation.
-<video src="https://github.com" controls="controls" width="100%"></video>
+### 🤖 AI & LLM Orchestration Creation a small model llm for Proof of Concept 
+**Project Overview:** High-performance local LLM creation on Macbook Pro 16GB Unified Memory. This section focuses on engineering, tools, design ideas, my thoughts, workflows.
 
 ### 🧠 Orchestrator Overview
 * **Key Tech:** Python, PyTorch, Local LLMs
 * **Hardware:** 16GB Unified Memory (M-Series Mac)
 <video src="https://github.com" controls="controls" width="100%"></video>
+
+
+### 🤖 AI Engineering Overview of George my local AI
+**Project Overview:** High-performance local LLM orchestration on Macbook Pro 16GB Unified Memory. This section focuses on setup of local LLM , multimodal screen interaction and agentic workflows and other considerations.
+<video src="https://github.com" controls="controls" width="100%"></video>
+
+
 
 [↑ Back to Menu](#-quick-links)
 
