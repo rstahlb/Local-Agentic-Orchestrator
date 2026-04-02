@@ -15,6 +15,8 @@ High-performance local LLM orchestration on 16GB Unified Memory with multimodal 
 # Bubbles in html
 <div style="text-align: center; margin: 20px 0;">
     <h2>Bubble Simulation</h2>
-    <iframe src="bubbles.html" width="100%" height="300px" style="border: 1px solid #ccc; border-radius: 8px;"></iframe>
+    <!-- This points to the bubbles folder you created -->
+    <iframe src="bubbles/index.html" width="100%" height="500px" style="border: 2px solid #333; border-radius: 10px;"></iframe>
 </div>
+
 
