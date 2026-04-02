@@ -8,7 +8,7 @@
 ---
 
 ## 🤖 AI & LLM Orchestration
-**Project Overview:** High-performance local LLM orchestration on 16GB Unified Memory. This section focuses on multimodal screen interaction and agentic workflows.
+**Project Overview:** High-performance local LLM orchestration on Macbook Pro 16GB Unified Memory. This section focuses on Creation , multimodal screen interaction and agentic workflows.
 
 ### 🐕 Virtual Quadruped Training
 Training a quad virtual dog on resolving a maze. This project explores reinforcement learning and spatial navigation.
