@@ -16,9 +16,9 @@
 <video src="https://github.com" controls="controls" width="100%"></video>
 
 
-### 🤖 AI Engineering Overview of George my local AI
-**Project Overview:** High-performance local LLM orchestration on Macbook Pro 16GB Unified Memory. This section focuses on setup of local LLM , multimodal screen interaction and agentic workflows and other considerations.
-<video src="https://github.com" controls="controls" width="100%"></video>
+[↑ Back to Menu](#-quick-links)
+
+---
 
 
 
@@ -26,27 +26,6 @@
 
 ---
 
-## 📱 iPad LiDAR: Proof of Concept
-**Project Overview:** Using iPad LiDAR sensors to capture real-world environments for multimodal AI interaction.
 
-* **Sensor:** iPad Pro LiDAR
-* **Goal:** Convert 3D spatial data into tokens for the AI Orchestrator.
-
-> *[Drop your LiDAR video here to generate your link]*
-
-[↑ Back to Menu](#-quick-links)
-
----
-
-## 🧪 Learning & Random Projects
-A collection of experiments built to master different hardware and software environments.
-
-### 🔵 Android Bubbles & Physics
-Random balls affected by physical phone movement (shaking), featuring gravity and collision logic.
-<video src="https://github.com" controls="controls" width="100%"></video>
-
-### 💻 Ubuntu Linux Touchbar Control
-Running native Ubuntu on a 2019 MacBook. Project focuses on controlling the Touchbar and creating custom animations.
-<video src="https://github.com" controls="controls" width="100%"></video>
 
 [↑ Back to Menu](#-quick-links)
