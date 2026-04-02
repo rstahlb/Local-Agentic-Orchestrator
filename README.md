@@ -22,10 +22,4 @@
 
 
 
-[↑ Back to Menu](#-quick-links)
 
----
-
-
-
-[↑ Back to Menu](#-quick-links)
