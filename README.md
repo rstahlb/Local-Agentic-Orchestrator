@@ -1,50 +1,57 @@
-# My Project Portfolio
+
+
+# 🚀 My Project Portfolio
+
+### 📍 Quick Links
+* [🤖 AI & LLM Orchestration](#-ai--llm-orchestration)
+* [📱 iPad LiDAR: Proof of Concept](#-ipad-lidar-proof-of-concept)
+* [🧪 Learning & Random Projects](#-learning--random-projects)
+
+---
 
 ## 🤖 AI & LLM Orchestration
 **Project Overview:** High-performance local LLM orchestration on 16GB Unified Memory. This section focuses on multimodal screen interaction and agentic workflows.
 
-*   **Key Tech:** Python, PyTorch, Local LLMs
-*   **Hardware:** 16GB Unified Memory (M-Series Mac)
+### 🐕 Virtual Quadruped Training
+Training a quad virtual dog on resolving a maze. This project explores reinforcement learning and spatial navigation.
+* **Objective:** Maze solving without pre-defined paths.
+* **Status:** Active Training.
 
 <video src="https://github.com" controls="controls" width="100%"></video>
 
----
-
-## 🐕 Learning Projects: Virtual Quadruped
-**Project Overview:** Training a quad virtual dog on resolving a maze. This project explores reinforcement learning and spatial navigation.
-
-*   **Objective:** Maze solving without pre-defined paths.
-*   **Status:** Active Training.
+### 🧠 Orchestrator Overview
+* **Key Tech:** Python, PyTorch, Local LLMs
+* **Hardware:** 16GB Unified Memory (M-Series Mac)
 
 <video src="https://github.com" controls="controls" width="100%"></video>
 
+[↑ Back to Menu](#-quick-links)
+
 ---
 
-## 📱 iPad LiDAR & Spatial Mapping
+## 📱 iPad LiDAR: Proof of Concept
 **Project Overview:** Using iPad LiDAR sensors to capture real-world environments for multimodal AI interaction.
 
-*   **Sensor:** iPad Pro LiDAR
-*   **Goal:** Convert 3D spatial data into tokens for the AI Orchestrator.
+* **Sensor:** iPad Pro LiDAR
+* **Goal:** Convert 3D spatial data into tokens for the AI Orchestrator.
 
-[Drop your LiDAR video or screenshots here!]
+> *[Place your LiDAR video link here when ready]*
 
+[↑ Back to Menu](#-quick-links)
 
+---
 
+## 🧪 Learning & Random Projects
+A collection of experiments built to master different hardware and software environments.
 
-# Android project, random balls that are affected when you shake the physical phone, they have gravity, and collisions :)
-<video src="https://github.com/user-attachments/assets/6b97af8b-12cf-4b94-8fc5-0c52bd16b305" controls="controls" width="100%"></video>
+### 🔵 Android Bubbles & Physics
+Random balls affected by physical phone movement (shaking), featuring gravity and collision logic.
 
-# 2019 MacBook running Ubuntu Linux Native.  Project: control trackbar and animate.
-<video src="https://github.com/user-attachments/assets/ed3673a4-a5d3-46e7-9385-63119a126987" controls="controls" width="100%"></video>
+<video src="https://github.com" controls="controls" width="100%" loop muted playsinline></video>
 
-# Bubbles 
+### 💻 Ubuntu Linux Touchbar Control
+Running native Ubuntu on a 2019 MacBook. Project focuses on controlling the Touchbar and creating custom animations.
 
-<div style="text-align: center; margin: 20px 0;">
-    <video width="100%" height="auto" controls autoplay muted playsinline loop>
-        <source src="output.mp4" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
-</div>
+<video src="https://github.com" controls="controls" width="100%"></video>
 
-
-
+[↑ Back to Menu](#-quick-links)
