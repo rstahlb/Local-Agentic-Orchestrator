@@ -552,12 +552,22 @@ footer span { color: var(--accent1); }
   0%,100% { transform:scale(1);   opacity:0.5; }
   50%      { transform:scale(1.1); opacity:1;   }
 }
+
+/* ── BUBBLE LAYER ── */
+#bubbleCanvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
 </style>
 </head>
 <body>
 
 <!-- STARFIELD -->
 <div id="stars"></div>
+<canvas id="bubbleCanvas"></canvas>
 
 <div id="app">
 
@@ -1368,6 +1378,149 @@ const observer = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.08 });
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+
+// ════════ FALLING BUBBLES ════════
+(function(){
+  var canvas = document.getElementById('bubbleCanvas');
+  var ctx    = canvas.getContext('2d');
+  var W, H;
+
+  function resize(){
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  var COLORS = [
+    [160,200,255],[200,160,255],[160,255,220],
+    [255,210,160],[160,240,255],[255,170,210]
+  ];
+
+  function rnd(a,b){ return a + Math.random()*(b-a); }
+
+  function Bubble(){
+    this.reset(true);
+  }
+
+  Bubble.prototype.reset = function(fromRandom){
+    var size = Math.random();
+    if(size < 0.5)       this.r = rnd(8, 18);   // small
+    else if(size < 0.82) this.r = rnd(18, 36);  // medium
+    else                 this.r = rnd(36, 60);  // large
+
+    this.x       = rnd(this.r, W - this.r);
+    this.y       = fromRandom ? rnd(-200, H) : -this.r - rnd(10, 80);
+    this.vy      = rnd(0.18, 0.65) * (1 - this.r/120);  // bigger = slower
+    this.vx      = rnd(-0.25, 0.25);
+    this.drift   = rnd(0.003, 0.012);
+    this.driftOff= rnd(0, Math.PI*2);
+    this.hue     = Math.floor(rnd(0, COLORS.length));
+    this.shimmer = rnd(0, Math.PI*2);
+    this.shimmerS= rnd(0.012, 0.03);
+    this.alpha   = rnd(0.06, 0.16);  // very transparent
+    this.alive   = true;
+  };
+
+  Bubble.prototype.update = function(dt){
+    this.shimmer += this.shimmerS;
+    this.driftOff += this.drift;
+    this.x += this.vx + Math.sin(this.driftOff) * 0.35;
+    this.y += this.vy;
+    if(this.y - this.r > H) this.reset(false);
+    if(this.x - this.r < 0 || this.x + this.r > W) {
+      this.vx *= -1;
+      this.x = Math.max(this.r, Math.min(W - this.r, this.x));
+    }
+  };
+
+  Bubble.prototype.draw = function(){
+    var r  = this.r;
+    var x  = this.x, y = this.y;
+    var sh = Math.sin(this.shimmer);
+    var c  = COLORS[this.hue];
+    var cr = c[0], cg = c[1], cb = c[2];
+    var a  = this.alpha;
+
+    // main bubble body
+    var g1 = ctx.createRadialGradient(x, y, r*0.1, x, y, r);
+    g1.addColorStop(0,    'rgba(255,255,255,0)');
+    g1.addColorStop(0.45, 'rgba('+cr+','+cg+','+cb+','+(a*0.5+0.02*sh)+')');
+    g1.addColorStop(0.8,  'rgba('+cr+','+cg+','+cb+','+(a*1.1)+')');
+    g1.addColorStop(1,    'rgba('+cr+','+cg+','+cb+','+(a*1.8)+')');
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2);
+    ctx.fillStyle = g1; ctx.fill();
+
+    // rim highlight
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2);
+    ctx.strokeStyle = 'rgba(255,255,255,'+(a*1.6+0.04*sh)+')';
+    ctx.lineWidth = 0.8; ctx.stroke();
+
+    // top-left specular
+    var sx = x - r*0.3, sy = y - r*0.35, sr = r*0.28;
+    var gs = ctx.createRadialGradient(sx, sy, 0, sx, sy, sr);
+    gs.addColorStop(0,   'rgba(255,255,255,'+(a*3.5)+')');
+    gs.addColorStop(0.5, 'rgba(255,255,255,'+(a*1.2)+')');
+    gs.addColorStop(1,   'rgba(255,255,255,0)');
+    ctx.beginPath(); ctx.ellipse(sx, sy, sr, sr*0.55, -0.4, 0, Math.PI*2);
+    ctx.fillStyle = gs; ctx.fill();
+  };
+
+  // collision
+  function collide(bubbles){
+    for(var i=0;i<bubbles.length;i++){
+      var a = bubbles[i];
+      for(var j=i+1;j<bubbles.length;j++){
+        var b = bubbles[j];
+        var dx = b.x-a.x, dy = b.y-a.y;
+        var dist = Math.sqrt(dx*dx+dy*dy);
+        var minD = a.r + b.r;
+        if(dist < minD && dist > 0.1){
+          var nx = dx/dist, ny = dy/dist;
+          var overlap = (minD-dist)*0.5;
+          a.x -= nx*overlap; a.y -= ny*overlap;
+          b.x += nx*overlap; b.y += ny*overlap;
+          var dvx = a.vx-b.vx, dvy = a.vy-b.vy;
+          var dot = dvx*nx + dvy*ny;
+          if(dot > 0){
+            var ma = a.r*a.r, mb = b.r*b.r, tot = ma+mb;
+            var imp = 2*dot/tot;
+            a.vx -= imp*mb*nx; a.vy -= imp*mb*ny;
+            b.vx += imp*ma*nx; b.vy += imp*ma*ny;
+          }
+        }
+      }
+    }
+  }
+
+  // init ~35 bubbles spread across full page
+  var bubbles = [];
+  for(var i=0;i<35;i++){
+    var b = new Bubble();
+    bubbles.push(b);
+  }
+
+  var lastT = 0;
+  function loop(ts){
+    var dt = Math.min((ts-lastT)/1000, 0.05);
+    lastT = ts;
+
+    ctx.clearRect(0,0,W,H);
+
+    for(var i=0;i<bubbles.length;i++) bubbles[i].update(dt);
+    collide(bubbles);
+
+    // draw small first (behind large)
+    var sorted = bubbles.slice().sort(function(a,b){ return a.r-b.r; });
+    for(var i=0;i<sorted.length;i++) sorted[i].draw();
+
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(function(t){ lastT=t; requestAnimationFrame(loop); });
+})();
+// ════════════════════════════════════
+
 
 
 // ════════ GEORGE VIDEO PLAYER ════════
