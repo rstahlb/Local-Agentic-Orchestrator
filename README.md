@@ -29,7 +29,7 @@ Training a quad virtual dog on resolving a maze. This project explores reinforce
 * **Sensor:** iPad Pro LiDAR
 * **Goal:** Convert 3D spatial data into tokens for the AI Orchestrator.
 
-> *[Drag and drop your LiDAR video here to generate a new link]*
+> *[Drop your LiDAR video here to generate your link]*
 
 [↑ Back to Menu](#-quick-links)
 
