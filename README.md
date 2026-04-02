@@ -1,6 +1,4 @@
 
-
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -101,18 +99,6 @@
 
 </body>
 </html>
-
-
-
-
-
-# High-performance local LLM orchestration on 16GB Unified Memory with multimodal screen interaction some early bugs being addressed.
-<video src="https://github.com/user-attachments/assets/61ee7283-83a2-4165-bc5b-51fdca72ce01" controls="controls" width="100%"></video>
-
-
-
-
-
 
 
 # 🤖 Local Agentic Orchestrator
