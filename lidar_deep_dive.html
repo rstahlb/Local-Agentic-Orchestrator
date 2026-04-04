@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LiDAR Scanner Deep Dive — r.stahlb</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Geist+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #050810; --bg2: #080d1a; --bg3: #0d1425;
+  --border: #1e2d4a; --border2: #28385e;
+  --text: #dde6f8; --text-dim: #8fa3cc; --text-bright: #f0f5ff;
+  --accent1: #3d8bff; --accent2: #18d4ff; --accent3: #ff7a47; --accent4: #c084fc;
+  --yellow: #ffd166; --code-bg: #070c18;
+  --font-display: 'Inter', sans-serif; --font-mono: 'Geist Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-display); font-size: 15px; line-height: 1.75; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+
+#stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.star { position: absolute; border-radius: 50%; background: white; animation: twinkle var(--dur) ease-in-out infinite alternate; opacity: 0; }
+@keyframes twinkle { from { opacity: var(--min-op); } to { opacity: var(--max-op); } }
+
+#bgCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+#app { position: relative; z-index: 1; }
+
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 56px; background: rgba(5,8,16,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
+.nav-brand { font-weight: 800; font-size: 1.05rem; color: var(--text-bright); letter-spacing: -0.02em; }
+.nav-brand span { color: var(--accent1); }
+.nav-links { display: flex; gap: 0.25rem; list-style: none; }
+.nav-links a { color: var(--text-dim); text-decoration: none; font-size: 0.8rem; font-weight: 500; padding: 0.35rem 0.85rem; border-radius: 6px; transition: color 0.2s, background 0.2s; }
+.nav-links a:hover { color: var(--text-bright); background: var(--bg3); }
+.back-link { color: var(--accent2) !important; }
+
+.page-hero { padding: 7rem 2rem 2rem; max-width: 900px; margin: 0 auto; text-align: center; }
+.page-hero .project-number { font-size: 0.68rem; letter-spacing: 0.22em; color: var(--accent3); text-transform: uppercase; margin-bottom: 0.75rem; font-weight: 500; }
+.page-hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; color: var(--text-bright); letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 1rem; }
+.page-hero h1 span { color: var(--accent3); }
+.page-hero .project-desc { color: #a8bde0; font-size: 0.92rem; max-width: 640px; line-height: 1.85; border-left: 2px solid var(--accent3); padding-left: 1rem; margin: 0 auto 2rem; text-align: left; }
+
+.why-box { max-width: 900px; margin: 0 auto 2rem; padding: 0 2rem; }
+.why-inner { background: linear-gradient(135deg, rgba(255,122,71,0.05), rgba(192,132,252,0.05)); border: 1px solid rgba(255,122,71,0.25); border-radius: 12px; padding: 1.75rem 2rem; }
+.why-inner h2 { font-size: 1rem; font-weight: 700; color: var(--accent3); margin-bottom: 0.75rem; letter-spacing: 0.02em; }
+.why-inner p { font-size: 0.88rem; color: #a8bde0; line-height: 1.85; margin-bottom: 0.75rem; }
+.why-inner p:last-child { margin-bottom: 0; }
+.why-inner strong { color: var(--text-bright); }
+
+.tech-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; margin: 1.5rem auto; padding: 0 2rem; max-width: 900px; }
+.tech-item { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem 1rem; }
+.tech-item .tech-label { font-size: 0.65rem; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.25rem; }
+.tech-item .tech-val { font-size: 0.8rem; color: var(--text-bright); font-weight: 600; }
+
+.section-divider { width: 100%; height: 1px; background: linear-gradient(90deg, transparent, var(--border2), transparent); }
+
+.chapter { padding: 0 2rem 4rem; max-width: 900px; margin: 0 auto; }
+.chapter-title { font-size: 1.4rem; font-weight: 700; color: var(--text-bright); letter-spacing: -0.02em; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; }
+.chapter-num { font-size: 0.67rem; color: var(--accent3); letter-spacing: 0.15em; text-transform: uppercase; font-family: var(--font-mono); font-weight: 500; }
+h4 { font-size: 0.98rem; font-weight: 700; color: var(--accent3); margin: 1.75rem 0 0.75rem; letter-spacing: -0.01em; }
+p { color: var(--text); font-size: 0.9rem; line-height: 1.9; margin-bottom: 1rem; }
+p strong { color: var(--text-bright); font-weight: 600; }
+
+.callout { border-radius: 8px; padding: 1rem 1.25rem; margin: 1.25rem 0; font-size: 0.82rem; line-height: 1.7; display: flex; gap: 0.75rem; align-items: flex-start; }
+.callout-tip  { background: rgba(255,122,71,0.06); border: 1px solid rgba(255,122,71,0.3); color: var(--accent3); }
+.callout-warn { background: rgba(255,200,64,0.06); border: 1px solid rgba(255,200,64,0.2); color: var(--yellow); }
+.callout-info { background: rgba(26,111,255,0.06); border: 1px solid rgba(26,111,255,0.2); color: #7aacff; }
+.callout-purple { background: rgba(192,132,252,0.06); border: 1px solid rgba(192,132,252,0.25); color: var(--accent4); }
+.callout-icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.1rem; }
+.callout-body { color: var(--text); }
+.callout-body strong { color: inherit; }
+
+pre { background: var(--code-bg); border: 1px solid rgba(255,122,71,0.18); border-radius: 8px; padding: 1.25rem 1.5rem; overflow-x: auto; margin: 1rem 0 1.5rem; position: relative; }
+pre code { font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.75; color: #b8d0f8; }
+.code-lang { position: absolute; top: 0.5rem; right: 0.75rem; font-size: 0.6rem; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; }
+code { font-family: var(--font-mono); background: rgba(255,122,71,0.08); border: 1px solid rgba(255,122,71,0.15); border-radius: 4px; padding: 0.1em 0.4em; font-size: 0.82em; color: #ffb08a; }
+pre code { background: none; border: none; padding: 0; font-size: inherit; color: inherit; }
+
+.table-wrap { overflow-x: auto; margin: 1rem 0 1.5rem; border-radius: 8px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead tr { background: var(--bg3); }
+th { padding: 0.75rem 1rem; text-align: left; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: #8fa3cc; font-weight: 600; border-bottom: 1px solid var(--border); }
+td { padding: 0.7rem 1rem; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: rgba(255,122,71,0.03); }
+td code { font-size: 0.75em; }
+
+.pipeline-flow { display: flex; flex-direction: column; gap: 0.6rem; margin: 1.5rem 0; }
+.pipeline-step { display: flex; align-items: flex-start; gap: 1rem; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.25rem; transition: border-color 0.2s; }
+.pipeline-step:hover { border-color: var(--accent3); }
+.step-num { font-family: var(--font-mono); font-size: 0.65rem; color: var(--accent3); font-weight: 600; letter-spacing: 0.1em; min-width: 2rem; padding-top: 0.1rem; }
+.step-title { font-size: 0.88rem; font-weight: 700; color: var(--text-bright); }
+.step-desc { font-size: 0.8rem; color: var(--text-dim); line-height: 1.55; margin-top: 0.2rem; }
+
+.checklist { list-style: none; margin: 0.5rem 0 1.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.checklist li { font-size: 0.86rem; color: var(--text-dim); padding-left: 1.5rem; position: relative; }
+.checklist li::before { content: '□'; position: absolute; left: 0; color: var(--accent3); font-size: 0.9rem; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0 1.5rem; }
+.info-box { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; }
+.info-box h5 { font-size: 0.8rem; font-weight: 700; color: var(--accent3); margin-bottom: 0.6rem; letter-spacing: 0.05em; }
+.info-box p { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 0; line-height: 1.6; }
+
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+
+footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--text-dim); font-size: 0.75rem; }
+footer span { color: var(--accent3); }
+footer a { color: var(--accent2); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+@media (max-width: 640px) { .nav-links { display: none; } .chapter { padding-left: 1.25rem; padding-right: 1.25rem; } .two-col { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div id="stars"></div>
+<canvas id="bgCanvas"></canvas>
+
+<div id="app">
+<nav>
+  <div class="nav-brand">r<span>.</span>stahlb</div>
+  <ul class="nav-links">
+    <li><a href="index.html" class="back-link">← Home</a></li>
+    <li><a href="george.html">George AI</a></li>
+    <li><a href="gpt.html">GPT from Scratch</a></li>
+    <li><a href="learning.html">Learning</a></li>
+    <li><a href="https://github.com/rstahlb" target="_blank">GitHub ↗</a></li>
+  </ul>
+</nav>
+
+<div class="page-hero reveal">
+  <div class="project-number">📡 Deep Dive</div>
+  <h1>LiDAR Scanner<br><span>Technical Guide</span></h1>
+  <p class="project-desc">Every aspect of the LiDAR Scanner Xcode project — from how laser depth sensing physically works, to the Swift code that captures meshes and exports 3D files. iPad Pro M4 · ARKit · RealityKit · ModelIO · SwiftUI.</p>
+</div>
+
+<div class="why-box reveal">
+  <div class="why-inner">
+    <h2>📋 What This Guide Covers</h2>
+    <p>This guide walks through the complete LiDAR scanning pipeline — from the physics of time-of-flight sensing, to ARKit's scene reconstruction pipeline, to the Swift code that converts raw GPU mesh buffers into exportable 3D files in USDZ, OBJ, and PLY formats.</p>
+    <p><strong>Read front to back for a full understanding</strong>, or jump directly to any chapter. The code walkthrough in Chapters 5–7 is self-contained if you already understand the theory.</p>
+  </div>
+</div>
+
+<div class="tech-grid reveal">
+  <div class="tech-item"><div class="tech-label">Language</div><div class="tech-val">Swift 5.9</div></div>
+  <div class="tech-item"><div class="tech-label">UI Framework</div><div class="tech-val">SwiftUI</div></div>
+  <div class="tech-item"><div class="tech-label">3D Framework</div><div class="tech-val">RealityKit</div></div>
+  <div class="tech-item"><div class="tech-label">AR Framework</div><div class="tech-val">ARKit Scene Reconstruction</div></div>
+  <div class="tech-item"><div class="tech-label">3D Export</div><div class="tech-val">ModelIO</div></div>
+  <div class="tech-item"><div class="tech-label">Target Device</div><div class="tech-val">iPad Pro (M1+), iOS 17.0+</div></div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- CHAPTER 1 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 01</span> What is LiDAR?</h3>
+  <h4>1.1 The Physics of Laser Depth Sensing</h4>
+  <p>LiDAR stands for <strong>Light Detection and Ranging</strong>. The sensor fires invisible infrared laser pulses at a scene and measures the exact time each pulse takes to bounce back. Because light travels at a known speed (~300,000 km/s), the sensor calculates the distance to every point it hits.</p>
+
+  <div class="two-col">
+    <div class="info-box">
+      <h5>⚡ Time-of-Flight (ToF)</h5>
+      <p>Distance = (Speed of Light × Round-trip Time) ÷ 2<br><br>The iPad Pro uses direct ToF — each laser pulse gets its own timer. This gives accurate depth even in motion.</p>
+    </div>
+    <div class="info-box">
+      <h5>📐 Point Cloud Output</h5>
+      <p>Each pulse → one 3D point (X, Y, Z). Thousands of pulses per second → a dense point cloud. ARKit fuses these into a continuous mesh surface automatically.</p>
+    </div>
+  </div>
+
+  <h4>1.2 iPad Pro LiDAR Specs</h4>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Property</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td>Range</td><td>Up to ~5 metres (indoor), best under 2m for objects</td></tr>
+      <tr><td>Pulse rate</td><td>Thousands of depth points per second</td></tr>
+      <tr><td>Latency</td><td>Low latency — ARKit can reconstruct in real time</td></tr>
+      <tr><td>Works in dark?</td><td>Yes — laser is infrared, does not need visible light</td></tr>
+      <tr><td>Works outside?</td><td>Yes, but sunlight IR interference reduces accuracy</td></tr>
+      <tr><td>Vs camera depth</td><td>Far more accurate than stereo camera depth estimation</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-tip">
+    <span class="callout-icon">💡</span>
+    <div class="callout-body"><strong>Key insight:</strong> The LiDAR gives ARKit raw depth data. ARKit then uses the RGB camera alongside this to build a textured understanding of the scene. Our app rides on top of this.</div>
+  </div>
+</div>
+
+<!-- CHAPTER 2 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 02</span> How ARKit Uses the Sensor</h3>
+  <h4>2.1 Scene Reconstruction Pipeline</h4>
+  <p>ARKit runs a multi-stage pipeline to turn raw LiDAR depth data into the clean 3D mesh your app receives:</p>
+
+  <div class="pipeline-flow">
+    <div class="pipeline-step"><span class="step-num">①</span><div><div class="step-title">Depth Frame Capture</div><div class="step-desc">LiDAR fires pulses. Each frame produces a depth map (every pixel has a distance value).</div></div></div>
+    <div class="pipeline-step"><span class="step-num">②</span><div><div class="step-title">RGB + Depth Fusion</div><div class="step-desc">The RGB camera image is aligned with the depth map using intrinsic/extrinsic calibration baked into the device.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">③</span><div><div class="step-title">TSDF Integration</div><div class="step-desc">ARKit uses a Truncated Signed Distance Function — a 3D volumetric grid. Each new depth frame "votes" to update the grid.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">④</span><div><div class="step-title">Mesh Extraction</div><div class="step-desc">Apple's marching-cubes algorithm extracts a triangle mesh from the TSDF volume and creates ARMeshAnchor objects.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">⑤</span><div><div class="step-title">Classification</div><div class="step-desc">A Core ML model classifies each triangle as floor, wall, ceiling, table, seat, window, door, or unknown.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">⑥</span><div><div class="step-title">Delegate Callbacks</div><div class="step-desc">Your ARSessionDelegate receives didAdd / didUpdate / didRemove anchors — that's where ScanManager.swift plugs in.</div></div></div>
+  </div>
+
+  <h4>2.2 ARMeshAnchor — The Data Container</h4>
+  <p>Each <code>ARMeshAnchor</code> represents a region of the reconstructed mesh. It contains:</p>
+  <ul class="checklist">
+    <li><code>geometry.vertices</code> — buffer of Float3 positions (X, Y, Z in metres, local space)</li>
+    <li><code>geometry.faces</code> — buffer of triangle indices (3 × UInt32 per face)</li>
+    <li><code>geometry.normals</code> — surface normal vectors per vertex</li>
+    <li><code>geometry.classification</code> — per-face semantic label (floor, wall, etc.)</li>
+    <li><code>transform</code> — 4×4 matrix to convert local → world coordinates</li>
+  </ul>
+
+  <div class="callout callout-warn">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-body"><strong>Coordinate system:</strong> ARKit uses a right-handed coordinate system with Y-up. When you export to OBJ for Blender, note that Blender uses Y-forward, Z-up — you may need to rotate on import.</div>
+  </div>
+</div>
+
+<!-- CHAPTER 3 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 03</span> Project Setup (Xcode + Sideload)</h3>
+  <h4>3.1 What You Need</h4>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Requirement</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td>Mac</td><td>macOS 14 Sonoma or later recommended</td></tr>
+      <tr><td>Xcode</td><td>Version 15 or later (free from Mac App Store)</td></tr>
+      <tr><td>Apple ID</td><td>Free account works — 7-day sideload cert. Paid $99/yr = no expiry</td></tr>
+      <tr><td>iPad Pro</td><td>Any iPad Pro with LiDAR (2020+). M4 is perfect</td></tr>
+      <tr><td>USB Cable</td><td>USB-C to USB-C, or USB-C to Mac port adapter</td></tr>
+      <tr><td>iOS</td><td>17.0 minimum on the iPad</td></tr>
+    </tbody>
+  </table></div>
+
+  <h4>3.2 Step-by-Step: Create the Xcode Project</h4>
+  <ul class="checklist">
+    <li>Open Xcode → File → New → Project</li>
+    <li>Select iOS → App → click Next</li>
+    <li>Fill in: Product Name = LiDARScanner, Interface = SwiftUI, Language = Swift</li>
+    <li>Choose a save location → Create</li>
+    <li>Delete the auto-generated ContentView.swift (we replace it with our own)</li>
+    <li>Drag in all 5 Swift files from the downloaded zip (LiDARScannerApp, ContentView, ARViewContainer, ScanManager, ShareSheet)</li>
+    <li>Drag Info.plist into the project — in the dialog, choose "Copy items if needed"</li>
+  </ul>
+
+  <div class="callout callout-info">
+    <span class="callout-icon">🔑</span>
+    <div class="callout-body"><strong>Signing is required:</strong> Without signing, Xcode cannot install to your physical iPad. Use any Apple ID — it is free. Go to Signing & Capabilities → set Team → change Bundle Identifier to something unique, e.g. <code>com.YOURNAME.lidarscanner</code>.</div>
+  </div>
+
+  <div class="callout callout-warn">
+    <span class="callout-icon">🔄</span>
+    <div class="callout-body"><strong>Free sideload expiry:</strong> Free Apple ID certificates last 7 days. After that, just plug in the iPad and press ⌘R again in Xcode. The app data is NOT deleted.</div>
+  </div>
+</div>
+
+<!-- CHAPTER 4 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 04</span> App Architecture & File Map</h3>
+  <h4>4.1 File Structure</h4>
+  <div class="table-wrap"><table>
+    <thead><tr><th>File</th><th>Responsibility</th></tr></thead>
+    <tbody>
+      <tr><td><code>LiDARScannerApp.swift</code></td><td>Entry point. @main struct that launches the SwiftUI window.</td></tr>
+      <tr><td><code>ContentView.swift</code></td><td>All visible UI. Buttons, stats, share sheet trigger. Reads from ScanManager.</td></tr>
+      <tr><td><code>ARViewContainer.swift</code></td><td>Tiny bridge between SwiftUI and UIKit/RealityKit. Wraps ARView.</td></tr>
+      <tr><td><code>ScanManager.swift</code></td><td>The brain. Runs AR session, collects mesh anchors, exports 3D files.</td></tr>
+      <tr><td><code>ShareSheet.swift</code></td><td>Wraps UIActivityViewController so SwiftUI can call the iOS share sheet.</td></tr>
+      <tr><td><code>Info.plist</code></td><td>Camera permission text. LiDAR device capability requirement.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h4>4.2 Data Flow</h4>
+  <div class="pipeline-flow">
+    <div class="pipeline-step"><span class="step-num">📡</span><div><div class="step-title">LiDAR Sensor</div><div class="step-desc">Hardware depth pulses</div></div></div>
+    <div class="pipeline-step"><span class="step-num">🍎</span><div><div class="step-title">ARKit (OS level)</div><div class="step-desc">ARWorldTrackingConfiguration + sceneReconstruction</div></div></div>
+    <div class="pipeline-step"><span class="step-num">🔷</span><div><div class="step-title">ARSessionDelegate callbacks</div><div class="step-desc">didAdd / didUpdate / didRemove ARMeshAnchor</div></div></div>
+    <div class="pipeline-step"><span class="step-num">🧠</span><div><div class="step-title">ScanManager</div><div class="step-desc">Stores anchors in [UUID: ARMeshAnchor] dictionary, recalculates stats</div></div></div>
+    <div class="pipeline-step"><span class="step-num">📦</span><div><div class="step-title">Export (ModelIO)</div><div class="step-desc">Converts ARMeshGeometry → MDLMesh → file on disk</div></div></div>
+    <div class="pipeline-step"><span class="step-num">📤</span><div><div class="step-title">ShareSheet</div><div class="step-desc">UIActivityViewController → AirDrop / Files / Cloud</div></div></div>
+  </div>
+</div>
+
+<!-- CHAPTER 5 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 05</span> Full Code Walkthrough</h3>
+
+  <h4>5.1 App Entry Point — LiDARScannerApp.swift</h4>
+  <p>The simplest file. Swift's <code>@main</code> attribute marks this as the application entry point. SwiftUI's App protocol launches a WindowGroup containing ContentView.</p>
+  <pre><code class="language-swift">import SwiftUI
+
+@main
+struct LiDARScannerApp: App {
+  var body: some Scene {
+    WindowGroup {
+      ContentView() // Root view
+    }
+  }
+}</code><span class="code-lang">Swift</span></pre>
+
+  <h4>5.2 ARView Bridge — ARViewContainer.swift</h4>
+  <p>RealityKit's ARView is a UIKit component (UIView). SwiftUI cannot use UIKit views directly — you need a <code>UIViewRepresentable</code> wrapper. This struct is that bridge.</p>
+  <pre><code class="language-swift">struct ARViewContainer: UIViewRepresentable {
+  @ObservedObject var scanManager: ScanManager
+
+  // Called ONCE: create the ARView
+  func makeUIView(context: Context) -> ARView {
+    let arView = ARView(frame: .zero)
+    scanManager.setup(arView: arView) // hand off to ScanManager
+    return arView
+  }
+
+  // Called on SwiftUI re-renders: nothing to update
+  func updateUIView(_ uiView: ARView, context: Context) {}
+}</code><span class="code-lang">Swift</span></pre>
+
+  <div class="callout callout-tip">
+    <span class="callout-icon">💡</span>
+    <div class="callout-body"><strong>Why @ObservedObject here?</strong> ARViewContainer observes ScanManager so SwiftUI knows the two are linked — but we never actually use its published values directly here. The real work happens inside ScanManager.</div>
+  </div>
+</div>
+
+<!-- CHAPTER 6 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 06</span> Mesh Capture Logic (ScanManager)</h3>
+
+  <h4>6.1 Class Declaration & State</h4>
+  <p>ScanManager inherits from NSObject (required by ARSessionDelegate), ObservableObject (so SwiftUI can react to changes), and ARSessionDelegate (to receive mesh updates from ARKit).</p>
+  <pre><code class="language-swift">@MainActor
+class ScanManager: NSObject, ObservableObject, ARSessionDelegate {
+  // Published = SwiftUI watches these automatically
+  @Published var meshAnchorCount: Int = 0
+  @Published var totalVertexCount: Int = 0
+  @Published var totalFaceCount: Int = 0
+  @Published var statusMessage: String = "Move iPad to start scanning"
+  @Published var showMesh: Bool = true
+
+  // Internal storage: one entry per mesh region
+  private var meshAnchors: [UUID: ARMeshAnchor] = [:]
+  private weak var arView: ARView?
+}</code><span class="code-lang">Swift</span></pre>
+
+  <div class="callout callout-purple">
+    <span class="callout-icon">🧩</span>
+    <div class="callout-body"><strong>@MainActor:</strong> This annotation ensures all code in ScanManager runs on the main thread. Required because ARKit delegate callbacks arrive on background threads but UI updates must be on main.</div>
+  </div>
+
+  <h4>6.2 Starting the AR Session</h4>
+  <pre><code class="language-swift">func setup(arView: ARView) {
+  self.arView = arView
+  arView.session.delegate = self
+
+  guard ARWorldTrackingConfiguration
+    .supportsSceneReconstruction(.meshWithClassification) else {
+    statusMessage = "LiDAR not available"
+    return
+  }
+  startSession()
+}
+
+private func startSession() {
+  let config = ARWorldTrackingConfiguration()
+  config.sceneReconstruction = .meshWithClassification
+  config.environmentTexturing = .automatic
+  config.planeDetection = [.horizontal, .vertical]
+  arView?.session.run(config, options: [.resetTracking, .removeExistingAnchors])
+  arView?.debugOptions = showMesh ? [.showSceneUnderstanding] : []
+}</code><span class="code-lang">Swift</span></pre>
+
+  <h4>6.3 Receiving Mesh Delegate Callbacks</h4>
+  <pre><code class="language-swift">nonisolated func session(_ session: ARSession, didAdd anchors: [ARAnchor]) {
+  let meshes = anchors.compactMap { $0 as? ARMeshAnchor }
+  guard !meshes.isEmpty else { return }
+  Task { @MainActor in self.addMeshAnchors(meshes) }
+}
+
+nonisolated func session(_ session: ARSession, didUpdate anchors: [ARAnchor]) {
+  let meshes = anchors.compactMap { $0 as? ARMeshAnchor }
+  guard !meshes.isEmpty else { return }
+  Task { @MainActor in self.updateMeshAnchors(meshes) }
+}
+
+nonisolated func session(_ session: ARSession, didRemove anchors: [ARAnchor]) {
+  let ids = anchors.compactMap { $0 as? ARMeshAnchor }.map { $0.identifier }
+  guard !ids.isEmpty else { return }
+  Task { @MainActor in self.removeMeshAnchors(ids) }
+}</code><span class="code-lang">Swift</span></pre>
+</div>
+
+<!-- CHAPTER 7 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 07</span> Export Pipeline (USDZ / OBJ / PLY)</h3>
+
+  <h4>7.1 Overview: ARKit Geometry → ModelIO → File</h4>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Type</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>ARMeshGeometry</code></td><td>Raw GPU buffers — vertices and face indices as Metal MTLBuffer</td></tr>
+      <tr><td><code>MDLMesh</code></td><td>ModelIO mesh object. Understands vertex descriptors, materials, transforms</td></tr>
+      <tr><td><code>MDLAsset</code></td><td>Container for one or more MDLMesh objects. Has the export() method</td></tr>
+      <tr><td><code>MTKMeshBufferAllocator</code></td><td>Bridges between Metal GPU buffers and ModelIO CPU buffers</td></tr>
+    </tbody>
+  </table></div>
+
+  <h4>7.2 Export Formats Compared</h4>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Format</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><strong>USDZ</strong></td><td>Apple's preferred format. Self-contained ZIP of USD + textures. Opens natively in iOS Files, QuickLook, AR Quick Look. Best for sharing on Apple devices.</td></tr>
+      <tr><td><strong>OBJ</strong></td><td>Universal 3D format. Opens in Blender, Maya, Cinema4D, 3ds Max. Geometry only — no texture in our export. Good for further editing.</td></tr>
+      <tr><td><strong>PLY</strong></td><td>Polygon file format. Widely used in point cloud research. Opens in MeshLab, CloudCompare, Open3D. Good for scientific/analysis workflows.</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-info">
+    <span class="callout-icon">📱</span>
+    <div class="callout-body"><strong>USDZ tip:</strong> AirDrop a USDZ file to another iPhone/iPad and it opens in AR Quick Look immediately — the scanned object appears life-size in your room. No app needed.</div>
+  </div>
+</div>
+
+<!-- CHAPTER 8 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 08</span> UI Layer (SwiftUI)</h3>
+
+  <h4>8.1 Layout Structure</h4>
+  <p>The UI is a <code>ZStack</code> — a layered stack. <code>ARViewContainer</code> fills the background (full screen camera feed + mesh), and all controls float on top as overlays.</p>
+  <pre><code class="language-swift">ZStack {
+  ARViewContainer(scanManager: scanManager)
+    .ignoresSafeArea()
+  VStack {
+    // Top bar: title, status, mesh toggle button
+    HStack { ... }.background(gradient: black → clear)
+    Spacer()
+    // Middle: vertex/face stats badges
+    HStack { StatBadge(...) ... }
+    // Bottom: Reset + Export buttons
+    HStack { ... }.background(gradient: clear → black)
+  }
+}</code><span class="code-lang">Swift</span></pre>
+
+  <h4>8.2 Reactive State</h4>
+  <p>ContentView creates ScanManager as a <code>@StateObject</code>. Any change to its <code>@Published</code> properties automatically re-renders the relevant parts of the UI.</p>
+  <pre><code class="language-swift">@StateObject private var scanManager = ScanManager()
+
+// These auto-update the StatBadges:
+scanManager.meshAnchorCount      // → "Anchors: 12"
+scanManager.vertexCountFormatted  // → "Vertices: 48.2K"
+scanManager.faceCountFormatted    // → "Faces: 31.7K"
+scanManager.statusMessage         // → "Scanning... 12 mesh regions"</code><span class="code-lang">Swift</span></pre>
+</div>
+
+<!-- CHAPTER 9 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 09</span> Known Limitations</h3>
+
+  <div class="callout callout-warn">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-body"><strong>This is real — know it before you start:</strong> ARKit's scene reconstruction is tuned for room-scale spatial computing, not object scanning. The mesh will look great for furniture/walls and blocky for small objects.</div>
+  </div>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Issue</th><th>Effect</th></tr></thead>
+    <tbody>
+      <tr><td>Small objects (&lt;20cm)</td><td>Very low detail. Figurines, mugs look blocky. Use Polycam instead.</td></tr>
+      <tr><td>Shiny/reflective surfaces</td><td>LiDAR IR pulses scatter — gaps and holes in mesh</td></tr>
+      <tr><td>Glass/transparent objects</td><td>Near-invisible to LiDAR — large holes guaranteed</td></tr>
+      <tr><td>Fine detail (hair, fabric)</td><td>Smoothed out by the marching-cubes mesh extraction</td></tr>
+      <tr><td>Texture / color</td><td>Raw export has no texture. You need to project camera image onto mesh separately</td></tr>
+      <tr><td>Underside of objects</td><td>Anything the camera cannot see = missing geometry</td></tr>
+    </tbody>
+  </table></div>
+</div>
+
+<!-- CHAPTER 10 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 10</span> Next Steps & Upgrades</h3>
+
+  <h4>10.1 Texture Baking</h4>
+  <p>The biggest missing feature: color on the exported mesh. Capture <code>ARFrame.capturedImage</code> alongside the depth, project camera pixels onto mesh triangles using the camera's intrinsic matrix, and bake a texture atlas into the OBJ export as an MTL material file. Apple's Object Capture API (on macOS) can do this automatically from a video scan.</p>
+
+  <h4>10.2 Mesh Simplification</h4>
+  <p>Raw ARKit meshes can be very dense. Adding a decimation step would shrink file sizes massively. ModelIO has built-in support via <code>generateAmbientOcclusionTexture</code>, or use a third-party lib like MeshOptimizer via Swift Package Manager.</p>
+
+  <h4>10.3 Object Isolation</h4>
+  <p>Use ARKit's mesh classification to filter and keep only specific surface types during export:</p>
+  <pre><code class="language-swift">// Filter to only table-top objects during export
+let classification = anchor.geometry.classificationOf(face: faceIndex)
+if classification == .table || classification == .none {
+  // include this face
+}</code><span class="code-lang">Swift</span></pre>
+
+  <h4>10.4 LiDAR → AI Texture Upgrade</h4>
+  <div class="pipeline-flow">
+    <div class="pipeline-step"><span class="step-num">01</span><div><div class="step-title">Scan with LiDAR</div><div class="step-desc">Use this app to export OBJ mesh</div></div></div>
+    <div class="pipeline-step"><span class="step-num">02</span><div><div class="step-title">Import to Python on Mac</div><div class="step-desc">Load OBJ into processing script</div></div></div>
+    <div class="pipeline-step"><span class="step-num">03</span><div><div class="step-title">NeRF / Gaussian Splatting</div><div class="step-desc">Use Instant-NGP or nerfstudio to refine geometry from video frames</div></div></div>
+    <div class="pipeline-step"><span class="step-num">04</span><div><div class="step-title">AI Texture Upscale</div><div class="step-desc">Use Real-ESRGAN to upscale textures</div></div></div>
+    <div class="pipeline-step"><span class="step-num">05</span><div><div class="step-title">Result</div><div class="step-desc">Photorealistic 3D object — fully local, no cloud needed</div></div></div>
+  </div>
+
+  <div class="callout callout-tip">
+    <span class="callout-icon">🚀</span>
+    <div class="callout-body"><strong>The bigger picture:</strong> Your iPad M4 is the LiDAR scanner. Your Mac handles the AI refinement step. Together they form a fully local 3D scanning + AI pipeline — no cloud needed.</div>
+  </div>
+</div>
+
+<footer>
+  <p>LiDAR Scanner Deep Dive &nbsp;·&nbsp; Built for <span>iPad Pro M4</span> · ARKit · RealityKit · ModelIO · SwiftUI &nbsp;·&nbsp; <a href="index.html">← Back to Portfolio</a></p>
+</footer>
+</div>
+
+<script>
+// Starfield
+const container = document.getElementById('stars');
+for (let i = 0; i < 120; i++) {
+  const s = document.createElement('div'); s.className = 'star';
+  const size = Math.random() * 2 + 0.5;
+  s.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--dur:${2+Math.random()*4}s;--min-op:${0.05+Math.random()*0.1};--max-op:${0.3+Math.random()*0.5};animation-delay:${Math.random()*5}s;`;
+  container.appendChild(s);
+}
+
+// LiDAR particle background — laser pulses + point clouds
+(function(){
+  var canvas = document.getElementById('bgCanvas'), ctx = canvas.getContext('2d'), W, H;
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+
+  function rnd(a, b) { return a + Math.random() * (b - a); }
+
+  // Laser pulse: a beam that shoots out and fades
+  function Pulse() { this.reset(true); }
+  Pulse.prototype.reset = function(fromRandom) {
+    this.x = rnd(0, W); this.y = fromRandom ? rnd(0, H) : rnd(0, H * 0.3);
+    this.angle = rnd(-Math.PI / 4, Math.PI / 4);
+    this.speed = rnd(1.5, 4); this.len = rnd(20, 80);
+    this.life = 1; this.decay = rnd(0.02, 0.06);
+    this.col = Math.random() > 0.5 ? [255, 122, 71] : [61, 139, 255];
+  };
+  Pulse.prototype.update = function() {
+    this.x += Math.sin(this.angle) * this.speed;
+    this.y += Math.cos(this.angle) * this.speed;
+    this.life -= this.decay;
+    if (this.life <= 0 || this.y > H + 50) this.reset(false);
+  };
+  Pulse.prototype.draw = function() {
+    var c = this.col, a = this.life * 0.5;
+    ctx.beginPath();
+    ctx.moveTo(this.x, this.y);
+    ctx.lineTo(this.x - Math.sin(this.angle) * this.len, this.y - Math.cos(this.angle) * this.len);
+    var g = ctx.createLinearGradient(this.x, this.y, this.x - Math.sin(this.angle)*this.len, this.y - Math.cos(this.angle)*this.len);
+    g.addColorStop(0, 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')');
+    g.addColorStop(1, 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',0)');
+    ctx.strokeStyle = g; ctx.lineWidth = 1.5; ctx.stroke();
+  };
+
+  // Depth point: a small glowing dot (simulates point cloud)
+  function DepthPoint() { this.reset(true); }
+  DepthPoint.prototype.reset = function(fromRandom) {
+    this.x = rnd(0, W); this.y = fromRandom ? rnd(0, H) : -10;
+    this.r = rnd(1, 3.5); this.vy = rnd(0.1, 0.4); this.vx = rnd(-0.1, 0.1);
+    this.alpha = rnd(0.08, 0.25);
+    this.col = Math.random() > 0.6 ? [255, 122, 71] : (Math.random() > 0.5 ? [61, 139, 255] : [24, 212, 255]);
+  };
+  DepthPoint.prototype.update = function() {
+    this.x += this.vx; this.y += this.vy;
+    if (this.y > H + 10) this.reset(false);
+  };
+  DepthPoint.prototype.draw = function() {
+    var c = this.col;
+    var g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r * 3);
+    g.addColorStop(0, 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + (this.alpha * 2) + ')');
+    g.addColorStop(1, 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',0)');
+    ctx.beginPath(); ctx.arc(this.x, this.y, this.r * 3, 0, Math.PI * 2);
+    ctx.fillStyle = g; ctx.fill();
+  };
+
+  var pulses = []; for (var i = 0; i < 25; i++) pulses.push(new Pulse());
+  var points = []; for (var i = 0; i < 80; i++) points.push(new DepthPoint());
+
+  function loop() {
+    ctx.clearRect(0, 0, W, H);
+    points.forEach(function(p) { p.update(); p.draw(); });
+    pulses.forEach(function(p) { p.update(); p.draw(); });
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

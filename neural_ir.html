@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neural IR — Storm VST3 — r.stahlb</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Geist+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #050810; --bg2: #080d1a; --bg3: #0d1425;
+  --border: #1e2d4a; --border2: #28385e;
+  --text: #dde6f8; --text-dim: #8fa3cc; --text-bright: #f0f5ff;
+  --accent1: #3d8bff; --accent2: #18d4ff; --accent3: #c084fc; --accent4: #3dffa0;
+  --yellow: #ffd166; --code-bg: #070c18;
+  --font-display: 'Inter', sans-serif; --font-mono: 'Geist Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-display); font-size: 15px; line-height: 1.75; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+
+#stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.star { position: absolute; border-radius: 50%; background: white; animation: twinkle var(--dur) ease-in-out infinite alternate; opacity: 0; }
+@keyframes twinkle { from { opacity: var(--min-op); } to { opacity: var(--max-op); } }
+
+#bgCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+#app { position: relative; z-index: 1; }
+
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 56px; background: rgba(5,8,16,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
+.nav-brand { font-weight: 800; font-size: 1.05rem; color: var(--text-bright); letter-spacing: -0.02em; }
+.nav-brand span { color: var(--accent1); }
+.nav-links { display: flex; gap: 0.25rem; list-style: none; }
+.nav-links a { color: var(--text-dim); text-decoration: none; font-size: 0.8rem; font-weight: 500; padding: 0.35rem 0.85rem; border-radius: 6px; transition: color 0.2s, background 0.2s; }
+.nav-links a:hover { color: var(--text-bright); background: var(--bg3); }
+.back-link { color: var(--accent2) !important; }
+
+.page-hero { padding: 7rem 2rem 2rem; max-width: 900px; margin: 0 auto; text-align: center; }
+.page-hero .project-number { font-size: 0.68rem; letter-spacing: 0.22em; color: var(--accent3); text-transform: uppercase; margin-bottom: 0.75rem; font-weight: 500; }
+.page-hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; color: var(--text-bright); letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 1rem; }
+.page-hero h1 span { color: var(--accent3); }
+.page-hero .project-desc { color: #a8bde0; font-size: 0.92rem; max-width: 640px; line-height: 1.85; border-left: 2px solid var(--accent3); padding-left: 1rem; margin: 0 auto 2rem; text-align: left; }
+
+.why-box { max-width: 900px; margin: 0 auto 2rem; padding: 0 2rem; }
+.why-inner { background: linear-gradient(135deg, rgba(192,132,252,0.05), rgba(61,255,160,0.05)); border: 1px solid rgba(192,132,252,0.25); border-radius: 12px; padding: 1.75rem 2rem; }
+.why-inner h2 { font-size: 1rem; font-weight: 700; color: var(--accent3); margin-bottom: 0.75rem; letter-spacing: 0.02em; }
+.why-inner p { font-size: 0.88rem; color: #a8bde0; line-height: 1.85; margin-bottom: 0.75rem; }
+.why-inner p:last-child { margin-bottom: 0; }
+.why-inner strong { color: var(--text-bright); }
+
+.tech-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; margin: 1.5rem auto; padding: 0 2rem; max-width: 900px; }
+.tech-item { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem 1rem; }
+.tech-item .tech-label { font-size: 0.65rem; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.25rem; }
+.tech-item .tech-val { font-size: 0.8rem; color: var(--text-bright); font-weight: 600; }
+
+.section-divider { width: 100%; height: 1px; background: linear-gradient(90deg, transparent, var(--border2), transparent); }
+
+.chapter { padding: 0 2rem 4rem; max-width: 900px; margin: 0 auto; }
+.chapter-title { font-size: 1.4rem; font-weight: 700; color: var(--text-bright); letter-spacing: -0.02em; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; }
+.chapter-num { font-size: 0.67rem; color: var(--accent3); letter-spacing: 0.15em; text-transform: uppercase; font-family: var(--font-mono); font-weight: 500; }
+h4 { font-size: 0.98rem; font-weight: 700; color: var(--accent3); margin: 1.75rem 0 0.75rem; letter-spacing: -0.01em; }
+p { color: var(--text); font-size: 0.9rem; line-height: 1.9; margin-bottom: 1rem; }
+p strong { color: var(--text-bright); font-weight: 600; }
+
+.callout { border-radius: 8px; padding: 1rem 1.25rem; margin: 1.25rem 0; font-size: 0.82rem; line-height: 1.7; display: flex; gap: 0.75rem; align-items: flex-start; }
+.callout-tip  { background: rgba(192,132,252,0.06); border: 1px solid rgba(192,132,252,0.3); color: var(--accent3); }
+.callout-warn { background: rgba(255,200,64,0.06); border: 1px solid rgba(255,200,64,0.2); color: var(--yellow); }
+.callout-info { background: rgba(26,111,255,0.06); border: 1px solid rgba(26,111,255,0.2); color: #7aacff; }
+.callout-green { background: rgba(61,255,160,0.06); border: 1px solid rgba(61,255,160,0.25); color: var(--accent4); }
+.callout-icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.1rem; }
+.callout-body { color: var(--text); }
+.callout-body strong { color: inherit; }
+
+pre { background: var(--code-bg); border: 1px solid rgba(192,132,252,0.18); border-radius: 8px; padding: 1.25rem 1.5rem; overflow-x: auto; margin: 1rem 0 1.5rem; position: relative; }
+pre code { font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.75; color: #b8d0f8; }
+.code-lang { position: absolute; top: 0.5rem; right: 0.75rem; font-size: 0.6rem; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; }
+code { font-family: var(--font-mono); background: rgba(192,132,252,0.08); border: 1px solid rgba(192,132,252,0.15); border-radius: 4px; padding: 0.1em 0.4em; font-size: 0.82em; color: #d8b4fe; }
+pre code { background: none; border: none; padding: 0; font-size: inherit; color: inherit; }
+
+.table-wrap { overflow-x: auto; margin: 1rem 0 1.5rem; border-radius: 8px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead tr { background: var(--bg3); }
+th { padding: 0.75rem 1rem; text-align: left; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: #8fa3cc; font-weight: 600; border-bottom: 1px solid var(--border); }
+td { padding: 0.7rem 1rem; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: rgba(192,132,252,0.03); }
+td code { font-size: 0.75em; }
+
+.pipeline-flow { display: flex; flex-direction: column; gap: 0.6rem; margin: 1.5rem 0; }
+.pipeline-step { display: flex; align-items: flex-start; gap: 1rem; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.25rem; transition: border-color 0.2s; }
+.pipeline-step:hover { border-color: var(--accent3); }
+.step-num { font-family: var(--font-mono); font-size: 0.65rem; color: var(--accent3); font-weight: 600; letter-spacing: 0.1em; min-width: 2rem; padding-top: 0.1rem; }
+.step-title { font-size: 0.88rem; font-weight: 700; color: var(--text-bright); }
+.step-desc { font-size: 0.8rem; color: var(--text-dim); line-height: 1.55; margin-top: 0.2rem; }
+
+.file-table { font-size: 0.82rem; border-radius: 8px; border: 1px solid var(--border); overflow: hidden; margin: 1rem 0 1.5rem; }
+.file-row { display: grid; grid-template-columns: 1fr 2fr; border-bottom: 1px solid var(--border); }
+.file-row:last-child { border-bottom: none; }
+.file-row:hover { background: rgba(192,132,252,0.03); }
+.file-path { padding: 0.65rem 1rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent3); border-right: 1px solid var(--border); background: var(--bg3); }
+.file-desc { padding: 0.65rem 1rem; color: var(--text-dim); }
+
+.checklist { list-style: none; margin: 0.5rem 0 1.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.checklist li { font-size: 0.86rem; color: var(--text-dim); padding-left: 1.5rem; position: relative; }
+.checklist li::before { content: '□'; position: absolute; left: 0; color: var(--accent3); font-size: 0.9rem; }
+
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+
+footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--text-dim); font-size: 0.75rem; }
+footer span { color: var(--accent3); }
+footer a { color: var(--accent2); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+@media (max-width: 640px) { .nav-links { display: none; } .chapter { padding-left: 1.25rem; padding-right: 1.25rem; } .file-row { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div id="stars"></div>
+<canvas id="bgCanvas"></canvas>
+
+<div id="app">
+<nav>
+  <div class="nav-brand">r<span>.</span>stahlb</div>
+  <ul class="nav-links">
+    <li><a href="index.html" class="back-link">← Home</a></li>
+    <li><a href="george.html">George AI</a></li>
+    <li><a href="gpt.html">GPT from Scratch</a></li>
+    <li><a href="learning.html">Learning</a></li>
+    <li><a href="https://github.com/rstahlb" target="_blank">GitHub ↗</a></li>
+  </ul>
+</nav>
+
+<div class="page-hero reveal">
+  <div class="project-number">🎸 Neural IR</div>
+  <h1>SoloDallas Storm <span>VST3</span></h1>
+  <p class="project-desc">A complete staged implementation plan for capturing the SoloDallas Storm pedal as a neural network impulse response — recording 27 physical measurements, training a Temporal Convolutional Network, exporting to ONNX, and shipping a cross-platform VST3 plugin via JUCE.</p>
+</div>
+
+<div class="why-box reveal">
+  <div class="why-inner">
+    <h2>🧠 The Approach: Neural IR Capture</h2>
+    <p>Instead of trying to model the Storm's circuitry analytically, this project captures its sonic character through <strong>neural impulse response modeling</strong>. We record the physical hardware's response to 27 precisely controlled input conditions, train a TCN to learn the transfer function, and export a plugin that sounds indistinguishable from the hardware.</p>
+    <p>The plan is broken into <strong>6 self-contained stages</strong>. Each stage has a clear deliverable and can be stopped and resumed independently — progress is never lost between sessions.</p>
+  </div>
+</div>
+
+<div class="tech-grid reveal">
+  <div class="tech-item"><div class="tech-label">Hardware Target</div><div class="tech-val">SoloDallas Storm Pedal</div></div>
+  <div class="tech-item"><div class="tech-label">Model Architecture</div><div class="tech-val">Temporal Convolutional Network (TCN)</div></div>
+  <div class="tech-item"><div class="tech-label">Training Framework</div><div class="tech-val">PyTorch (MPS / GPU)</div></div>
+  <div class="tech-item"><div class="tech-label">Inference Format</div><div class="tech-val">ONNX Runtime</div></div>
+  <div class="tech-item"><div class="tech-label">Plugin Framework</div><div class="tech-val">JUCE (VST3 / AU / AAX)</div></div>
+  <div class="tech-item"><div class="tech-label">Target Platforms</div><div class="tech-val">macOS / Windows / Linux</div></div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- STAGE 1 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Stage 01</span> Data Capture & Preparation <span style="font-size:0.7rem;color:var(--text-dim);font-weight:400;letter-spacing:0;font-family:var(--font-display);">Weeks 1–2</span></h3>
+
+  <p>Record <strong>27 impulse responses</strong> from the physical Storm at various parameter settings using log chirp sweeps. The recording matrix covers the full parameter space of the pedal.</p>
+
+  <div class="callout callout-info">
+    <span class="callout-icon">🎛️</span>
+    <div class="callout-body"><strong>Recording setup:</strong> Connect Storm → audio interface (24-bit/48kHz). Warm up 15 minutes before recording. Generate log chirps: 1–20 kHz sweeps (10–30 sec) using Audacity/Reaper.</div>
+  </div>
+
+  <h4>Recording Matrix — 3 × 3 × 3 = 27 Files</h4>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Parameter</th><th>Low</th><th>Mid</th><th>High</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Drive</strong></td><td>0</td><td>50</td><td>100</td></tr>
+      <tr><td><strong>Tone</strong></td><td>0 (dark)</td><td>50 (mid)</td><td>100 (bright)</td></tr>
+      <tr><td><strong>Volume</strong></td><td>30</td><td>60</td><td>100</td></tr>
+    </tbody>
+  </table></div>
+
+  <h4>Naming Convention</h4>
+  <pre><code>storm_drive-[0-50-100]_tone-[0-50-100]_vol-[30-60-100].wav
+
+# Examples:
+storm_drive-0_tone-0_vol-30.wav      # minimum settings
+storm_drive-100_tone-100_vol-100.wav  # maximum settings
+storm_drive-50_tone-50_vol-60.wav     # midpoint</code><span class="code-lang">Shell</span></pre>
+
+  <h4>Stage 1 Deliverables</h4>
+  <ul class="checklist">
+    <li>27 .wav files organized in <code>data/raw_recordings/</code></li>
+    <li><code>recording_log.csv</code> tracking peak levels for each file</li>
+    <li>Preprocessed audio: normalized peaks to -1 dB, silence trimmed → <code>data/normalized/</code></li>
+  </ul>
+</div>
+
+<!-- STAGE 2 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Stage 02</span> Dataset Creation <span style="font-size:0.7rem;color:var(--text-dim);font-weight:400;letter-spacing:0;font-family:var(--font-display);">Weeks 2–3</span></h3>
+
+  <p>Extract impulse responses from the recorded sweeps and prepare the data for PyTorch training. Overlapping audio chunks ensure the model learns transient behavior effectively.</p>
+
+  <div class="pipeline-flow">
+    <div class="pipeline-step"><span class="step-num">01</span><div><div class="step-title">IR Extraction</div><div class="step-desc">Run ir_extract.py: deconvolve sweep signals → impulse responses. Trim to 500ms. Output → data/impulse_responses/</div></div></div>
+    <div class="pipeline-step"><span class="step-num">02</span><div><div class="step-title">Train/Val/Test Split</div><div class="step-desc">Split data: train (70%) / val (15%) / test (15%).</div></div></div>
+    <div class="pipeline-step"><span class="step-num">03</span><div><div class="step-title">Chunking</div><div class="step-desc">Create overlapping chunks: 16KB windows with 50% overlap.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">04</span><div><div class="step-title">Output Dataset</div><div class="step-desc">input_audio.npy + output_audio.npy + metadata.json → data/training_dataset/</div></div></div>
+    <div class="pipeline-step"><span class="step-num">05</span><div><div class="step-title">PyTorch DataLoader</div><div class="step-desc">pip install -r requirements.txt. Create DataLoader in train_utils.py.</div></div></div>
+  </div>
+
+  <div class="callout callout-green">
+    <span class="callout-icon">✅</span>
+    <div class="callout-body"><strong>Checkpoint #1:</strong> Commit data/ + scripts/preprocess_audio.py, ir_extract.py, create_dataset.py, train_utils.py. Dataset ready for training.</div>
+  </div>
+</div>
+
+<!-- STAGE 3 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Stage 03</span> Model Training <span style="font-size:0.7rem;color:var(--text-dim);font-weight:400;letter-spacing:0;font-family:var(--font-display);">Weeks 3–5</span></h3>
+
+  <p>Implement and train a <strong>Temporal Convolutional Network (TCN)</strong> — the standard architecture for audio modeling tasks. Dilated convolutions give the model a large receptive field with manageable compute.</p>
+
+  <h4>Model Architecture</h4>
+  <pre><code class="language-python">class StormTCN(nn.Module):
+    """Base model: dilated TCN, 4 dilation levels"""
+    # Receptive field grows exponentially with depth
+    # Level 1: dilation=1, Level 2: dilation=2, ...
+
+class StormConditionedTCN(nn.Module):
+    """Conditioned model: accepts drive/tone/volume as side info"""
+    # Injects parameter values via FiLM conditioning layers
+    # Allows single model to cover all 27 recording conditions</code><span class="code-lang">Python</span></pre>
+
+  <h4>Training Configuration</h4>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Setting</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>Optimizer</td><td>Adam</td></tr>
+      <tr><td>Loss Function</td><td>MSE (Mean Squared Error)</td></tr>
+      <tr><td>Epochs</td><td>50–150 (with early stopping)</td></tr>
+      <tr><td>Early Stopping</td><td>Save best model when validation loss plateaus</td></tr>
+      <tr><td>Target Validation Loss</td><td>&lt; 0.01</td></tr>
+      <tr><td>Target ESR</td><td>&lt; 0.1 (Error-to-Signal Ratio on test set)</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-green">
+    <span class="callout-icon">✅</span>
+    <div class="callout-body"><strong>Checkpoint #2 — MVP Ready:</strong> Commit models/ + results/ + training scripts. Output: <code>models/storm_tcn_best.pt</code> + <code>training_log.csv</code> + <code>results/metrics.txt</code>. Trained model ready for export.</div>
+  </div>
+</div>
+
+<!-- STAGE 4 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Stage 04</span> Model Export & C++ Wrapper <span style="font-size:0.7rem;color:var(--text-dim);font-weight:400;letter-spacing:0;font-family:var(--font-display);">Weeks 5–7</span></h3>
+
+  <p>Export the trained PyTorch model to <strong>ONNX format</strong> and write a C++ inference class that JUCE can call at audio rate.</p>
+
+  <h4>ONNX Export</h4>
+  <pre><code class="language-python"># export_onnx.py
+torch.onnx.export(
+    model,
+    dummy_input,
+    "models/storm_tcn.onnx",
+    opset_version=14,
+    dynamic_axes={
+        'input': {0: 'batch', 2: 'time'},   # dynamic batch & time
+        'output': {0: 'batch', 2: 'time'}
+    }
+)
+
+# Validate: test inference with ONNX Runtime Python
+# Verify output shapes & values match PyTorch model</code><span class="code-lang">Python</span></pre>
+
+  <h4>C++ Inference Class Interface</h4>
+  <pre><code class="language-cpp">// storm_inference.h
+class StormInference {
+public:
+    StormInference(const std::string& model_path);
+
+    // Process one audio chunk with parameter values
+    std::vector&lt;float&gt; process(
+        const std::vector&lt;float&gt;& audio_chunk,
+        float drive,   // 0.0 – 1.0
+        float tone,    // 0.0 – 1.0
+        float volume   // 0.0 – 1.0
+    );
+
+private:
+    Ort::Session session_;
+    Ort::Env env_;
+};</code><span class="code-lang">C++</span></pre>
+
+  <div class="callout callout-green">
+    <span class="callout-icon">✅</span>
+    <div class="callout-body"><strong>Checkpoint #3:</strong> Commit cpp/ + export scripts. Verify C++ code builds on macOS/Windows/Linux. Test inference produces correct output shapes. Status: C++ inference working and tested.</div>
+  </div>
+</div>
+
+<!-- STAGE 5 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Stage 05</span> JUCE Plugin Integration <span style="font-size:0.7rem;color:var(--text-dim);font-weight:400;letter-spacing:0;font-family:var(--font-display);">Weeks 7–8</span></h3>
+
+  <p>Integrate the C++ inference class into a JUCE AudioProcessor and build a minimal but functional VST3 plugin.</p>
+
+  <h4>AudioProcessor Integration</h4>
+  <pre><code class="language-cpp">// PluginProcessor.h
+class StormAudioProcessor : public juce::AudioProcessor {
+public:
+    void processBlock(juce::AudioBuffer&lt;float&gt;&amp;, juce::MidiBuffer&amp;) override {
+        // For each buffer chunk:
+        // 1. Extract audio samples
+        // 2. Get current drive/tone/volume parameter values
+        // 3. Call inference.process(chunk, drive, tone, volume)
+        // 4. Write output back to buffer
+    }
+
+private:
+    std::unique_ptr&lt;StormInference&gt; inference_;
+    juce::AudioProcessorValueTreeState apvts;
+};</code><span class="code-lang">C++</span></pre>
+
+  <h4>Parameters</h4>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Parameter</th><th>Range</th><th>Behavior</th></tr></thead>
+    <tbody>
+      <tr><td><code>drive</code></td><td>0.0 – 1.0</td><td>Maps to Storm Drive knob. Responds to parameter changes in real-time.</td></tr>
+      <tr><td><code>tone</code></td><td>0.0 – 1.0</td><td>Maps to Storm Tone knob. Dark (0) → Bright (1).</td></tr>
+      <tr><td><code>volume</code></td><td>0.0 – 1.0</td><td>Maps to Storm Volume knob. Affects output level and character.</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-green">
+    <span class="callout-icon">✅</span>
+    <div class="callout-body"><strong>Checkpoint #4 — MVP Plugin Ready:</strong> Commit juce/ + plugin binaries. Load in Reaper. Test audio flows. Parameters respond. Output: VST3 plugin binary (Windows/macOS/Linux). Next: UI polish & testing.</div>
+  </div>
+</div>
+
+<!-- STAGE 6 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Stage 06</span> UI Polish & Testing <span style="font-size:0.7rem;color:var(--text-dim);font-weight:400;letter-spacing:0;font-family:var(--font-display);">Weeks 8+</span></h3>
+
+  <ul class="checklist">
+    <li><strong>Custom UI design:</strong> Sketch mockup → implement with JUCE Graphics or web-based approach</li>
+    <li><strong>Preset system:</strong> Save/load parameter states. Create factory presets.</li>
+    <li><strong>Advanced metering:</strong> Input/output spectrum analyzer, gain reduction indicator</li>
+    <li><strong>Optimization:</strong> Profile CPU & latency. Use Instruments (macOS) or Perfetto (Linux).</li>
+    <li><strong>Cross-DAW testing:</strong> Reaper, Logic, Ableton, Studio One. Verify latency compensation, automation, MIDI.</li>
+    <li><strong>Blind A/B tests:</strong> Record plugin output vs. hardware. 3–5 listeners. Target: &gt;70% correct identification suggests good accuracy.</li>
+  </ul>
+
+  <div class="callout callout-tip">
+    <span class="callout-icon">🎯</span>
+    <div class="callout-body"><strong>Final commit:</strong> Release candidate v1.0 with complete documentation.</div>
+  </div>
+</div>
+
+<!-- FILE STRUCTURE -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Reference</span> File Structure</h3>
+
+  <div class="file-table">
+    <div class="file-row"><div class="file-path">data/raw_recordings/</div><div class="file-desc">27 raw .wav from Storm + recording_log.csv</div></div>
+    <div class="file-row"><div class="file-path">data/normalized/</div><div class="file-desc">Peak-normalized, silence-trimmed audio</div></div>
+    <div class="file-row"><div class="file-path">data/impulse_responses/</div><div class="file-desc">Deconvolved IRs, trimmed to 500ms</div></div>
+    <div class="file-row"><div class="file-path">data/training_dataset/</div><div class="file-desc">input_audio.npy, output_audio.npy, metadata.json</div></div>
+    <div class="file-row"><div class="file-path">scripts/</div><div class="file-desc">All Python scripts (preprocess, dataset, training, export)</div></div>
+    <div class="file-row"><div class="file-path">models/</div><div class="file-desc">storm_tcn_best.pt, storm_tcn.onnx</div></div>
+    <div class="file-row"><div class="file-path">cpp/</div><div class="file-desc">storm_inference.h/cpp, CMakeLists.txt</div></div>
+    <div class="file-row"><div class="file-path">juce/</div><div class="file-desc">Full VST3 project (StormVST3.jucer, Source/, CMakeLists.txt)</div></div>
+    <div class="file-row"><div class="file-path">results/</div><div class="file-desc">metrics.txt, training_log.csv, test results</div></div>
+  </div>
+</div>
+
+<footer>
+  <p>SoloDallas Storm VST3 — Neural IR Staged Implementation &nbsp;·&nbsp; <span>PyTorch · ONNX · JUCE · C++</span> &nbsp;·&nbsp; <a href="index.html">← Back to Portfolio</a></p>
+</footer>
+</div>
+
+<script>
+// Starfield
+const container = document.getElementById('stars');
+for (let i = 0; i < 120; i++) {
+  const s = document.createElement('div'); s.className = 'star';
+  const size = Math.random() * 2 + 0.5;
+  s.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--dur:${2+Math.random()*4}s;--min-op:${0.05+Math.random()*0.1};--max-op:${0.3+Math.random()*0.5};animation-delay:${Math.random()*5}s;`;
+  container.appendChild(s);
+}
+
+// Audio waveform / signal processing background
+(function(){
+  var canvas = document.getElementById('bgCanvas'), ctx = canvas.getContext('2d'), W, H;
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+  function rnd(a, b) { return a + Math.random() * (b - a); }
+
+  // Waveform: a sine wave segment that drifts across the screen
+  function Waveform() { this.reset(true); }
+  Waveform.prototype.reset = function(fromRandom) {
+    this.y = fromRandom ? rnd(0, H) : rnd(-100, 0);
+    this.vy = rnd(0.08, 0.3);
+    this.freq = rnd(0.008, 0.03);
+    this.amp = rnd(8, 35);
+    this.phase = rnd(0, Math.PI * 2);
+    this.phaseSpeed = rnd(0.008, 0.02);
+    this.alpha = rnd(0.04, 0.12);
+    this.col = Math.random() > 0.5 ? [192, 132, 252] : [61, 139, 255];
+    this.len = rnd(W * 0.3, W * 0.8);
+    this.x0 = rnd(0, W - this.len);
+  };
+  Waveform.prototype.update = function() {
+    this.y += this.vy;
+    this.phase += this.phaseSpeed;
+    if (this.y > H + 60) this.reset(false);
+  };
+  Waveform.prototype.draw = function() {
+    var c = this.col;
+    ctx.beginPath();
+    var steps = Math.floor(this.len);
+    for (var i = 0; i <= steps; i += 2) {
+      var x = this.x0 + i;
+      var y = this.y + Math.sin(i * this.freq + this.phase) * this.amp;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.strokeStyle = 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + this.alpha + ')';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  };
+
+  // Spectral bar: a vertical bar (frequency bin) that pulses
+  function SpecBar() { this.reset(true); }
+  SpecBar.prototype.reset = function(fromRandom) {
+    this.x = rnd(0, W);
+    this.y = fromRandom ? rnd(0, H) : H + rnd(10, 80);
+    this.w = rnd(1.5, 4);
+    this.h = rnd(10, 60);
+    this.vy = rnd(-0.15, -0.05);
+    this.alpha = rnd(0.05, 0.18);
+    this.col = [192, 132, 252];
+  };
+  SpecBar.prototype.update = function() {
+    this.y += this.vy;
+    if (this.y + this.h < 0) this.reset(false);
+  };
+  SpecBar.prototype.draw = function() {
+    var c = this.col;
+    var g = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.h);
+    g.addColorStop(0, 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + this.alpha + ')');
+    g.addColorStop(1, 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(this.x, this.y, this.w, this.h);
+  };
+
+  var waveforms = []; for (var i = 0; i < 20; i++) waveforms.push(new Waveform());
+  var bars = []; for (var i = 0; i < 60; i++) bars.push(new SpecBar());
+
+  function loop() {
+    ctx.clearRect(0, 0, W, H);
+    bars.forEach(function(b) { b.update(); b.draw(); });
+    waveforms.forEach(function(w) { w.update(); w.draw(); });
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
