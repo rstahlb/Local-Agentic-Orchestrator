@@ -18,27 +18,23 @@
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
-body { background: var(--bg); color: var(--text); font-family: var(--font-display); font-size: 15px; line-height: 1.75; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+body { background: #050810; color: var(--text); font-family: var(--font-display); font-size: 15px; line-height: 1.75; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 
 #stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
 .star { position: absolute; border-radius: 50%; background: white; animation: twinkle var(--dur) ease-in-out infinite alternate; opacity: 0; }
 @keyframes twinkle { from { opacity: var(--min-op); } to { opacity: var(--max-op); } }
 
 /* ── DANCING GIR LAYER ── */
+/* ── DANCING GIR LAYER ── */
 #girLayer {
   position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
-  mix-blend-mode: screen;
-  isolation: isolate;
 }
 .gir-dancer {
   position: absolute;
   pointer-events: none;
-  background: transparent;
 }
-.gir-dancer video {
-  width: 100%; height: 100%; object-fit: cover; display: block;
-  background: #050810;
-  mix-blend-mode: screen;
+.gir-dancer canvas {
+  width: 100%; height: 100%; display: block;
 }
 
 #app { position: relative; z-index: 1; }
@@ -488,89 +484,136 @@ document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 (function(){
   var layer = document.getElementById('girLayer');
   var GIR_SRC = 'dance_gir.mp4';
-  var COUNT = 12; // number of GIRs on screen at once
+  var COUNT = 12;
   var girs = [];
-
   var W = window.innerWidth, H = window.innerHeight;
   window.addEventListener('resize', function(){ W = window.innerWidth; H = window.innerHeight; });
 
   function randBetween(a, b){ return a + Math.random() * (b - a); }
 
+  // One hidden master video — all canvases read from this single decoded stream
+  var masterVid = document.createElement('video');
+  masterVid.src = GIR_SRC;
+  masterVid.loop = true;
+  masterVid.muted = true;
+  masterVid.playsInline = true;
+  masterVid.autoplay = true;
+  masterVid.style.cssText = 'position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;';
+  document.body.appendChild(masterVid);
+  masterVid.play().catch(function(){});
+
+  // Offscreen canvas for pixel processing
+  var offscreen = document.createElement('canvas');
+  var offCtx = offscreen.getContext('2d', { willReadFrequently: true });
+
   function createGir() {
     var wrapper = document.createElement('div');
     wrapper.className = 'gir-dancer';
 
-    // Random small size — between 60px and 130px
-    var size = randBetween(60, 130);
+    var size = Math.round(randBetween(60, 130));
     wrapper.style.width  = size + 'px';
     wrapper.style.height = size + 'px';
 
-    // Start at a random position on screen
     var x = randBetween(0, W - size);
     var y = randBetween(0, H - size);
     wrapper.style.left = x + 'px';
     wrapper.style.top  = y + 'px';
 
-    // Very subtle opacity so they don't overpower the content
     var alpha = randBetween(0.07, 0.18);
     wrapper.style.opacity = alpha;
 
-    // Physics
     var vx = randBetween(-1.2, 1.2);
     var vy = randBetween(-1.2, 1.2);
-    // Ensure it's actually moving
     if (Math.abs(vx) < 0.3) vx = vx < 0 ? -0.5 : 0.5;
     if (Math.abs(vy) < 0.3) vy = vy < 0 ? -0.5 : 0.5;
 
-    var spinSpeed = randBetween(-1.2, 1.2); // degrees per frame
+    var spinSpeed = randBetween(-1.2, 1.2);
     var currentAngle = randBetween(0, 360);
     var wobble = randBetween(0, Math.PI * 2);
     var wobbleSpeed = randBetween(0.01, 0.03);
 
-    // Create the video element
-    var vid = document.createElement('video');
-    vid.src = GIR_SRC;
-    vid.loop = true;
-    vid.muted = true;
-    vid.playsInline = true;
-    vid.autoplay = true;
-    vid.style.background = '#050810';
-    vid.style.mixBlendMode = 'screen';
-    // Randomise start time so they're not all in sync
-    vid.addEventListener('loadedmetadata', function(){
-      vid.currentTime = Math.random() * vid.duration;
-    });
-    vid.play().catch(function(){});
+    // Each Gir gets a canvas instead of a video
+    var canvas = document.createElement('canvas');
+    canvas.width  = size;
+    canvas.height = size;
+    var ctx = canvas.getContext('2d');
 
-    wrapper.appendChild(vid);
+    wrapper.appendChild(canvas);
     layer.appendChild(wrapper);
 
-    var gir = { el: wrapper, x: x, y: y, vx: vx, vy: vy, size: size, angle: currentAngle, spin: spinSpeed, wobble: wobble, wobbleSpeed: wobbleSpeed };
+    var gir = { el: wrapper, canvas: canvas, ctx: ctx, size: size, x: x, y: y, vx: vx, vy: vy, angle: currentAngle, spin: spinSpeed, wobble: wobble, wobbleSpeed: wobbleSpeed };
     girs.push(gir);
     return gir;
   }
 
-  // Spawn all GIRs
   for (var i = 0; i < COUNT; i++) createGir();
 
-  // Animation loop
+  var VW = 0, VH = 0;
+  masterVid.addEventListener('loadedmetadata', function(){
+    VW = masterVid.videoWidth;
+    VH = masterVid.videoHeight;
+    offscreen.width  = VW;
+    offscreen.height = VH;
+    // Stagger start times
+    girs.forEach(function(g, idx){
+      setTimeout(function(){}, idx * 80);
+    });
+  });
+
+  // White-removal threshold: pixels with R>220 && G>220 && B>220 become transparent
+  var THRESH = 220;
+
+  function drawFrame() {
+    if (masterVid.readyState < 2 || VW === 0) return;
+
+    // Draw master video to offscreen canvas
+    offCtx.drawImage(masterVid, 0, 0, VW, VH);
+
+    try {
+      var imgData = offCtx.getImageData(0, 0, VW, VH);
+      var d = imgData.data;
+
+      // Remove white/near-white pixels
+      for (var i = 0; i < d.length; i += 4) {
+        var r = d[i], g = d[i+1], b = d[i+2];
+        if (r > THRESH && g > THRESH && b > THRESH) {
+          d[i+3] = 0; // fully transparent
+        } else if (r > 180 && g > 180 && b > 180) {
+          // Semi-transparent fringe — smooth the edge
+          var whiteness = (r + g + b) / 3;
+          d[i+3] = Math.round(((255 - whiteness) / (255 - 180)) * 255);
+        }
+      }
+      offCtx.putImageData(imgData, 0, 0);
+
+      // Draw processed frame to each gir canvas
+      girs.forEach(function(g) {
+        g.ctx.clearRect(0, 0, g.size, g.size);
+        g.ctx.drawImage(offscreen, 0, 0, g.size, g.size);
+      });
+    } catch(e) {
+      // Cross-origin guard — fallback to direct draw
+      girs.forEach(function(g) {
+        g.ctx.clearRect(0, 0, g.size, g.size);
+        g.ctx.drawImage(masterVid, 0, 0, g.size, g.size);
+      });
+    }
+  }
+
   function animate() {
+    drawFrame();
     for (var i = 0; i < girs.length; i++) {
       var g = girs[i];
       g.wobble += g.wobbleSpeed;
-
-      // Drift with slight sine wobble
       g.x += g.vx + Math.sin(g.wobble) * 0.4;
       g.y += g.vy + Math.cos(g.wobble * 0.7) * 0.3;
       g.angle += g.spin;
 
-      // Bounce off walls
       if (g.x < -g.size * 0.5) { g.x = -g.size * 0.5; g.vx = Math.abs(g.vx); }
       if (g.x > W - g.size * 0.5) { g.x = W - g.size * 0.5; g.vx = -Math.abs(g.vx); }
       if (g.y < -g.size * 0.5) { g.y = -g.size * 0.5; g.vy = Math.abs(g.vy); }
       if (g.y > H - g.size * 0.5) { g.y = H - g.size * 0.5; g.vy = -Math.abs(g.vy); }
 
-      // Apply
       g.el.style.transform = 'translate(' + g.x + 'px,' + g.y + 'px) rotate(' + g.angle + 'deg)';
       g.el.style.left = '0';
       g.el.style.top  = '0';
