@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>George AI — r.stahlb</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Geist+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #050810; --bg2: #080d1a; --bg3: #0d1425;
+  --border: #1e2d4a; --border2: #28385e;
+  --text: #dde6f8; --text-dim: #8fa3cc; --text-bright: #f0f5ff;
+  --accent1: #3d8bff; --accent2: #18d4ff; --accent3: #ff7a47; --accent4: #3dffa0;
+  --yellow: #ffd166; --code-bg: #070c18;
+  --font-display: 'Inter', sans-serif; --font-mono: 'Geist Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-display); font-size: 15px; line-height: 1.75; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+
+#stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.star { position: absolute; border-radius: 50%; background: white; animation: twinkle var(--dur) ease-in-out infinite alternate; opacity: 0; }
+@keyframes twinkle { from { opacity: var(--min-op); } to { opacity: var(--max-op); } }
+
+/* ── DANCING GIR LAYER ── */
+#girLayer { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.gir-dancer {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.gir-dancer video { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+#app { position: relative; z-index: 1; }
+
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 2rem; height: 56px;
+  background: rgba(5,8,16,0.85); backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-brand { font-weight: 800; font-size: 1.05rem; color: var(--text-bright); letter-spacing: -0.02em; }
+.nav-brand span { color: var(--accent1); }
+.nav-links { display: flex; gap: 0.25rem; list-style: none; }
+.nav-links a { color: var(--text-dim); text-decoration: none; font-size: 0.8rem; font-weight: 500; padding: 0.35rem 0.85rem; border-radius: 6px; transition: color 0.2s, background 0.2s; }
+.nav-links a:hover { color: var(--text-bright); background: var(--bg3); }
+.back-link { color: var(--accent2) !important; }
+
+.page-hero {
+  padding: 7rem 2rem 2rem;
+  max-width: 900px; margin: 0 auto; text-align: center;
+}
+.page-hero .project-number { font-size: 0.68rem; letter-spacing: 0.22em; color: var(--accent2); text-transform: uppercase; margin-bottom: 0.75rem; font-weight: 500; }
+.page-hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; color: var(--text-bright); letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 1rem; }
+.page-hero h1 span { color: var(--accent1); }
+.page-hero .project-desc { color: #a8bde0; font-size: 0.92rem; max-width: 600px; line-height: 1.85; border-left: 2px solid var(--accent1); padding-left: 1rem; margin: 0 auto 2rem; text-align: left; }
+
+.tech-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; margin: 1.5rem 0; max-width: 900px; margin-left: auto; margin-right: auto; padding: 0 2rem; }
+.tech-item { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem 1rem; }
+.tech-item .tech-label { font-size: 0.65rem; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.25rem; }
+.tech-item .tech-val { font-size: 0.8rem; color: var(--text-bright); font-weight: 600; }
+
+.section-divider { width: 100%; height: 1px; background: linear-gradient(90deg, transparent, var(--border2), transparent); }
+
+.chapter { padding: 0 2rem 4rem; max-width: 900px; margin: 0 auto; }
+.chapter-title { font-size: 1.4rem; font-weight: 700; color: var(--text-bright); letter-spacing: -0.02em; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; }
+.chapter-num { font-size: 0.67rem; color: var(--accent2); letter-spacing: 0.15em; text-transform: uppercase; font-family: var(--font-mono); font-weight: 500; }
+h4 { font-size: 0.98rem; font-weight: 700; color: var(--accent2); margin: 1.75rem 0 0.75rem; letter-spacing: -0.01em; }
+p { color: var(--text); font-size: 0.9rem; line-height: 1.9; margin-bottom: 1rem; }
+p strong { color: var(--text-bright); font-weight: 600; }
+
+.callout { border-radius: 8px; padding: 1rem 1.25rem; margin: 1.25rem 0; font-size: 0.82rem; line-height: 1.7; display: flex; gap: 0.75rem; align-items: flex-start; }
+.callout-tip  { background: rgba(0,200,255,0.06); border: 1px solid rgba(0,200,255,0.2); color: var(--accent2); }
+.callout-warn { background: rgba(255,200,64,0.06); border: 1px solid rgba(255,200,64,0.2); color: var(--yellow); }
+.callout-info { background: rgba(26,111,255,0.06); border: 1px solid rgba(26,111,255,0.2); color: #7aacff; }
+.callout-icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.1rem; }
+.callout-body { color: var(--text); }
+.callout-body strong { color: inherit; }
+
+pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem 1.5rem; overflow-x: auto; margin: 1rem 0 1.5rem; position: relative; }
+pre code { font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.75; color: #b8d0f8; }
+.code-lang { position: absolute; top: 0.5rem; right: 0.75rem; font-size: 0.6rem; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; }
+code { font-family: var(--font-mono); background: rgba(61,139,255,0.1); border: 1px solid rgba(61,139,255,0.18); border-radius: 4px; padding: 0.1em 0.4em; font-size: 0.82em; color: #88baff; }
+pre code { background: none; border: none; padding: 0; font-size: inherit; color: inherit; }
+
+.table-wrap { overflow-x: auto; margin: 1rem 0 1.5rem; border-radius: 8px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead tr { background: var(--bg3); }
+th { padding: 0.75rem 1rem; text-align: left; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: #8fa3cc; font-weight: 600; border-bottom: 1px solid var(--border); }
+td { padding: 0.7rem 1rem; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: rgba(26,111,255,0.04); }
+td code { font-size: 0.75em; }
+
+.boot-seq { counter-reset: boot; list-style: none; display: grid; gap: 0.4rem; margin: 1rem 0 1.5rem; }
+.boot-seq li { counter-increment: boot; display: flex; gap: 1rem; font-size: 0.84rem; color: var(--text); padding: 0.5rem 0.75rem; border-radius: 6px; background: var(--bg3); border: 1px solid var(--border); align-items: flex-start; }
+.boot-seq li::before { content: counter(boot, decimal-leading-zero); color: var(--accent1); font-weight: 700; font-size: 0.7rem; flex-shrink: 0; padding-top: 0.1rem; font-family: var(--font-mono); }
+
+.orb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.75rem; margin: 1rem 0 1.5rem; }
+.orb-item { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; display: flex; flex-direction: column; gap: 0.4rem; transition: border-color 0.2s; }
+.orb-item:hover { border-color: var(--accent1); }
+.orb-num { font-size: 0.6rem; color: var(--text-dim); letter-spacing: 0.1em; }
+.orb-name { font-size: 0.85rem; font-weight: 600; color: var(--text-bright); }
+.orb-desc { font-size: 0.75rem; color: #8fa3cc; line-height: 1.55; }
+
+.reward-pos { color: var(--accent4); font-weight: 600; }
+.reward-neg { color: var(--accent3); font-weight: 600; }
+
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+
+footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--text-dim); font-size: 0.75rem; }
+footer span { color: var(--accent1); }
+footer a { color: var(--accent2); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+
+@media (max-width: 640px) { .nav-links { display: none; } .chapter, .tech-grid { padding-left: 1.25rem; padding-right: 1.25rem; } }
+</style>
+</head>
+<body>
+<div id="stars"></div>
+<div id="girLayer"></div>
+
+<div id="app">
+<nav>
+  <div class="nav-brand">r<span>.</span>stahlb</div>
+  <ul class="nav-links">
+    <li><a href="index.html" class="back-link">← Home</a></li>
+    <li><a href="gpt.html">GPT from Scratch</a></li>
+    <li><a href="learning.html">Learning</a></li>
+    <li><a href="https://github.com/rstahlb" target="_blank">GitHub ↗</a></li>
+  </ul>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero reveal">
+  <div class="project-number">Project 01</div>
+  <h1>George <span>AI</span></h1>
+  <p class="project-desc">A floating AI orb for macOS — voice-first, privacy-focused, built entirely in Swift + Python. Runs a local LLM on-device via Apple MLX, cascades to cloud APIs only when needed, plays chess, plays Arkanoid autonomously via reinforcement learning, and learns your preferences over time.</p>
+</div>
+
+<div class="tech-grid reveal">
+  <div class="tech-item"><div class="tech-label">UI & App</div><div class="tech-val">Swift / SwiftUI / AppKit</div></div>
+  <div class="tech-item"><div class="tech-label">Local AI</div><div class="tech-val">MLX · Llama 3.2 3B 4-bit</div></div>
+  <div class="tech-item"><div class="tech-label">Cloud AI</div><div class="tech-val">OpenRouter → OpenAI → Gemini</div></div>
+  <div class="tech-item"><div class="tech-label">Backend</div><div class="tech-val">Python Flask · localhost:8765</div></div>
+  <div class="tech-item"><div class="tech-label">Speech In</div><div class="tech-val">SFSpeechRecognizer + AVAudioEngine</div></div>
+  <div class="tech-item"><div class="tech-label">Memory</div><div class="tech-val">Local JSON · never sent to cloud</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- MEDIA GALLERY                               -->
+<!-- To add a video: copy a card block,          -->
+<!-- replace the mp4 filename + text below.      -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Media</span> George AI in Action</h3>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem;">
+
+    <!-- ── CARD 1 — ADD MP4 NAME HERE (currently: george_inter.mp4) ── -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+      <video controls playsinline style="width:100%;display:block;max-height:200px;object-fit:cover;background:#000;">
+        <source src="george_inter.mp4" type="video/mp4">
+      </video>
+      <div style="padding:1rem;">
+        <div style="font-size:0.7rem;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.3rem;">Demo</div>
+        <div style="font-size:0.9rem;font-weight:700;color:var(--text-bright);">George Interactive</div>
+        <!-- ADD DESCRIPTION HERE -->
+        <div style="font-size:0.78rem;color:#8fa3cc;margin-top:0.3rem;line-height:1.55;">George my llm conversing with me, he is able to see the screen and able to see desktop. He sees my flying bird and makes a comment. I store long term memory with json file, he has a long term memory.</div>
+      </div>
+    </div>
+
+    <!-- ── CARD 2 — coming soon. Replace div below with <video> when ready ── -->
+    <div style="background:var(--bg2);border:1px dashed var(--border2);border-radius:12px;overflow:hidden;opacity:0.6;">
+      <!-- ADD MP4 NAME HERE e.g. george_chess.mp4 -->
+      <div style="width:100%;height:200px;background:var(--bg3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.5rem;">
+        <div style="font-size:2rem;">🎬</div>
+        <div style="font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-dim);">Coming Soon</div>
+      </div>
+      <div style="padding:1rem;">
+        <!-- ADD CATEGORY HERE -->
+        <div style="font-size:0.7rem;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.3rem;">Coming Soon</div>
+        <!-- ADD TITLE HERE -->
+        <div style="font-size:0.9rem;font-weight:700;color:var(--text-bright);">Video Title Here</div>
+        <!-- ADD DESCRIPTION HERE -->
+        <div style="font-size:0.78rem;color:#8fa3cc;margin-top:0.3rem;line-height:1.55;">Add your description here.</div>
+      </div>
+    </div>
+
+    <!-- ── CARD 3 — coming soon ── -->
+    <div style="background:var(--bg2);border:1px dashed var(--border2);border-radius:12px;overflow:hidden;opacity:0.6;">
+      <!-- ADD MP4 NAME HERE -->
+      <div style="width:100%;height:200px;background:var(--bg3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.5rem;">
+        <div style="font-size:2rem;">🎬</div>
+        <div style="font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-dim);">Coming Soon</div>
+      </div>
+      <div style="padding:1rem;">
+        <div style="font-size:0.7rem;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.3rem;">Coming Soon</div>
+        <div style="font-size:0.9rem;font-weight:700;color:var(--text-bright);">Video Title Here</div>
+        <!-- ADD DESCRIPTION HERE -->
+        <div style="font-size:0.78rem;color:#8fa3cc;margin-top:0.3rem;line-height:1.55;">Add your description here.</div>
+      </div>
+    </div>
+
+    <!-- ── CARD 4 — coming soon ── -->
+    <div style="background:var(--bg2);border:1px dashed var(--border2);border-radius:12px;overflow:hidden;opacity:0.6;">
+      <!-- ADD MP4 NAME HERE -->
+      <div style="width:100%;height:200px;background:var(--bg3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.5rem;">
+        <div style="font-size:2rem;">🎬</div>
+        <div style="font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-dim);">Coming Soon</div>
+      </div>
+      <div style="padding:1rem;">
+        <div style="font-size:0.7rem;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.3rem;">Coming Soon</div>
+        <div style="font-size:0.9rem;font-weight:700;color:var(--text-bright);">Video Title Here</div>
+        <!-- ADD DESCRIPTION HERE -->
+        <div style="font-size:0.78rem;color:#8fa3cc;margin-top:0.3rem;line-height:1.55;">Add your description here.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- CH 1 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 01</span> System Architecture & AI Routing</h3>
+  <p>George uses a two-tier intelligence model: a <strong>local on-device LLM</strong> running on Apple Silicon GPU via <code>mlx_lm</code> for fast, private answers, and a <strong>cascade of cloud APIs</strong> for questions requiring real-time data.</p>
+  <div class="table-wrap"><table><thead><tr><th>File</th><th>Role</th></tr></thead><tbody>
+    <tr><td><code>GeorgeController.swift</code></td><td>Main Swift controller — mic, speech recognition, screen capture, TTS, all AI calls</td></tr>
+    <tr><td><code>server.py</code></td><td>Python HTTP server on localhost:8765 — LLM routing, local inference, cloud API calls</td></tr>
+    <tr><td><code>Agent.swift</code></td><td>Reinforcement learning layer — learns preferences and improves routing decisions over time</td></tr>
+    <tr><td><code>Memory.swift</code></td><td>Persistent memory of facts, conversation history, and user profile</td></tr>
+  </tbody></table></div>
+  <h4>Smart 3-Step Routing</h4>
+  <p><strong>Step 1 — Fast Pattern Matching</strong> — Before invoking any model, <code>server.py</code> runs the query through compiled regex patterns. Zero tokens, zero API calls.</p>
+  <pre><code class="language-python"># server.py — fast_route()
+def fast_route(user_input, has_cloud):
+    if PERSONAL_LOCAL_PATTERNS.search(user_input): return 'LOCAL'
+    if not has_cloud: return 'LOCAL'
+    if FORCE_CLOUD_PATTERNS.search(user_input): return 'CLOUD'
+    if CLOUD_PATTERNS.search(user_input): return 'CLOUD'
+    if LOCAL_PATTERNS.search(user_input): return 'LOCAL'
+    return None  # ambiguous — go to Step 2</code><span class="code-lang">python</span></pre>
+  <div class="table-wrap"><table><thead><tr><th>Pattern</th><th>Triggers</th></tr></thead><tbody>
+    <tr><td><code>PERSONAL_LOCAL</code></td><td>Questions about you, your family, health, schedule — always local, never sent to cloud</td></tr>
+    <tr><td><code>FORCE_CLOUD</code></td><td>"use the internet", "search online", "google it" — bypasses local model entirely</td></tr>
+    <tr><td><code>CLOUD_PATTERNS</code></td><td>News, scores, stock prices, current events, today's weather</td></tr>
+    <tr><td><code>LOCAL_PATTERNS</code></td><td>Definitions, jokes, stories, math, general knowledge — anything timeless</td></tr>
+  </tbody></table></div>
+  <p><strong>Step 2 — LLM Router</strong> — If pattern matching returns <code>None</code>, George uses its own local LLM to classify the query. A 4-token inference call at <code>temperature=0</code> returns only the word <code>LOCAL</code> or <code>CLOUD</code>.</p>
+  <p><strong>Step 3 — Cloud Cascade</strong> — When a query needs the internet, George tries providers in order:</p>
+  <div class="table-wrap"><table><thead><tr><th>Priority</th><th>Provider</th><th>Notes</th></tr></thead><tbody>
+    <tr><td>0</td><td>wttr.in</td><td>Weather queries bypass all LLMs — free, no API key</td></tr>
+    <tr><td>1</td><td>OpenRouter</td><td>Tries gpt-4o-mini, gemma-3, llama-3 in order</td></tr>
+    <tr><td>2</td><td>OpenAI</td><td>Direct fallback if OpenRouter fails</td></tr>
+    <tr><td>3</td><td>Gemini</td><td>Google Gemini 2.0 Flash as final fallback</td></tr>
+    <tr><td>4</td><td>Local fallback</td><td>Answers locally with a caveat if all cloud fails</td></tr>
+  </tbody></table></div>
+  <div class="callout callout-warn"><span class="callout-icon">🟡</span><div class="callout-body">When any cloud provider answers, the orb displays a <strong>yellow ring</strong> — you always know when data left your Mac.</div></div>
+  <h4>Streaming Response Format</h4>
+  <pre><code>{"sentence": "Here is the first sentence.", "source": "local"}
+{"sentence": "And here is the second.",      "source": "cloud"}
+{"done": true, "full": "Complete text",      "source": "cloud"}</code><span class="code-lang">json</span></pre>
+</div>
+
+<!-- CH 2 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 02</span> Screen Vision</h3>
+  <p>George can look at your screen on demand. Say <em>"Hey George, what's on my screen?"</em> and George takes a screenshot, encodes it, and sends it to a cloud vision model.</p>
+  <p><strong>Trigger phrases:</strong> "what's on my screen" · "describe my screen" · "what do you see" · "look at my screen" · "read the screen" · "summarize this page"</p>
+  <pre><code class="language-swift">// GeorgeController.swift — handleScreenVision()
+let path = "/tmp/george_screen.png"
+_ = await shell("screencapture -x " + path)
+{ "type": "image_url", "image_url": { "url": "data:image/png;base64,..." } }</code><span class="code-lang">swift</span></pre>
+  <div class="callout callout-info"><span class="callout-icon">🔒</span><div class="callout-body">George <strong>never</strong> passively monitors your screen. Screen vision is triggered only when you explicitly ask. Screen Recording permission must be granted in <strong>System Settings → Privacy & Security → Screen Recording</strong>.</div></div>
+</div>
+
+<!-- CH 3 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 03</span> Hardware Integration</h3>
+  <p>George integrates with macOS hardware through official Apple APIs and standard Unix tools — no kernel extensions, no custom drivers.</p>
+  <h4>Microphone</h4>
+  <div class="table-wrap"><table><thead><tr><th>Framework</th><th>Role</th></tr></thead><tbody>
+    <tr><td><code>AVAudioEngine</code></td><td>Captures raw audio at 44.1kHz, streams buffers to the speech recognizer</td></tr>
+    <tr><td><code>SFSpeechRecognizer</code></td><td>On-device speech recognition. A second instance listens for "stop" / "shut up" while George is speaking</td></tr>
+  </tbody></table></div>
+  <h4>GPU — Local AI Inference</h4>
+  <p>The local LLM runs on Apple Silicon GPU (M1/M2/M3/M4) using Apple's MLX framework via <code>mlx_lm</code>. Loaded into GPU memory at startup.</p>
+  <h4>Hardware Stats</h4>
+  <div class="table-wrap"><table><thead><tr><th>Data</th><th>Command</th></tr></thead><tbody>
+    <tr><td>CPU usage</td><td><code>ps -A -o %cpu | awk</code></td></tr>
+    <tr><td>RAM total / free</td><td><code>sysctl -n hw.memsize</code> / <code>vm_stat</code></td></tr>
+    <tr><td>Battery</td><td><code>pmset -g batt</code></td></tr>
+    <tr><td>Disk usage</td><td><code>df -h /</code></td></tr>
+    <tr><td>Network interface</td><td><code>route get default</code></td></tr>
+    <tr><td>Fan / CPU temp</td><td><code>istats fan speed</code> / <code>istats cpu temp</code> (optional)</td></tr>
+  </tbody></table></div>
+</div>
+
+<!-- CH 4 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 04</span> Memory Engine</h3>
+  <p>George's memory system is what makes it feel like a real companion rather than a stateless chatbot. Everything lives in <code>~/.george/memory.json</code> — never sent to the cloud.</p>
+  <pre><code>{ "persona": { "name": "George", "traits": ["curious","warm","witty","direct","honest"] },
+  "history": [ /* last 80 conversation turns */ ],
+  "facts":   [ /* up to 300 plain-English facts about you */ ] }</code><span class="code-lang">json</span></pre>
+  <h4>Proactive Fact Mining</h4>
+  <p>Every user message is scanned by a regex-based fact extractor <strong>before</strong> it reaches the AI. Categories detected:</p>
+  <p>Name · Spouse/Partner · Children · Extended family · Job · Location · Age · Pets · Hobbies (21 types) · Music genres (27 types)</p>
+  <h4>Correction System</h4>
+  <p>If you say "correction", "remember I...", "actually I...", or "I don't listen to X", George removes the conflicting fact and stores the corrected version.</p>
+  <div class="table-wrap"><table><thead><tr><th>Rule</th></tr></thead><tbody>
+    <tr><td>Voice-only output — no markdown, no asterisks, no bullet points</td></tr>
+    <tr><td>Keep replies to 1–3 sentences unless asked for detail</td></tr>
+    <tr><td>Naturally weave in past facts when they enrich the answer</td></tr>
+    <tr><td>Never invent facts, news, weather, or current events without real data</td></tr>
+    <tr><td>Never mention Claude, Anthropic, LLaMA, or that you're an AI — you ARE George</td></tr>
+  </tbody></table></div>
+</div>
+
+<!-- CH 5 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 05</span> Orb Visual System</h3>
+  <p>The floating orb is a real-time status display built in pure SwiftUI with <strong>11 distinct visual styles</strong>.</p>
+  <h4>The Five Orb States</h4>
+  <div class="table-wrap"><table><thead><tr><th>State</th><th>Visual Behavior</th></tr></thead><tbody>
+    <tr><td><code>.booting</code></td><td>Scale pulls in (0.92x), three animated dots cycle below showing loading progress</td></tr>
+    <tr><td><code>.idle</code></td><td>Slow breathing — scale oscillates 1.0 ↔ 1.07 over 3 seconds</td></tr>
+    <tr><td><code>.listening</code></td><td>Orb shrinks to 82%, ripple ring expands and fades, live transcription displayed</td></tr>
+    <tr><td><code>.thinking</code></td><td>Subtle nudge to 1.02x, 6 particles orbit the perimeter</td></tr>
+    <tr><td><code>.speaking</code></td><td>Rapid pulse between 1.0 and 1.26 scale — fast heartbeat effect</td></tr>
+  </tbody></table></div>
+  <h4>The 11 Orb Styles</h4>
+  <div class="orb-grid">
+    <div class="orb-item"><span class="orb-num">00</span><span class="orb-name">Classic Blue</span><span class="orb-desc">Radial gradient sphere with blue glow and orbiting particles</span></div>
+    <div class="orb-item"><span class="orb-num">01</span><span class="orb-name">Blue Flower</span><span class="orb-desc">8 rotating ellipse petals orbit the outside of the orb</span></div>
+    <div class="orb-item"><span class="orb-num">02</span><span class="orb-name">Plasma Arc</span><span class="orb-desc">3 partial arcs rotate at 120° offsets — electric effect</span></div>
+    <div class="orb-item"><span class="orb-num">03</span><span class="orb-name">Crystal Gem</span><span class="orb-desc">6 rotating diamond shapes with ice-white facets</span></div>
+    <div class="orb-item"><span class="orb-num">04</span><span class="orb-name">Deep Nebula</span><span class="orb-desc">4 rotating gradient nebula clouds + 12 star dots</span></div>
+    <div class="orb-item"><span class="orb-num">05</span><span class="orb-name">Matrix Rain</span><span class="orb-desc">Green globe with orbiting 0, 1, ▓, ░ characters</span></div>
+    <div class="orb-item"><span class="orb-num">06</span><span class="orb-name">Lava Lamp</span><span class="orb-desc">5 blurred orange/red blobs float and merge inside</span></div>
+    <div class="orb-item"><span class="orb-num">07</span><span class="orb-name">Ghost Light</span><span class="orb-desc">Three concentric rings breathing slowly around a white core</span></div>
+    <div class="orb-item"><span class="orb-num">08</span><span class="orb-name">Aurora</span><span class="orb-desc">5 blurred gradient bands rotating like aurora curtains</span></div>
+    <div class="orb-item"><span class="orb-num">09</span><span class="orb-name">Neon Pulse</span><span class="orb-desc">Hot pink globe with 3 concentric neon rings pulsing outward</span></div>
+    <div class="orb-item"><span class="orb-num">10</span><span class="orb-name">Vortex</span><span class="orb-desc">6 arc segments colored by hue rotation spin together</span></div>
+  </div>
+  <div class="callout callout-tip"><span class="callout-icon">💡</span><div class="callout-body"><strong>Double-tap the orb</strong> to quit George. Single taps are ignored — voice is the primary input.</div></div>
+</div>
+
+<!-- CH 6 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 06</span> Chess Engine</h3>
+  <p>George includes a complete, self-contained chess implementation in Swift with no external libraries — full rules, minimax search, alpha-beta pruning, and natural-language move commentary.</p>
+  <h4>Board Representation</h4>
+  <p>Pieces encoded as raw integers 0–12, stored as a flat 64-element array. <code>ChessBoard</code> is a Swift <strong>struct</strong> (value type) — every speculative move creates an independent copy.</p>
+  <pre><code class="language-swift">struct ChessBoard {
+    var squares: [ChessPiece] = Array(repeating: .empty, count: 64)
+    var whiteKingsideCastle  = true
+    var whiteQueensideCastle = true
+    var blackKingsideCastle  = true
+    var blackQueensideCastle = true
+    var enPassantSquare: Int = -1
+    var whiteToMove = true
+}</code><span class="code-lang">swift</span></pre>
+  <h4>Material Values</h4>
+  <div class="table-wrap"><table><thead><tr><th>Piece</th><th>Value</th><th>Reasoning</th></tr></thead><tbody>
+    <tr><td>Pawn</td><td>100</td><td>Baseline unit</td></tr>
+    <tr><td>Knight</td><td>320</td><td>Slightly less than bishop</td></tr>
+    <tr><td>Bishop</td><td>330</td><td>Bishop pair advantage</td></tr>
+    <tr><td>Rook</td><td>500</td><td>Worth ~5 pawns</td></tr>
+    <tr><td>Queen</td><td>900</td><td>Worth ~9 pawns</td></tr>
+    <tr><td>King</td><td>20,000</td><td>Sentinel — game ends before capture</td></tr>
+  </tbody></table></div>
+  <h4>Minimax with Alpha-Beta Pruning</h4>
+  <p>Searches 4 moves deep. Without pruning: ~810,000 positions (30⁴). Alpha-beta reduces the effective branching factor from ~30 to ~7 — responses under one second on Apple Silicon.</p>
+  <pre><code class="language-swift">private static func alphabeta(_ board: ChessBoard, depth: Int,
+                                alpha: Int, beta: Int, maximising: Bool) -> Int {
+    if depth == 0 { return board.evaluate() }
+    if b <= a { break }  // beta cutoff — prune remaining branches
+}</code><span class="code-lang">swift</span></pre>
+</div>
+
+<!-- CH 7 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 07</span> Reinforcement Learning Game Player</h3>
+  <p>George can play Arkanoid autonomously using a Q-learning agent. It watches the game screen via screenshot, infers state, chooses actions, and sends real keyboard inputs to control the paddle.</p>
+  <h4>Q-Learning Algorithm</h4>
+  <pre><code class="language-python"># Bellman equation — GamePlayer.swift updateQ()
+bestNext = max(qTable[nextState][action] for action in actions)
+updated  = current + α × (reward + γ × bestNext − current)
+qTable[state][action] = updated</code><span class="code-lang">python</span></pre>
+  <div class="table-wrap"><table><thead><tr><th>Hyperparameter</th><th>Value</th><th>Reasoning</th></tr></thead><tbody>
+    <tr><td>Learning rate (α)</td><td>0.25</td><td>Conservative for noisy screen-based state</td></tr>
+    <tr><td>Discount factor (γ)</td><td>0.95</td><td>Longer horizon — brick hits are delayed by many frames</td></tr>
+    <tr><td>Epsilon (ε)</td><td>0.3 → 0.1</td><td>Explore freely at first, then mostly exploit learned strategy</td></tr>
+    <tr><td>Frame rate</td><td>50ms / loop</td><td>20 decisions per second</td></tr>
+  </tbody></table></div>
+  <h4>Reward Function</h4>
+  <div class="table-wrap"><table><thead><tr><th>Reward</th><th>Trigger</th></tr></thead><tbody>
+    <tr><td><span class="reward-pos">+2.0</span></td><td>Ball moving toward paddle AND paddle within 15% of ball</td></tr>
+    <tr><td><span class="reward-pos">+1.5</span></td><td>A brick was destroyed this frame</td></tr>
+    <tr><td><span class="reward-pos">+1.0</span></td><td>Ball velocity moving toward paddle (correct anticipation)</td></tr>
+    <tr><td><span class="reward-neg">-0.5</span></td><td>Ball moving toward paddle but paddle is far away</td></tr>
+    <tr><td><span class="reward-neg">-2.0</span></td><td>Ball reached the bottom edge (ball lost)</td></tr>
+  </tbody></table></div>
+  <div class="callout callout-tip"><span class="callout-icon">💾</span><div class="callout-body">The Q-table is saved to <code>~/.george/qtable.json</code>. George gets smarter across sessions. On startup: <em>"Starting Arkanoid. I have 847 states learned."</em></div></div>
+</div>
+
+<!-- CH 8 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 08</span> App Entry Point</h3>
+  <p><code>main.swift</code> is 46 lines. <code>AppDelegate.swift</code> is 42 lines. Small files, enormous consequences.</p>
+  <h4>Activation Policy</h4>
+  <pre><code class="language-swift">app.setActivationPolicy(.accessory)
+// No Dock icon · Not in Cmd+Tab · No menu bar
+// George is ambient — always present, never intrusive</code><span class="code-lang">swift</span></pre>
+  <h4>Boot Sequence</h4>
+  <ol class="boot-seq">
+    <li>OS loads George binary → main.swift executes</li>
+    <li>installCrashHandlers() registers SIGBUS, SIGSEGV, SIGABRT, SIGILL, SIGFPE</li>
+    <li>NSApplication.shared creates the app singleton</li>
+    <li>AppDelegate() instantiated and wired to app</li>
+    <li>setActivationPolicy(.accessory) — hidden from Dock</li>
+    <li>app.run() — main run loop starts, never returns</li>
+    <li>applicationDidFinishLaunching fires</li>
+    <li>NSPanel created and configured (.borderless, .nonactivatingPanel)</li>
+    <li>Panel positioned bottom-right using NSScreen.main.visibleFrame</li>
+    <li>GeorgeController() created — Memory + Agent loaded from disk</li>
+    <li>OrbView SwiftUI view tree created</li>
+    <li>NSHostingView bridges SwiftUI into AppKit</li>
+    <li>panel.makeKeyAndOrderFront — orb appears on screen</li>
+    <li>Task { await george.boot() } scheduled async</li>
+    <li>Boot: requests mic + speech recognition permissions</li>
+    <li>Boot: launches server.py as child process</li>
+    <li>Boot: pings localhost:8765 until server responds</li>
+    <li>Boot: server.py loads local LLM into Apple Silicon GPU</li>
+    <li>Boot: state → .idle — breathing animation begins</li>
+    <li>George speaks a random greeting — fully operational</li>
+  </ol>
+</div>
+
+<!-- CH 9 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 09</span> Setup & Mobile UI</h3>
+  <h4>setup.sh — One-Command Installation</h4>
+  <pre><code class="language-bash">./setup.sh
+~/Desktop/George.command   # double-click launcher</code><span class="code-lang">bash</span></pre>
+  <p>8 steps: Verify prerequisites → Create <code>~/.george/</code> → Copy <code>server.py</code> → Enter API keys → Install <code>mlx-lm</code> → Install <code>yt-dlp</code> → <code>swift build -c release</code> → Download Llama 3.2 3B (~1.8 GB)</p>
+  <h4>Mobile Web UI</h4>
+  <p>A self-contained single-file web app served by <code>server.py</code> at <code>GET /</code>. Open it on any phone, tablet, or computer — no install required. Dark space theme, CSS-only animated orb, streaming text, voice input via Web Speech API.</p>
+  <div class="callout callout-info"><span class="callout-icon">📱</span><div class="callout-body">You can be in another room, send George a query from your phone, and hear the response come out of your Mac speakers. The phone is just a remote control.</div></div>
+</div>
+
+<footer>
+  <p>Built with <span>♥</span> on an M1 MacBook Pro &nbsp;·&nbsp; <a href="index.html">← Back to Portfolio</a></p>
+</footer>
+</div>
+
+<script>
+// Starfield
+const container = document.getElementById('stars');
+for (let i = 0; i < 120; i++) {
+  const s = document.createElement('div'); s.className = 'star';
+  const size = Math.random() * 2 + 0.5;
+  s.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--dur:${2+Math.random()*4}s;--min-op:${0.05+Math.random()*0.1};--max-op:${0.3+Math.random()*0.5};animation-delay:${Math.random()*5}s;`;
+  container.appendChild(s);
+}
+
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ════════ DANCING GIR BACKGROUND ════════
+(function(){
+  var layer = document.getElementById('girLayer');
+  var GIR_SRC = 'dance_gir.mp4';
+  var COUNT = 12; // number of GIRs on screen at once
+  var girs = [];
+
+  var W = window.innerWidth, H = window.innerHeight;
+  window.addEventListener('resize', function(){ W = window.innerWidth; H = window.innerHeight; });
+
+  function randBetween(a, b){ return a + Math.random() * (b - a); }
+
+  function createGir() {
+    var wrapper = document.createElement('div');
+    wrapper.className = 'gir-dancer';
+
+    // Random small size — between 60px and 130px
+    var size = randBetween(60, 130);
+    wrapper.style.width  = size + 'px';
+    wrapper.style.height = size + 'px';
+
+    // Start at a random position on screen
+    var x = randBetween(0, W - size);
+    var y = randBetween(0, H - size);
+    wrapper.style.left = x + 'px';
+    wrapper.style.top  = y + 'px';
+
+    // Very subtle opacity so they don't overpower the content
+    var alpha = randBetween(0.07, 0.18);
+    wrapper.style.opacity = alpha;
+
+    // Physics
+    var vx = randBetween(-1.2, 1.2);
+    var vy = randBetween(-1.2, 1.2);
+    // Ensure it's actually moving
+    if (Math.abs(vx) < 0.3) vx = vx < 0 ? -0.5 : 0.5;
+    if (Math.abs(vy) < 0.3) vy = vy < 0 ? -0.5 : 0.5;
+
+    var spinSpeed = randBetween(-1.2, 1.2); // degrees per frame
+    var currentAngle = randBetween(0, 360);
+    var wobble = randBetween(0, Math.PI * 2);
+    var wobbleSpeed = randBetween(0.01, 0.03);
+
+    // Create the video element
+    var vid = document.createElement('video');
+    vid.src = GIR_SRC;
+    vid.loop = true;
+    vid.muted = true;
+    vid.playsInline = true;
+    vid.autoplay = true;
+    // Randomise start time so they're not all in sync
+    vid.addEventListener('loadedmetadata', function(){
+      vid.currentTime = Math.random() * vid.duration;
+    });
+    vid.play().catch(function(){});
+
+    wrapper.appendChild(vid);
+    layer.appendChild(wrapper);
+
+    var gir = { el: wrapper, x: x, y: y, vx: vx, vy: vy, size: size, angle: currentAngle, spin: spinSpeed, wobble: wobble, wobbleSpeed: wobbleSpeed };
+    girs.push(gir);
+    return gir;
+  }
+
+  // Spawn all GIRs
+  for (var i = 0; i < COUNT; i++) createGir();
+
+  // Animation loop
+  function animate() {
+    for (var i = 0; i < girs.length; i++) {
+      var g = girs[i];
+      g.wobble += g.wobbleSpeed;
+
+      // Drift with slight sine wobble
+      g.x += g.vx + Math.sin(g.wobble) * 0.4;
+      g.y += g.vy + Math.cos(g.wobble * 0.7) * 0.3;
+      g.angle += g.spin;
+
+      // Bounce off walls
+      if (g.x < -g.size * 0.5) { g.x = -g.size * 0.5; g.vx = Math.abs(g.vx); }
+      if (g.x > W - g.size * 0.5) { g.x = W - g.size * 0.5; g.vx = -Math.abs(g.vx); }
+      if (g.y < -g.size * 0.5) { g.y = -g.size * 0.5; g.vy = Math.abs(g.vy); }
+      if (g.y > H - g.size * 0.5) { g.y = H - g.size * 0.5; g.vy = -Math.abs(g.vy); }
+
+      // Apply
+      g.el.style.transform = 'translate(' + g.x + 'px,' + g.y + 'px) rotate(' + g.angle + 'deg)';
+      g.el.style.left = '0';
+      g.el.style.top  = '0';
+    }
+    requestAnimationFrame(animate);
+  }
+  requestAnimationFrame(animate);
+})();
+// ════════════════════════════════════════
+</script>
+</body>
+</html>

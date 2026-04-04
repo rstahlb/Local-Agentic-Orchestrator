@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fine-Tuning LLMs on M1 — r.stahlb</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Geist+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #050810; --bg2: #080d1a; --bg3: #0d1425;
+  --border: #1e2d4a; --border2: #28385e;
+  --text: #dde6f8; --text-dim: #8fa3cc; --text-bright: #f0f5ff;
+  --accent1: #3d8bff; --accent2: #18d4ff; --accent3: #3dffa0; --accent4: #c084fc;
+  --yellow: #ffd166; --code-bg: #070c18;
+  --font-display: 'Inter', sans-serif; --font-mono: 'Geist Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-display); font-size: 15px; line-height: 1.75; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+
+#stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.star { position: absolute; border-radius: 50%; background: white; animation: twinkle var(--dur) ease-in-out infinite alternate; opacity: 0; }
+@keyframes twinkle { from { opacity: var(--min-op); } to { opacity: var(--max-op); } }
+
+#neuralCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+#app { position: relative; z-index: 1; }
+
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 56px; background: rgba(5,8,16,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
+.nav-brand { font-weight: 800; font-size: 1.05rem; color: var(--text-bright); letter-spacing: -0.02em; }
+.nav-brand span { color: var(--accent1); }
+.nav-links { display: flex; gap: 0.25rem; list-style: none; }
+.nav-links a { color: var(--text-dim); text-decoration: none; font-size: 0.8rem; font-weight: 500; padding: 0.35rem 0.85rem; border-radius: 6px; transition: color 0.2s, background 0.2s; }
+.nav-links a:hover { color: var(--text-bright); background: var(--bg3); }
+.back-link { color: var(--accent2) !important; }
+
+.page-hero { padding: 7rem 2rem 2rem; max-width: 900px; margin: 0 auto; text-align: center; }
+.page-hero .project-number { font-size: 0.68rem; letter-spacing: 0.22em; color: var(--accent3); text-transform: uppercase; margin-bottom: 0.75rem; font-weight: 500; }
+.page-hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; color: var(--text-bright); letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 1rem; }
+.page-hero h1 span { color: var(--accent3); }
+.page-hero .project-desc { color: #a8bde0; font-size: 0.92rem; max-width: 640px; line-height: 1.85; border-left: 2px solid var(--accent3); padding-left: 1rem; margin: 0 auto 2rem; text-align: left; }
+
+.why-box { max-width: 900px; margin: 0 auto 2rem; padding: 0 2rem; }
+.why-inner { background: linear-gradient(135deg, rgba(61,255,160,0.05), rgba(192,132,252,0.05)); border: 1px solid rgba(61,255,160,0.25); border-radius: 12px; padding: 1.75rem 2rem; }
+.why-inner h2 { font-size: 1rem; font-weight: 700; color: var(--accent3); margin-bottom: 0.75rem; letter-spacing: 0.02em; }
+.why-inner p { font-size: 0.88rem; color: #a8bde0; line-height: 1.85; margin-bottom: 0.75rem; }
+.why-inner p:last-child { margin-bottom: 0; }
+.why-inner strong { color: var(--text-bright); }
+
+.tech-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; margin: 1.5rem auto; padding: 0 2rem; max-width: 900px; }
+.tech-item { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem 1rem; }
+.tech-item .tech-label { font-size: 0.65rem; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.25rem; }
+.tech-item .tech-val { font-size: 0.8rem; color: var(--text-bright); font-weight: 600; }
+
+.section-divider { width: 100%; height: 1px; background: linear-gradient(90deg, transparent, var(--border2), transparent); }
+
+.chapter { padding: 0 2rem 4rem; max-width: 900px; margin: 0 auto; }
+.chapter-title { font-size: 1.4rem; font-weight: 700; color: var(--text-bright); letter-spacing: -0.02em; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; }
+.chapter-num { font-size: 0.67rem; color: var(--accent3); letter-spacing: 0.15em; text-transform: uppercase; font-family: var(--font-mono); font-weight: 500; }
+h4 { font-size: 0.98rem; font-weight: 700; color: var(--accent3); margin: 1.75rem 0 0.75rem; letter-spacing: -0.01em; }
+p { color: var(--text); font-size: 0.9rem; line-height: 1.9; margin-bottom: 1rem; }
+p strong { color: var(--text-bright); font-weight: 600; }
+
+.callout { border-radius: 8px; padding: 1rem 1.25rem; margin: 1.25rem 0; font-size: 0.82rem; line-height: 1.7; display: flex; gap: 0.75rem; align-items: flex-start; }
+.callout-tip  { background: rgba(61,255,160,0.06); border: 1px solid rgba(61,255,160,0.3); color: var(--accent3); }
+.callout-warn { background: rgba(255,200,64,0.06); border: 1px solid rgba(255,200,64,0.2); color: var(--yellow); }
+.callout-info { background: rgba(26,111,255,0.06); border: 1px solid rgba(26,111,255,0.2); color: #7aacff; }
+.callout-purple { background: rgba(192,132,252,0.06); border: 1px solid rgba(192,132,252,0.25); color: var(--accent4); }
+.callout-icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.1rem; }
+.callout-body { color: var(--text); }
+.callout-body strong { color: inherit; }
+
+pre { background: var(--code-bg); border: 1px solid rgba(61,255,160,0.18); border-radius: 8px; padding: 1.25rem 1.5rem; overflow-x: auto; margin: 1rem 0 1.5rem; position: relative; }
+pre code { font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.75; color: #b8d0f8; }
+.code-lang { position: absolute; top: 0.5rem; right: 0.75rem; font-size: 0.6rem; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; }
+code { font-family: var(--font-mono); background: rgba(61,255,160,0.08); border: 1px solid rgba(61,255,160,0.15); border-radius: 4px; padding: 0.1em 0.4em; font-size: 0.82em; color: #7fffb8; }
+pre code { background: none; border: none; padding: 0; font-size: inherit; color: inherit; }
+
+.table-wrap { overflow-x: auto; margin: 1rem 0 1.5rem; border-radius: 8px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead tr { background: var(--bg3); }
+th { padding: 0.75rem 1rem; text-align: left; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: #8fa3cc; font-weight: 600; border-bottom: 1px solid var(--border); }
+td { padding: 0.7rem 1rem; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: rgba(61,255,160,0.03); }
+td code { font-size: 0.75em; }
+
+.pipeline-flow { display: flex; flex-direction: column; gap: 0.6rem; margin: 1.5rem 0; }
+.pipeline-step { display: flex; align-items: flex-start; gap: 1rem; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.25rem; }
+.pipeline-step:hover { border-color: var(--accent3); }
+.step-num { font-family: var(--font-mono); font-size: 0.65rem; color: var(--accent3); font-weight: 600; letter-spacing: 0.1em; min-width: 2rem; padding-top: 0.1rem; }
+.step-title { font-size: 0.88rem; font-weight: 700; color: var(--text-bright); }
+.step-desc { font-size: 0.8rem; color: var(--text-dim); line-height: 1.55; margin-top: 0.2rem; }
+
+.checklist { list-style: none; margin: 0.5rem 0 1.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.checklist li { font-size: 0.86rem; color: var(--text-dim); padding-left: 1.5rem; position: relative; }
+.checklist li::before { content: '□'; position: absolute; left: 0; color: var(--accent3); font-size: 0.9rem; }
+
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+
+footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--text-dim); font-size: 0.75rem; }
+footer span { color: var(--accent3); }
+footer a { color: var(--accent2); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+@media (max-width: 640px) { .nav-links { display: none; } .chapter { padding-left: 1.25rem; padding-right: 1.25rem; } }
+</style>
+</head>
+<body>
+<div id="stars"></div>
+<canvas id="neuralCanvas"></canvas>
+
+<div id="app">
+<nav>
+  <div class="nav-brand">r<span>.</span>stahlb</div>
+  <ul class="nav-links">
+    <li><a href="index.html" class="back-link">← Home</a></li>
+    <li><a href="george.html">George AI</a></li>
+    <li><a href="gpt.html">GPT from Scratch</a></li>
+    <li><a href="learning.html">Learning</a></li>
+    <li><a href="https://github.com/rstahlb" target="_blank">GitHub ↗</a></li>
+  </ul>
+</nav>
+
+<div class="page-hero reveal">
+  <div class="project-number">Project 04</div>
+  <h1>Fine-Tuning LLMs on <span>Apple Silicon</span></h1>
+  <p class="project-desc">In 2026, building a large language model from the ground up is not the goal — it's a distraction. The real engineering challenge is knowing how to take a world-class pretrained model, shape it to your needs, and validate that it's genuinely learning. This guide documents that full pipeline, end to end, on an M1 Mac.</p>
+</div>
+
+<!-- WHY WE TRAIN, NOT BUILD -->
+<div class="why-box reveal">
+  <div class="why-inner">
+    <h2>🧠 Why We Fine-Tune in 2026 — Not Build From Scratch</h2>
+    <p>Training a capable large language model from zero requires hundreds of GPUs running continuously for months, terabytes of curated training data, and infrastructure budgets that rival a small company's annual operating costs. That was the challenge Meta, Google, and Mistral tackled so that the rest of us don't have to.</p>
+    <p>What we do instead is <strong>fine-tuning</strong>: we take an open-weight model that already understands language, reasoning, and the world — then we specialize it. Using a technique called <strong>LoRA (Low-Rank Adaptation)</strong>, we inject a small set of trainable adapter layers on top of a frozen base model. The result is a model that reflects your data, your domain, and your voice, built in hours rather than months, on hardware you already own.</p>
+    <p>This document covers the complete pipeline: choosing a base model, curating training data, running LoRA fine-tuning with Apple's MLX library, and — critically — <strong>validating that the model is actually learning</strong> and not just memorizing or degrading. The methodology here is what production ML teams use at scale, condensed for a 16 GB M1 Mac.</p>
+  </div>
+</div>
+
+<div class="tech-grid reveal">
+  <div class="tech-item"><div class="tech-label">Hardware</div><div class="tech-val">M1 Mac Pro · 16 GB Unified</div></div>
+  <div class="tech-item"><div class="tech-label">Framework</div><div class="tech-val">Apple MLX + mlx-lm</div></div>
+  <div class="tech-item"><div class="tech-label">Base Model</div><div class="tech-val">Llama 3.1 8B Instruct</div></div>
+  <div class="tech-item"><div class="tech-label">Method</div><div class="tech-val">LoRA Fine-Tuning</div></div>
+  <div class="tech-item"><div class="tech-label">Output Format</div><div class="tech-val">GGUF → Ollama</div></div>
+  <div class="tech-item"><div class="tech-label">Python</div><div class="tech-val">3.11 (pyenv)</div></div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- PART 0 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Part 00</span> Understanding Model Size</h3>
+  <p>When people say "8 GB model," they almost always mean <strong>8 billion parameters</strong> — not 8 gigabytes of storage. Here is how those numbers actually map to real-world hardware requirements:</p>
+  <div class="table-wrap"><table><thead><tr><th>Term</th><th>What It Means</th></tr></thead><tbody>
+    <tr><td>8B parameters</td><td>~15 GB on disk at full float32 precision</td></tr>
+    <tr><td>8B at 4-bit quantization</td><td>~4–5 GB on disk — fits in 16 GB unified RAM</td></tr>
+    <tr><td>Training 8B from scratch</td><td>Needs 100+ GB VRAM — not feasible on 16 GB</td></tr>
+    <tr><td>Fine-tuning 8B with LoRA</td><td>Needs ~12–14 GB — just barely feasible on 16 GB M1</td></tr>
+    <tr><td>"Medium" LLM consensus</td><td>1B–13B parameters is widely considered medium-sized</td></tr>
+  </tbody></table></div>
+  <div class="callout callout-tip"><span class="callout-icon">💡</span><div class="callout-body"><strong>The recommendation:</strong> On an M1 Mac with 16 GB, do not train from scratch. Start from a pretrained open-weight model like Llama 3.1 8B or Mistral 7B and fine-tune it. Training from scratch requires months on hundreds of GPUs — fine-tuning takes hours on hardware you already own.</div></div>
+</div>
+
+<!-- PART 1 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Part 01</span> The Full Pipeline</h3>
+  <p>From a blank terminal to a custom model running in Ollama, the pipeline has seven distinct phases. Each one builds on the last:</p>
+  <div class="pipeline-flow">
+    <div class="pipeline-step"><span class="step-num">01</span><div><div class="step-title">Choose a Base Model</div><div class="step-desc">Pick a pretrained open-weight model — Llama 3, Mistral 7B, Phi-3, or Gemma 2.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">02</span><div><div class="step-title">Gather Training Data</div><div class="step-desc">Curate conversation pairs, Q&A datasets, reasoning chains, and domain-specific content.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">03</span><div><div class="step-title">Fine-Tune with LoRA + MLX</div><div class="step-desc">Run LoRA training on your M1 Mac using Apple's MLX library — optimized for unified memory.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">04</span><div><div class="step-title">Evaluate Intelligence</div><div class="step-desc">Benchmark with lm-evaluation-harness before and after training. Save your baseline — it matters.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">05</span><div><div class="step-title">Merge & Quantize</div><div class="step-desc">Fuse LoRA adapter weights back into the base model, then quantize to 4-bit for efficient inference.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">06</span><div><div class="step-title">Convert to GGUF</div><div class="step-desc">Package the model in GGUF format — the standard Ollama and llama.cpp expect.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">07</span><div><div class="step-title">Register in Ollama</div><div class="step-desc">Write a Modelfile, set your system prompt and generation parameters, and run locally.</div></div></div>
+  </div>
+</div>
+
+<!-- PART 2 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Part 02</span> Choosing Your Base Model</h3>
+  <p>You never train a large model from scratch in 2026. You start from a pretrained base and customize it — think of it as tuning a precision engine rather than casting one from raw steel.</p>
+  <div class="table-wrap"><table><thead><tr><th>Model</th><th>Notes</th></tr></thead><tbody>
+    <tr><td><strong>Llama 3.1 8B (Meta)</strong></td><td>Best all-around for human conversation — widely supported, huge community</td></tr>
+    <tr><td>Mistral 7B v0.3</td><td>Fast, efficient, excellent instruction following</td></tr>
+    <tr><td>Phi-3 Mini 3.8B</td><td>Tiny but surprisingly capable — ideal when RAM is tight</td></tr>
+    <tr><td>Gemma 2 9B (Google)</td><td>Strong reasoning, fits in 16 GB with 4-bit quantization</td></tr>
+    <tr><td>Qwen2.5 7B (Alibaba)</td><td>Excellent multilingual and code understanding</td></tr>
+  </tbody></table></div>
+  <div class="callout callout-tip"><span class="callout-icon">🎯</span><div class="callout-body"><strong>Best choice for M1 16 GB:</strong> Llama 3.1 8B Instruct from Meta. Trained for human conversation by default, massive fine-tuning community, works natively with MLX on Apple Silicon.</div></div>
+  <h4>Downloading the Base Model</h4>
+  <pre><code class="language-bash"># Install Hugging Face CLI
+pip install huggingface_hub
+
+# Login with your HF token
+huggingface-cli login
+
+# Download Llama 3.1 8B Instruct
+huggingface-cli download meta-llama/Llama-3.1-8B-Instruct \
+  --local-dir ./models/llama-3.1-8b-instruct \
+  --local-dir-use-symlinks False</code><span class="code-lang">bash</span></pre>
+</div>
+
+<!-- PART 3 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Part 03</span> Training Data: What Makes a Model Smart</h3>
+  <p>Data quality is the single most important variable in how capable your fine-tuned model becomes. Excellent training code on bad data still produces a bad model — there are no shortcuts here.</p>
+  <h4>What Kind of Data You Need</h4>
+  <p>For a model that sounds like a knowledgeable, natural human, you want: conversation pairs (user message + assistant response), Q&A datasets with high-quality answers, reasoning chains showing step-by-step thinking, domain-specific knowledge for your target use case, and diversity across topics, styles, and lengths.</p>
+  <div class="table-wrap"><table><thead><tr><th>Dataset</th><th>Why Use It</th></tr></thead><tbody>
+    <tr><td><strong>OpenHermes-2.5</strong></td><td>1M high-quality GPT-4 conversations — top recommendation</td></tr>
+    <tr><td>UltraChat 200k</td><td>Diverse multi-turn dialogue, very human-like</td></tr>
+    <tr><td>ShareGPT</td><td>Real user ChatGPT conversations — authentic patterns</td></tr>
+    <tr><td>Alpaca (52k)</td><td>Classic instruction dataset — solid starting point</td></tr>
+    <tr><td>OpenOrca</td><td>Reasoning-heavy — makes the model measurably smarter</td></tr>
+    <tr><td>LIMA (1,000 examples)</td><td>Small but exceptional quality — proves quality beats quantity</td></tr>
+  </tbody></table></div>
+  <div class="callout callout-purple"><span class="callout-icon">📖</span><div class="callout-body"><strong>The LIMA insight (2023):</strong> 1,000 carefully curated examples outperforms 52,000 mediocre ones. Start with OpenHermes-2.5 filtered to 100k high-quality rows and you have an excellent foundation.</div></div>
+  <h4>Data Format — What MLX Expects</h4>
+  <p>MLX fine-tuning expects JSONL format — one JSON object per line, using the standard conversation structure:</p>
+  <pre><code class="language-json">{"messages": [
+  {"role": "system",    "content": "You are a helpful assistant."},
+  {"role": "user",      "content": "What is photosynthesis?"},
+  {"role": "assistant", "content": "Photosynthesis is the process..."}
+]}</code><span class="code-lang">jsonl</span></pre>
+  <h4>Downloading and Preparing Data</h4>
+  <pre><code class="language-python">from datasets import load_dataset
+import json
+
+ds = load_dataset('teknium/OpenHermes-2.5', split='train')
+ds = ds.shuffle(seed=42).select(range(100000))  # filter to 100k rows
+
+def to_chat_format(row):
+    messages = []
+    if row.get('system_prompt'):
+        messages.append({'role': 'system', 'content': row['system_prompt']})
+    messages.append({'role': 'user',      'content': row['instruction']})
+    messages.append({'role': 'assistant', 'content': row['output']})
+    return {'messages': messages}
+
+converted = [to_chat_format(r) for r in ds]
+split = int(len(converted) * 0.95)  # 95/5 train/valid split
+
+with open('data/train.jsonl', 'w') as f:
+    for row in converted[:split]: f.write(json.dumps(row) + '\n')
+with open('data/valid.jsonl', 'w') as f:
+    for row in converted[split:]: f.write(json.dumps(row) + '\n')</code><span class="code-lang">python</span></pre>
+</div>
+
+<!-- PART 4 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Part 04</span> Environment Setup</h3>
+  <div class="table-wrap"><table><thead><tr><th>Component</th><th>Requirement</th></tr></thead><tbody>
+    <tr><td>Mac</td><td>M1 Mac Pro — excellent</td></tr>
+    <tr><td>RAM</td><td>16 GB unified memory — minimum viable for 8B LoRA</td></tr>
+    <tr><td>Storage</td><td>50–80 GB free (model + data + checkpoints)</td></tr>
+    <tr><td>macOS</td><td>Ventura 13.3+ or Sonoma (required for MLX)</td></tr>
+    <tr><td>Python</td><td>3.11 or 3.12 (3.13 has MLX compatibility issues)</td></tr>
+  </tbody></table></div>
+  <pre><code class="language-bash"># 1. Install Homebrew
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# 2. Install Python 3.11 via pyenv
+brew install pyenv
+pyenv install 3.11.9
+pyenv global 3.11.9
+
+# 3. Create virtual environment
+python -m venv ~/llm-env
+source ~/llm-env/bin/activate
+
+# 4. Install MLX and fine-tuning tools
+pip install mlx mlx-lm
+pip install huggingface_hub datasets transformers
+pip install numpy tqdm sentencepiece
+
+# 5. Verify MLX sees Apple Silicon
+python -c "import mlx.core as mx; print(mx.default_device())"
+# Should print: Device(gpu, 0)</code><span class="code-lang">bash</span></pre>
+  <div class="callout callout-info"><span class="callout-icon">⚡</span><div class="callout-body"><strong>Why MLX?</strong> Apple's MLX framework is purpose-built for Apple Silicon's unified memory architecture. CPU and GPU share the same memory pool natively — this is why 16 GB on an M1 goes significantly further than 16 GB on a traditional discrete GPU setup.</div></div>
+</div>
+
+<!-- PART 5 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Part 05</span> Measuring Intelligence: Baseline First</h3>
+  <p>Before touching any training, establish your baseline benchmarks. This is non-negotiable — you cannot claim a model improved if you did not measure where it started.</p>
+  <h4>Quick Sanity Test</h4>
+  <pre><code class="language-python">from mlx_lm import load, generate
+
+model, tokenizer = load('./models/llama-3.1-8b-instruct')
+
+test_prompts = [
+    'Explain quantum entanglement simply.',
+    'Write a Python function to reverse a linked list.',
+    'What is the difference between empathy and sympathy?',
+    'If you have 3 apples and give away 1.5, how many remain?',
+]
+
+for prompt in test_prompts:
+    messages = [{'role': 'user', 'content': prompt}]
+    text = tokenizer.apply_chat_template(messages, tokenize=False)
+    response = generate(model, tokenizer, prompt=text, max_tokens=300)
+    print(f'PROMPT: {prompt}')
+    print(f'RESPONSE: {response}')
+    print('---')</code><span class="code-lang">python</span></pre>
+  <h4>Formal Benchmarks</h4>
+  <pre><code class="language-bash">pip install lm-eval
+
+lm_eval --model hf \
+  --model_args pretrained=./models/llama-3.1-8b-instruct \
+  --tasks hellaswag,arc_easy,arc_challenge,winogrande,mmlu \
+  --device mps \
+  --output_path ./evals/baseline/</code><span class="code-lang">bash</span></pre>
+  <div class="table-wrap"><table><thead><tr><th>Benchmark</th><th>What It Tests</th></tr></thead><tbody>
+    <tr><td><strong>MMLU (57 subjects)</strong></td><td>Broad knowledge — how "educated" the model is</td></tr>
+    <tr><td>HellaSwag</td><td>Common sense completion — human-like reasoning</td></tr>
+    <tr><td>ARC Challenge</td><td>Hard science questions from grade-school exams</td></tr>
+    <tr><td>TruthfulQA</td><td>Hallucination rate — does it make things up?</td></tr>
+    <tr><td>WinoGrande</td><td>Pronoun disambiguation — subtle language understanding</td></tr>
+    <tr><td>GSM8K</td><td>Grade school math word problems — arithmetic reasoning</td></tr>
+  </tbody></table></div>
+  <div class="callout callout-warn"><span class="callout-icon">⚠️</span><div class="callout-body"><strong>Record these numbers.</strong> Save your baseline scores before training begins. After fine-tuning, re-run the exact same benchmarks. Scores up = training helped. Scores down significantly = catastrophic forgetting — a common and fixable mistake.</div></div>
+</div>
+
+<!-- PART 6 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Part 06</span> LoRA Fine-Tuning with MLX</h3>
+  <h4>What is LoRA?</h4>
+  <p>LoRA (Low-Rank Adaptation) makes fine-tuning an 8B model feasible on 16 GB of RAM. Rather than updating all 8 billion weights — which would require 80–160 GB VRAM — LoRA freezes the base model entirely and trains small adapter matrices layered on top of the attention layers. At the end, those adapters merge back in seamlessly.</p>
+  <div class="table-wrap"><table><thead><tr><th>Concept</th><th>LoRA Explanation</th></tr></thead><tbody>
+    <tr><td>Full fine-tuning</td><td>Update all 8B parameters — needs 80–160 GB VRAM</td></tr>
+    <tr><td>LoRA rank 8</td><td>Trains ~20–40M adapter params — needs ~12–14 GB</td></tr>
+    <tr><td>LoRA rank 16</td><td>Slightly more capacity — use if rank 8 plateaus</td></tr>
+    <tr><td>What gets adapted</td><td>Attention layers: Q, K, V, O matrices</td></tr>
+    <tr><td>End result</td><td>Adapter file (~100–300 MB) that modifies base behavior</td></tr>
+  </tbody></table></div>
+  <h4>Running the Training</h4>
+  <pre><code class="language-bash">mlx_lm.lora \
+  --model ./models/llama-3.1-8b-instruct \
+  --train \
+  --data ./data \
+  --batch-size 2 \
+  --lora-layers 16 \
+  --iters 2000 \
+  --learning-rate 1e-5 \
+  --grad-checkpoint \
+  --adapter-path ./adapters \
+  --save-every 200 \
+  --val-every 100 \
+  --max-seq-length 2048</code><span class="code-lang">bash</span></pre>
+  <h4>What to Watch During Training</h4>
+  <div class="table-wrap"><table><thead><tr><th>Signal</th><th>What It Means</th></tr></thead><tbody>
+    <tr><td>Training loss decreasing</td><td>Model is learning — this is what you want</td></tr>
+    <tr><td>Validation loss decreasing too</td><td>Model is generalizing, not just memorizing — excellent</td></tr>
+    <tr><td>Val loss rising after a dip</td><td>Overfitting — stop here and use the earlier checkpoint</td></tr>
+    <tr><td>Loss flat / not moving</td><td>Learning rate too low, or data format is wrong</td></tr>
+    <tr><td>Out of memory error</td><td>Reduce <code>batch_size</code> to 1, reduce <code>max_seq_length</code> to 1024</td></tr>
+    <tr><td>Loss explodes (NaN)</td><td>Learning rate too high — reduce to <code>5e-6</code></td></tr>
+  </tbody></table></div>
+  <div class="callout callout-tip"><span class="callout-icon">📊</span><div class="callout-body"><strong>Rule of thumb:</strong> For 100k examples at batch size 2, 2,000 steps covers roughly 4% of your data. That's enough for noticeable personality and style changes. For deeper knowledge transfer, aim for 5,000–10,000 steps.</div></div>
+</div>
+
+<!-- PART 7 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Part 07</span> Validating That the Model Is Learning</h3>
+  <p>This is where most people skip ahead — don't. Validation is the mechanism that distinguishes a model that actually improved from one that just memorized your training set or quietly degraded its general capability.</p>
+  <h4>Test the Fine-Tuned Model</h4>
+  <pre><code class="language-python">from mlx_lm import load, generate
+
+# Load base model with your LoRA adapter active
+model, tokenizer = load(
+    './models/llama-3.1-8b-instruct',
+    adapter_path='./adapters'
+)
+
+# Use the SAME prompts as your baseline — this is the comparison
+test_prompts = [
+    'Explain quantum entanglement simply.',
+    'Write a Python function to reverse a linked list.',
+    'What is the difference between empathy and sympathy?',
+]
+
+for prompt in test_prompts:
+    messages = [{'role': 'user', 'content': prompt}]
+    text = tokenizer.apply_chat_template(messages, tokenize=False)
+    response = generate(model, tokenizer, prompt=text, max_tokens=400)
+    print(f'PROMPT: {prompt[:50]}...')
+    print(f'RESPONSE: {response}')
+    print('===')</code><span class="code-lang">python</span></pre>
+  <h4>Human Quality Evaluation</h4>
+  <p>Read 20 responses and score each dimension on a 1–5 scale. This is still the gold standard — benchmarks measure breadth, human review measures quality.</p>
+  <div class="table-wrap"><table><thead><tr><th>Quality Dimension</th><th>What to Look For</th></tr></thead><tbody>
+    <tr><td>Coherence</td><td>Does it stay on topic and follow a logical structure?</td></tr>
+    <tr><td>Naturalness</td><td>Does it sound like a person, or a robot listing facts?</td></tr>
+    <tr><td>Helpfulness</td><td>Does it actually answer what was asked?</td></tr>
+    <tr><td>Honesty</td><td>Does it acknowledge uncertainty rather than fabricating?</td></tr>
+    <tr><td>No hallucination</td><td>Does it invent facts or cite things that don't exist?</td></tr>
+  </tbody></table></div>
+  <h4>Re-Run Formal Benchmarks</h4>
+  <pre><code class="language-bash"># Merge adapters first — required for lm-eval
+python -m mlx_lm.fuse \
+  --model ./models/llama-3.1-8b-instruct \
+  --adapter-path ./adapters \
+  --save-path ./models/finetuned-merged
+
+# Benchmark the merged model
+lm_eval --model hf \
+  --model_args pretrained=./models/finetuned-merged \
+  --tasks hellaswag,arc_easy,arc_challenge,winogrande,mmlu \
+  --device mps \
+  --output_path ./evals/finetuned/
+
+# A drop of >3 points on MMLU = catastrophic forgetting
+# Ideal result: same or better on knowledge, improved on conversation style</code><span class="code-lang">bash</span></pre>
+  <div class="callout callout-warn"><span class="callout-icon">⚠️</span><div class="callout-body"><strong>Catastrophic Forgetting:</strong> If general benchmark scores drop significantly, the model was trained too long or on too narrow a dataset. The fix: blend general-knowledge data (OpenOrca, UltraChat) with your custom domain content. Aim for roughly 80% general, 20% custom.</div></div>
+</div>
+
+<!-- PART 8 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Part 08</span> Merging, Quantizing & GGUF</h3>
+  <h4>Step 1: Fuse LoRA into the Base Model</h4>
+  <pre><code class="language-bash">python -m mlx_lm.fuse \
+  --model ./models/llama-3.1-8b-instruct \
+  --adapter-path ./adapters \
+  --save-path ./models/finetuned-merged \
+  --de-quantize  # ensures full float16 output for best quality</code><span class="code-lang">bash</span></pre>
+  <h4>Step 2: Quantize to 4-bit</h4>
+  <p>Quantization compresses from ~15 GB (float16) down to ~4.5 GB (4-bit int). Inference becomes significantly faster and the model fits comfortably alongside other running applications.</p>
+  <pre><code class="language-bash">python -m mlx_lm.convert \
+  --hf-path ./models/finetuned-merged \
+  --mlx-path ./models/finetuned-4bit \
+  -q --q-bits 4 --q-group-size 64</code><span class="code-lang">bash</span></pre>
+  <h4>Step 3: Convert to GGUF</h4>
+  <pre><code class="language-bash"># Build llama.cpp with Metal support
+git clone https://github.com/ggerganov/llama.cpp
+cd llama.cpp
+cmake -B build -DLLAMA_METAL=ON -DLLAMA_CURL=ON
+cmake --build build --config Release -j $(sysctl -n hw.ncpu)
+
+# Convert to GGUF (float16 first)
+python convert_hf_to_gguf.py \
+  ./models/finetuned-merged \
+  --outfile ./models/my-llm-f16.gguf \
+  --outtype f16
+
+# Quantize to Q4_K_M — best quality/size tradeoff
+./build/bin/llama-quantize \
+  ./models/my-llm-f16.gguf \
+  ./models/my-llm-q4_k_m.gguf \
+  Q4_K_M</code><span class="code-lang">bash</span></pre>
+  <div class="table-wrap"><table><thead><tr><th>Quant Type</th><th>Size / Quality Tradeoff</th></tr></thead><tbody>
+    <tr><td>Q8_0</td><td>~8 GB — near-lossless quality, best for 16+ GB RAM</td></tr>
+    <tr><td><strong>Q4_K_M</strong></td><td><strong>~4.5 GB — excellent balance (recommended)</strong></td></tr>
+    <tr><td>Q4_K_S</td><td>~4.3 GB — slightly smaller, minimal quality difference</td></tr>
+    <tr><td>Q3_K_M</td><td>~3.5 GB — noticeable quality drop, use only if necessary</td></tr>
+    <tr><td>Q2_K</td><td>~2.8 GB — significant quality loss, not recommended</td></tr>
+  </tbody></table></div>
+</div>
+
+<!-- PART 9 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Part 09</span> Deploying to Ollama</h3>
+  <pre><code class="language-bash"># Create Modelfile
+cat > Modelfile << 'EOF'
+FROM ./models/my-llm-q4_k_m.gguf
+
+SYSTEM """
+You are a highly intelligent, helpful assistant. You are direct,
+thoughtful, and give thorough answers when needed but concise answers
+when brevity is appropriate. You admit when you don't know something
+and never fabricate facts.
+"""
+
+PARAMETER temperature 0.7
+PARAMETER top_p 0.9
+PARAMETER top_k 40
+PARAMETER repeat_penalty 1.1
+PARAMETER num_ctx 4096
+EOF
+
+# Register and run
+ollama serve &
+ollama create my-llm -f Modelfile
+ollama run my-llm</code><span class="code-lang">bash</span></pre>
+  <h4>Generation Parameter Reference</h4>
+  <div class="table-wrap"><table><thead><tr><th>Use Case</th><th>Settings</th></tr></thead><tbody>
+    <tr><td>Natural conversation</td><td><code>temp=0.75, top_p=0.9, repeat_penalty=1.1</code></td></tr>
+    <tr><td>Precise technical answers</td><td><code>temp=0.2, top_p=0.85, repeat_penalty=1.05</code></td></tr>
+    <tr><td>Creative writing</td><td><code>temp=0.9, top_p=0.95, repeat_penalty=1.0</code></td></tr>
+    <tr><td>Code generation</td><td><code>temp=0.1, top_p=0.95, repeat_penalty=1.05</code></td></tr>
+  </tbody></table></div>
+</div>
+
+<!-- PART 10 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Part 10</span> Troubleshooting & Iteration</h3>
+  <div class="table-wrap"><table><thead><tr><th>Problem</th><th>Fix</th></tr></thead><tbody>
+    <tr><td>Model repeats itself</td><td>Increase <code>repeat_penalty</code> to 1.15–1.2</td></tr>
+    <tr><td>Responses too short</td><td>Add examples of long, detailed responses to training data</td></tr>
+    <tr><td>Sounds robotic</td><td>Add more natural conversation data (ShareGPT, UltraChat)</td></tr>
+    <tr><td>Hallucinating facts</td><td>Add TruthfulQA-style data; lower temperature at inference</td></tr>
+    <tr><td>Benchmark scores dropped</td><td>Mix in general knowledge data (OpenOrca) — 80/20 ratio</td></tr>
+    <tr><td>Out of memory during training</td><td><code>batch_size=1, max_seq_length=1024, grad_checkpoint=True</code></td></tr>
+    <tr><td>Loss not decreasing</td><td>Check data format; try increasing <code>learning_rate</code> to <code>2e-5</code></td></tr>
+  </tbody></table></div>
+  <div class="callout callout-info"><span class="callout-icon">🔁</span><div class="callout-body"><strong>The iteration cycle:</strong> Change one variable at a time. Train for 500–1,000 steps as a quick test. Run your test prompts — does it feel better? If yes, run benchmarks to confirm scores held. If scores held or improved, continue. If not, revert the change.</div></div>
+</div>
+
+<!-- PART 11 — CHECKLIST -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Part 11</span> Complete Checklist</h3>
+  <h4>Environment</h4>
+  <ul class="checklist">
+    <li>Homebrew installed</li>
+    <li>pyenv + Python 3.11 installed and set as global</li>
+    <li>MLX virtual environment created and activated</li>
+    <li>mlx, mlx-lm, datasets, huggingface_hub installed</li>
+    <li>Hugging Face account created + CLI logged in</li>
+    <li>Ollama installed and service running</li>
+    <li>llama.cpp cloned and compiled with Metal support</li>
+  </ul>
+  <h4>Data Pipeline</h4>
+  <ul class="checklist">
+    <li>OpenHermes-2.5 downloaded and filtered to 100k rows</li>
+    <li>Converted to JSONL chat format</li>
+    <li>Split into train.jsonl (95%) and valid.jsonl (5%)</li>
+    <li>Format verified with json.loads test</li>
+  </ul>
+  <h4>Training</h4>
+  <ul class="checklist">
+    <li>Llama 3.1 8B Instruct downloaded to ./models/</li>
+    <li>Baseline benchmarks run and scores saved</li>
+    <li>LoRA training run — 2,000+ steps minimum</li>
+    <li>Loss curve decreasing — no divergence or plateau</li>
+    <li>Checkpoints saved every 200 steps</li>
+  </ul>
+  <h4>Post-Training & Deployment</h4>
+  <ul class="checklist">
+    <li>Test prompts run on fine-tuned model</li>
+    <li>Formal benchmarks re-run on merged model</li>
+    <li>Benchmark scores compared to baseline — no catastrophic forgetting</li>
+    <li>LoRA adapters fused into base model</li>
+    <li>Model quantized to Q4_K_M GGUF</li>
+    <li>Modelfile created with system prompt and generation parameters</li>
+    <li>Model imported into Ollama and tested interactively</li>
+  </ul>
+</div>
+
+<!-- APPENDIX -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Appendix</span> Quick Reference</h3>
+  <pre><code class="language-bash"># Fine-tune
+mlx_lm.lora --model ./models/llama-3.1-8b-instruct --train --data ./data ...
+
+# Test with adapter active
+mlx_lm.generate --model ./models/llama-3.1-8b-instruct --adapter-path ./adapters
+
+# Merge adapter into base
+python -m mlx_lm.fuse --model [base] --adapter-path ./adapters --save-path [out]
+
+# Convert to GGUF
+python llama.cpp/convert_hf_to_gguf.py [merged_model] --outfile model.gguf
+
+# Quantize
+./llama.cpp/build/bin/llama-quantize model-f16.gguf model-q4.gguf Q4_K_M
+
+# Register in Ollama
+ollama create my-llm -f Modelfile
+
+# Run
+ollama run my-llm</code><span class="code-lang">bash</span></pre>
+  <h4>Useful Links</h4>
+  <p>
+    <a href="https://github.com/ml-explore/mlx-examples" target="_blank" style="color:var(--accent2);">MLX Examples ↗</a> &nbsp;·&nbsp;
+    <a href="https://github.com/ggerganov/llama.cpp" target="_blank" style="color:var(--accent2);">llama.cpp ↗</a> &nbsp;·&nbsp;
+    <a href="https://huggingface.co" target="_blank" style="color:var(--accent2);">Hugging Face ↗</a> &nbsp;·&nbsp;
+    <a href="https://ollama.com/docs" target="_blank" style="color:var(--accent2);">Ollama Docs ↗</a> &nbsp;·&nbsp;
+    <a href="https://github.com/EleutherAI/lm-evaluation-harness" target="_blank" style="color:var(--accent2);">lm-evaluation-harness ↗</a>
+  </p>
+</div>
+
+<footer>
+  <p>Built with <span>♥</span> on an M1 MacBook Pro &nbsp;·&nbsp; <a href="index.html">← Back to Portfolio</a></p>
+</footer>
+</div>
+
+<script>
+// Starfield
+const container = document.getElementById('stars');
+for (let i = 0; i < 120; i++) {
+  const s = document.createElement('div'); s.className = 'star';
+  const size = Math.random() * 2 + 0.5;
+  s.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--dur:${2+Math.random()*4}s;--min-op:${0.05+Math.random()*0.1};--max-op:${0.3+Math.random()*0.5};animation-delay:${Math.random()*5}s;`;
+  container.appendChild(s);
+}
+
+// Neural Network Particle Animation
+(function(){
+  var canvas = document.getElementById('neuralCanvas');
+  var ctx = canvas.getContext('2d');
+  var W, H;
+
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Node types: input, hidden, output — themed as LLM layers
+  var LAYER_COLORS = [
+    [61, 139, 255],   // input — blue (accent1)
+    [61, 255, 160],   // hidden — green (accent3)
+    [192, 132, 252],  // output — purple (accent4)
+    [24, 212, 255],   // attention — cyan (accent2)
+  ];
+
+  function rnd(a, b) { return a + Math.random() * (b - a); }
+
+  // Node: a neuron that floats and pulses
+  function Node() { this.reset(true); }
+  Node.prototype.reset = function(fromRandom) {
+    this.layer = Math.floor(Math.random() * LAYER_COLORS.length);
+    this.r = rnd(3, 9);
+    this.x = rnd(this.r, W - this.r);
+    this.y = fromRandom ? rnd(-100, H) : -this.r - rnd(10, 60);
+    this.vx = rnd(-0.15, 0.15);
+    this.vy = rnd(0.08, 0.35);
+    this.drift = rnd(0.002, 0.01);
+    this.driftOff = rnd(0, Math.PI * 2);
+    this.pulse = rnd(0, Math.PI * 2);
+    this.pulseSpeed = rnd(0.015, 0.04);
+    this.alpha = rnd(0.25, 0.7);
+    this.col = LAYER_COLORS[this.layer];
+  };
+  Node.prototype.update = function() {
+    this.pulse += this.pulseSpeed;
+    this.driftOff += this.drift;
+    this.x += this.vx + Math.sin(this.driftOff) * 0.25;
+    this.y += this.vy;
+    if (this.y - this.r > H) this.reset(false);
+    if (this.x - this.r < 0 || this.x + this.r > W) { this.vx *= -1; this.x = Math.max(this.r, Math.min(W - this.r, this.x)); }
+  };
+  Node.prototype.draw = function() {
+    var pScale = 1 + 0.25 * Math.sin(this.pulse);
+    var pr = this.r * pScale;
+    var c = this.col;
+    var a = this.alpha;
+
+    // Outer glow
+    var glow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, pr * 3.5);
+    glow.addColorStop(0, 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + (a * 0.3) + ')');
+    glow.addColorStop(1, 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',0)');
+    ctx.beginPath(); ctx.arc(this.x, this.y, pr * 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = glow; ctx.fill();
+
+    // Core dot
+    var core = ctx.createRadialGradient(this.x - pr * 0.25, this.y - pr * 0.25, 0, this.x, this.y, pr);
+    core.addColorStop(0, 'rgba(255,255,255,' + (a * 0.9) + ')');
+    core.addColorStop(0.4, 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + (a * 0.95) + ')');
+    core.addColorStop(1, 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + (a * 0.4) + ')');
+    ctx.beginPath(); ctx.arc(this.x, this.y, pr, 0, Math.PI * 2);
+    ctx.fillStyle = core; ctx.fill();
+  };
+
+  // Synapse: a spinning data-flow packet that travels between two nodes
+  function Synapse(nodeA, nodeB) {
+    this.a = nodeA;
+    this.b = nodeB;
+    this.t = rnd(0, 1);
+    this.speed = rnd(0.003, 0.009);
+    this.alpha = rnd(0.15, 0.5);
+    this.col = LAYER_COLORS[nodeA.layer];
+  }
+  Synapse.prototype.update = function() {
+    this.t += this.speed;
+    if (this.t > 1) this.t = 0;
+  };
+  Synapse.prototype.draw = function() {
+    var dx = this.b.x - this.a.x, dy = this.b.y - this.a.y;
+    var dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist > 250) return; // only draw close connections
+
+    // Connection line
+    var c = this.col;
+    var lineAlpha = this.alpha * (1 - dist / 250) * 0.6;
+    ctx.beginPath();
+    ctx.moveTo(this.a.x, this.a.y);
+    ctx.lineTo(this.b.x, this.b.y);
+    ctx.strokeStyle = 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + lineAlpha + ')';
+    ctx.lineWidth = 0.6;
+    ctx.stroke();
+
+    // Travelling packet
+    var px = this.a.x + dx * this.t;
+    var py = this.a.y + dy * this.t;
+    var pg = ctx.createRadialGradient(px, py, 0, px, py, 5);
+    pg.addColorStop(0, 'rgba(255,255,255,' + (this.alpha * 0.9) + ')');
+    pg.addColorStop(0.4, 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + (this.alpha * 0.7) + ')');
+    pg.addColorStop(1, 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',0)');
+    ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI * 2);
+    ctx.fillStyle = pg; ctx.fill();
+  };
+
+  // Spinning weight matrix: a small rotating hexagon to represent a weight tensor
+  function WeightMatrix() { this.reset(true); }
+  WeightMatrix.prototype.reset = function(fromRandom) {
+    this.x = rnd(50, W - 50);
+    this.y = fromRandom ? rnd(-200, H) : -60;
+    this.size = rnd(18, 38);
+    this.angle = rnd(0, Math.PI * 2);
+    this.spinSpeed = rnd(0.004, 0.015) * (Math.random() > 0.5 ? 1 : -1);
+    this.vy = rnd(0.06, 0.2);
+    this.vx = rnd(-0.1, 0.1);
+    this.driftOff = rnd(0, Math.PI * 2);
+    this.drift = rnd(0.002, 0.008);
+    this.alpha = rnd(0.05, 0.18);
+    this.colIdx = Math.floor(Math.random() * LAYER_COLORS.length);
+    this.col = LAYER_COLORS[this.colIdx];
+    this.sides = Math.random() > 0.5 ? 6 : 4; // hexagon or square
+  };
+  WeightMatrix.prototype.update = function() {
+    this.angle += this.spinSpeed;
+    this.driftOff += this.drift;
+    this.x += this.vx + Math.sin(this.driftOff) * 0.2;
+    this.y += this.vy;
+    if (this.y - this.size > H) this.reset(false);
+    if (this.x - this.size < 0 || this.x + this.size > W) { this.vx *= -1; }
+  };
+  WeightMatrix.prototype.draw = function() {
+    var c = this.col;
+    var a = this.alpha;
+    var n = this.sides;
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.angle);
+
+    // Outer ring
+    ctx.beginPath();
+    for (var i = 0; i < n; i++) {
+      var ang = (i / n) * Math.PI * 2;
+      if (i === 0) ctx.moveTo(Math.cos(ang) * this.size, Math.sin(ang) * this.size);
+      else ctx.lineTo(Math.cos(ang) * this.size, Math.sin(ang) * this.size);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + (a * 2) + ')';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Inner grid dots (weight cells)
+    var gridR = this.size * 0.55;
+    var cols = 3;
+    for (var gi = 0; gi < cols; gi++) {
+      for (var gj = 0; gj < cols; gj++) {
+        var gx = (gi - 1) * gridR * 0.7;
+        var gy = (gj - 1) * gridR * 0.7;
+        ctx.beginPath();
+        ctx.arc(gx, gy, 1.2, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + (a * 2.5) + ')';
+        ctx.fill();
+      }
+    }
+    ctx.restore();
+  };
+
+  // Build particle systems
+  var nodes = [];
+  for (var i = 0; i < 40; i++) nodes.push(new Node());
+
+  var synapses = [];
+  for (var i = 0; i < 60; i++) {
+    var a = nodes[Math.floor(Math.random() * nodes.length)];
+    var b = nodes[Math.floor(Math.random() * nodes.length)];
+    if (a !== b) synapses.push(new Synapse(a, b));
+  }
+
+  var matrices = [];
+  for (var i = 0; i < 15; i++) matrices.push(new WeightMatrix());
+
+  var lastT = 0;
+  function loop(ts) {
+    ctx.clearRect(0, 0, W, H);
+
+    // Draw synapses first (behind nodes)
+    synapses.forEach(function(s) { s.update(); s.draw(); });
+    // Floating weight matrices
+    matrices.forEach(function(m) { m.update(); m.draw(); });
+    // Nodes on top
+    nodes.forEach(function(n) { n.update(); n.draw(); });
+
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

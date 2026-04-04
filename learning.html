@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learning & Random Projects — r.stahlb</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Geist+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #050810; --bg2: #080d1a; --bg3: #0d1425;
+  --border: #1e2d4a; --border2: #28385e;
+  --text: #dde6f8; --text-dim: #8fa3cc; --text-bright: #f0f5ff;
+  --accent1: #3d8bff; --accent2: #18d4ff; --accent3: #ff7a47; --accent4: #3dffa0;
+  --font-display: 'Inter', sans-serif; --font-mono: 'Geist Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-display); font-size: 15px; line-height: 1.75; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+#stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.star { position: absolute; border-radius: 50%; background: white; animation: twinkle var(--dur) ease-in-out infinite alternate; opacity: 0; }
+@keyframes twinkle { from { opacity: var(--min-op); } to { opacity: var(--max-op); } }
+#bubbleCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+#app { position: relative; z-index: 1; }
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 56px; background: rgba(5,8,16,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
+.nav-brand { font-weight: 800; font-size: 1.05rem; color: var(--text-bright); letter-spacing: -0.02em; }
+.nav-brand span { color: var(--accent1); }
+.nav-links { display: flex; gap: 0.25rem; list-style: none; }
+.nav-links a { color: var(--text-dim); text-decoration: none; font-size: 0.8rem; font-weight: 500; padding: 0.35rem 0.85rem; border-radius: 6px; transition: color 0.2s, background 0.2s; }
+.nav-links a:hover { color: var(--text-bright); background: var(--bg3); }
+.back-link { color: var(--accent2) !important; }
+.page-hero { padding: 7rem 2rem 3rem; max-width: 900px; margin: 0 auto; text-align: center; }
+.page-hero .project-number { font-size: 0.68rem; letter-spacing: 0.22em; color: var(--accent4); text-transform: uppercase; margin-bottom: 0.75rem; font-weight: 500; }
+.page-hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; color: var(--text-bright); letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 1rem; }
+.page-hero h1 span { color: var(--accent1); }
+.page-hero p { color: #a8bde0; font-size: 0.92rem; max-width: 520px; margin: 0 auto; line-height: 1.85; }
+.media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; max-width: 1000px; margin: 0 auto; padding: 0 2rem 5rem; }
+.media-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s; }
+.media-card:hover { border-color: var(--accent1); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(26,111,255,0.1); }
+.media-card video, .media-card img { width: 100%; display: block; max-height: 200px; object-fit: cover; background: #000; }
+.media-card-body { padding: 1rem; }
+.media-card-cat { font-size: 0.7rem; color: var(--accent2); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.3rem; }
+.media-card-title { font-size: 0.9rem; font-weight: 700; color: var(--text-bright); }
+.media-card-desc { font-size: 0.78rem; color: #8fa3cc; margin-top: 0.3rem; line-height: 1.55; }
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--text-dim); font-size: 0.75rem; }
+footer span { color: var(--accent1); }
+footer a { color: var(--accent2); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+@media (max-width: 640px) { .nav-links { display: none; } .media-grid { padding: 0 1.25rem 3rem; } }
+</style>
+</head>
+<body>
+<div id="stars"></div>
+<canvas id="bubbleCanvas"></canvas>
+<div id="app">
+<nav>
+  <div class="nav-brand">r<span>.</span>stahlb</div>
+  <ul class="nav-links">
+    <li><a href="index.html" class="back-link">← Home</a></li>
+    <li><a href="george.html">George AI</a></li>
+    <li><a href="gpt.html">GPT from Scratch</a></li>
+    <li><a href="https://github.com/rstahlb" target="_blank">GitHub ↗</a></li>
+  </ul>
+</nav>
+
+<div class="page-hero reveal">
+  <div class="project-number">Project 03</div>
+  <h1>Learning &amp; <span>Random Projects</span></h1>
+  <p>Animations, 3D sculpts, game experiments, and one-off builds — the scratchpad where ideas get tested and thrown at the wall.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- MEDIA GRID                                      -->
+<!-- To add a card: copy any block below,            -->
+<!-- replace the src, category, title, description.  -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="media-grid reveal">
+
+  <!-- ADD MP4 NAME HERE — currently: Screen_Recording_20260227_133802_BallBounce.mp4 -->
+  <div class="media-card">
+    <video controls playsinline><source src="Screen_Recording_20260227_133802_BallBounce.mp4" type="video/mp4"></video>
+    <div class="media-card-body">
+      <div class="media-card-cat">Animation</div>
+      <div class="media-card-title">Ball Bounce v1</div>
+      <!-- ADD DESCRIPTION HERE -->
+      <div class="media-card-desc">Add your description here.</div>
+    </div>
+  </div>
+
+  <!-- ADD MP4 NAME HERE — currently: Screen_Recording_20260227_155034_Ball Bounce.mp4 -->
+  <div class="media-card">
+    <video controls playsinline><source src="Screen_Recording_20260227_155034_Ball Bounce.mp4" type="video/mp4"></video>
+    <div class="media-card-body">
+      <div class="media-card-cat">Animation</div>
+      <div class="media-card-title">Ball Bounce v2</div>
+      <!-- ADD DESCRIPTION HERE -->
+      <div class="media-card-desc">Add your description here.</div>
+    </div>
+  </div>
+
+  <!-- ADD MP4 NAME HERE — currently: dance_gir.mp4 -->
+  <div class="media-card">
+    <video controls playsinline style="mix-blend-mode:screen;background:#050810;"><source src="dance_gir.mp4" type="video/mp4"></video>
+    <div class="media-card-body">
+      <div class="media-card-cat">3D Animation</div>
+      <div class="media-card-title">GIR Dance</div>
+      <!-- ADD DESCRIPTION HERE -->
+      <div class="media-card-desc">A test of making a sprite sheet, a transparent background and a dancing Invader Zim Character GIR :)</div>
+    </div>
+  </div>
+
+  <!-- ADD MP4 NAME HERE — currently: gir_dance.mov -->
+  <div class="media-card">
+    <video controls playsinline><source src="gir_dance.mov" type="video/mp4"></video>
+    <div class="media-card-body">
+      <div class="media-card-cat">3D Animation</div>
+      <div class="media-card-title">GIR Dance Alt</div>
+      <!-- ADD DESCRIPTION HERE -->
+      <div class="media-card-desc">html based sprite sheet editor, able to animate frames. Powderfinger acknowledged for the music.</div>
+    </div>
+  </div>
+
+  <!-- ADD MP4 NAME HERE — currently: lemmings.mp4 -->
+  <div class="media-card">
+    <video controls playsinline><source src="lemmings.mp4" type="video/mp4"></video>
+    <div class="media-card-body">
+      <div class="media-card-cat">Game</div>
+      <div class="media-card-title">Lemmings</div>
+      <!-- ADD DESCRIPTION HERE -->
+      <div class="media-card-desc">POC to add sprite sheet animation to fall and walk on the top of the Mac Dock. Success. Lemming walking.</div>
+    </div>
+  </div>
+
+  <!-- ADD MP4 NAME HERE — currently: tbar_animation.mp4 -->
+  <div class="media-card">
+    <video controls playsinline><source src="tbar_animation.mp4" type="video/mp4"></video>
+    <div class="media-card-body">
+      <div class="media-card-cat">Animation</div>
+      <div class="media-card-title">T-Bar Animation</div>
+      <!-- ADD DESCRIPTION HERE -->
+      <div class="media-card-desc">POC 2019 Intel MacBook running Ubuntu Linux native metal. Proved I could put animations into the touchbar. Success.</div>
+    </div>
+  </div>
+
+  <!-- ADD MP4 NAME HERE — currently: maxhead.mp4 -->
+  <div class="media-card">
+    <video controls playsinline><source src="maxhead.mp4" type="video/mp4"></video>
+    <div class="media-card-body">
+      <div class="media-card-cat">3D Character</div>
+      <div class="media-card-title">Max Head</div>
+      <!-- ADD DESCRIPTION HERE -->
+      <div class="media-card-desc">POC for possible talking MaxHeadroom for George AI. In progress.</div>
+    </div>
+  </div>
+
+  <!-- ADD MP4 NAME HERE — currently: maxsilly.mp4 -->
+  <div class="media-card">
+    <video controls playsinline><source src="maxsilly.mp4" type="video/mp4"></video>
+    <div class="media-card-body">
+      <div class="media-card-cat">3D Character</div>
+      <div class="media-card-title">Max Silly</div>
+      <!-- ADD DESCRIPTION HERE -->
+      <div class="media-card-desc">POC a glitchy looking Max, controlled by George. AI heard the girl singing and sings along says "DIGITAL.....REBOOT.. ahhh".</div>
+    </div>
+  </div>
+
+  <!-- ADD MP4 NAME HERE — currently: sprite-max-px-36_1.mp4 -->
+  <div class="media-card">
+    <video controls playsinline><source src="sprite-max-px-36_1.mp4" type="video/mp4"></video>
+    <div class="media-card-body">
+      <div class="media-card-cat">Sprite / Game Art</div>
+      <div class="media-card-title">Max Sprite (36px)</div>
+      <!-- ADD DESCRIPTION HERE -->
+      <div class="media-card-desc">POC for talking head. Using 10 seconds of voice I was able to get the head to sound like Mr Musk. I had it say junk for fun.</div>
+    </div>
+  </div>
+
+  <!-- ADD MP4 NAME HERE — currently: bubbles.mp4 -->
+  <div class="media-card">
+    <video controls playsinline><source src="bubbles.mp4" type="video/mp4"></video>
+    <div class="media-card-body">
+      <div class="media-card-cat">Simulation</div>
+      <div class="media-card-title">Bubbles</div>
+      <!-- ADD DESCRIPTION HERE -->
+      <div class="media-card-desc">POC python goal was to make random bubbles that look real on mac desktop. SUCCESS!.</div>
+    </div>
+  </div>
+
+  <!-- ADD IMAGE NAME HERE — currently: zbrush_robot.png -->
+  <div class="media-card">
+    <img src="zbrush_robot.png" alt="ZBrush Robot">
+    <div class="media-card-body">
+      <div class="media-card-cat">3D Sculpt</div>
+      <div class="media-card-title">ZBrush Robot</div>
+      <!-- ADD DESCRIPTION HERE -->
+      <div class="media-card-desc">Learning ZBrush, Low Poly Robot.</div>
+    </div>
+  </div>
+
+  <!-- ADD IMAGE NAME HERE — currently: eeee.png -->
+  <div class="media-card">
+    <img src="eeee.png" alt="Sketch / Art">
+    <div class="media-card-body">
+      <div class="media-card-cat">Art</div>
+      <div class="media-card-title">Sketch</div>
+      <!-- ADD DESCRIPTION HERE -->
+      <div class="media-card-desc">POC EVEE Render code from Blender, adapted to run standalone as POC. SUCCESS, I can load objects and they render.</div>
+    </div>
+  </div>
+
+</div><!-- /media-grid -->
+
+<footer>
+  <p>Built with <span>♥</span> on an M1 MacBook Pro &nbsp;·&nbsp; <a href="index.html">← Back to Portfolio</a></p>
+</footer>
+</div>
+
+<script>
+const container = document.getElementById('stars');
+for (let i = 0; i < 120; i++) {
+  const s = document.createElement('div'); s.className = 'star';
+  const size = Math.random() * 2 + 0.5;
+  s.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--dur:${2+Math.random()*4}s;--min-op:${0.05+Math.random()*0.1};--max-op:${0.3+Math.random()*0.5};animation-delay:${Math.random()*5}s;`;
+  container.appendChild(s);
+}
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+(function(){
+  var canvas=document.getElementById('bubbleCanvas'),ctx=canvas.getContext('2d'),W,H;
+  function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+  resize(); window.addEventListener('resize',resize);
+  var COLORS=[[160,200,255],[200,160,255],[160,255,220],[255,210,160],[160,240,255],[255,170,210]];
+  function rnd(a,b){return a+Math.random()*(b-a);}
+  function Bubble(){this.reset(true);}
+  Bubble.prototype.reset=function(f){var s=Math.random();if(s<0.5)this.r=rnd(8,18);else if(s<0.82)this.r=rnd(18,36);else this.r=rnd(36,60);this.x=rnd(this.r,W-this.r);this.y=f?rnd(-200,H):-this.r-rnd(10,80);this.vy=rnd(0.18,0.65)*(1-this.r/120);this.vx=rnd(-0.25,0.25);this.drift=rnd(0.003,0.012);this.driftOff=rnd(0,Math.PI*2);this.hue=Math.floor(rnd(0,COLORS.length));this.shimmer=rnd(0,Math.PI*2);this.shimmerS=rnd(0.012,0.03);this.alpha=rnd(0.06,0.16);};
+  Bubble.prototype.update=function(){this.shimmer+=this.shimmerS;this.driftOff+=this.drift;this.x+=this.vx+Math.sin(this.driftOff)*0.35;this.y+=this.vy;if(this.y-this.r>H)this.reset(false);if(this.x-this.r<0||this.x+this.r>W){this.vx*=-1;this.x=Math.max(this.r,Math.min(W-this.r,this.x));}};
+  Bubble.prototype.draw=function(){var r=this.r,x=this.x,y=this.y,sh=Math.sin(this.shimmer),c=COLORS[this.hue],a=this.alpha;var g1=ctx.createRadialGradient(x,y,r*0.1,x,y,r);g1.addColorStop(0,'rgba(255,255,255,0)');g1.addColorStop(0.45,'rgba('+c[0]+','+c[1]+','+c[2]+','+(a*0.5+0.02*sh)+')');g1.addColorStop(0.8,'rgba('+c[0]+','+c[1]+','+c[2]+','+(a*1.1)+')');g1.addColorStop(1,'rgba('+c[0]+','+c[1]+','+c[2]+','+(a*1.8)+')');ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=g1;ctx.fill();ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.strokeStyle='rgba(255,255,255,'+(a*1.6+0.04*sh)+')';ctx.lineWidth=0.8;ctx.stroke();};
+  var bubbles=[];for(var i=0;i<35;i++)bubbles.push(new Bubble());
+  var lastT=0;function loop(ts){var dt=Math.min((ts-lastT)/1000,0.05);lastT=ts;ctx.clearRect(0,0,W,H);bubbles.forEach(function(b){b.update();});bubbles.slice().sort(function(a,b){return a.r-b.r;}).forEach(function(b){b.draw();});requestAnimationFrame(loop);}
+  requestAnimationFrame(function(t){lastT=t;requestAnimationFrame(loop);});
+})();
+</script>
+</body>
+</html>

@@ -3,617 +3,137 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Project Portfolio</title>
+<title>r.stahlb — Portfolio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Geist+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #050810;
-  --bg2: #080d1a;
-  --bg3: #0d1425;
-  --border: #1e2d4a;
-  --border2: #28385e;
-  --text: #dde6f8;
-  --text-dim: #8fa3cc;
-  --text-bright: #f0f5ff;
-  --accent1: #3d8bff;
-  --accent2: #18d4ff;
-  --accent3: #ff7a47;
-  --accent4: #3dffa0;
-  --yellow: #ffd166;
-  --code-bg: #070c18;
-  --font-display: 'Inter', sans-serif;
-  --font-mono: 'Geist Mono', 'Geist Mono Fallback', monospace;
+  --bg: #050810; --bg2: #080d1a; --bg3: #0d1425;
+  --border: #1e2d4a; --border2: #28385e;
+  --text: #dde6f8; --text-dim: #8fa3cc; --text-bright: #f0f5ff;
+  --accent1: #3d8bff; --accent2: #18d4ff; --accent3: #ff7a47; --accent4: #3dffa0;
+  --yellow: #ffd166; --font-display: 'Inter', sans-serif; --font-mono: 'Geist Mono', monospace;
 }
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-display); font-size: 15px; line-height: 1.75; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-display);
-  font-size: 15px;
-  line-height: 1.75;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* ── STARFIELD ── */
-#stars {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  overflow: hidden;
-}
-.star {
-  position: absolute;
-  border-radius: 50%;
-  background: white;
-  animation: twinkle var(--dur) ease-in-out infinite alternate;
-  opacity: 0;
-}
-@keyframes twinkle {
-  from { opacity: var(--min-op); }
-  to   { opacity: var(--max-op); }
-}
-
-/* ── LAYOUT ── */
+#stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.star { position: absolute; border-radius: 50%; background: white; animation: twinkle var(--dur) ease-in-out infinite alternate; opacity: 0; }
+@keyframes twinkle { from { opacity: var(--min-op); } to { opacity: var(--max-op); } }
+#bubbleCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
 #app { position: relative; z-index: 1; }
 
-/* ── NAV ── */
 nav {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 2rem;
-  height: 56px;
-  background: rgba(5,8,16,0.85);
-  backdrop-filter: blur(16px);
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 2rem; height: 56px;
+  background: rgba(5,8,16,0.85); backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
 }
-.nav-brand {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 1.05rem;
-  color: var(--text-bright);
-  letter-spacing: -0.02em;
-}
+.nav-brand { font-weight: 800; font-size: 1.05rem; color: var(--text-bright); letter-spacing: -0.02em; }
 .nav-brand span { color: var(--accent1); }
-.nav-links {
-  display: flex;
-  gap: 0.25rem;
-  list-style: none;
-}
-.nav-links a {
-  color: var(--text-dim);
-  text-decoration: none;
-  font-size: 0.8rem;
-  font-weight: 500;
-  padding: 0.35rem 0.85rem;
-  border-radius: 6px;
-  transition: color 0.2s, background 0.2s;
-  letter-spacing: 0.01em;
-}
-.nav-links a:hover {
-  color: var(--text-bright);
-  background: var(--bg3);
-}
+.nav-links { display: flex; gap: 0.25rem; list-style: none; }
+.nav-links a { color: var(--text-dim); text-decoration: none; font-size: 0.8rem; font-weight: 500; padding: 0.35rem 0.85rem; border-radius: 6px; transition: color 0.2s, background 0.2s; }
+.nav-links a:hover { color: var(--text-bright); background: var(--bg3); }
 
-/* ── HERO ── */
-.hero {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 6rem 2rem 4rem;
-  position: relative;
-}
+.hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 6rem 2rem 4rem; }
 .hero-orb {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
+  width: 200px; height: 200px; border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #4a9fff, #1a6fff 50%, #0a2060);
   box-shadow: 0 0 60px rgba(26,111,255,0.5), 0 0 120px rgba(26,111,255,0.2);
-  margin-bottom: 2.5rem;
-  animation: orb-breathe 3s ease-in-out infinite alternate;
-  position: relative;
+  animation: orb-breathe 3s ease-in-out infinite alternate; position: relative; margin-bottom: 0;
 }
-.hero-orb::after {
-  content: '';
-  position: absolute;
-  inset: -8px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(26,111,255,0.3);
-  animation: orb-ring 3s ease-in-out infinite alternate;
-}
+.hero-orb::after { content: ''; position: absolute; inset: -8px; border-radius: 50%; border: 1.5px solid rgba(26,111,255,0.3); animation: orb-ring 3s ease-in-out infinite alternate; }
 @keyframes orb-breathe {
   from { transform: scale(1); box-shadow: 0 0 60px rgba(26,111,255,0.5), 0 0 120px rgba(26,111,255,0.2); }
   to   { transform: scale(1.07); box-shadow: 0 0 80px rgba(26,111,255,0.7), 0 0 160px rgba(26,111,255,0.3); }
 }
-@keyframes orb-ring {
-  from { transform: scale(1); opacity: 0.3; }
-  to   { transform: scale(1.12); opacity: 0.8; }
-}
-.hero-label {
-  font-size: 0.72rem;
-  letter-spacing: 0.22em;
-  color: var(--accent2);
-  text-transform: uppercase;
-  margin-bottom: 1rem;
-  font-weight: 500;
-}
-.hero h1 {
-  font-family: var(--font-display);
-  font-size: clamp(2.4rem, 6vw, 4.5rem);
-  font-weight: 800;
-  color: var(--text-bright);
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-  margin-bottom: 1.25rem;
-}
-.hero h1 em {
-  font-style: normal;
-  color: var(--accent1);
-}
-.hero-sub {
-  max-width: 540px;
-  color: #a8bde0;
-  font-size: 0.95rem;
-  line-height: 1.85;
-  margin-bottom: 2.5rem;
-  font-weight: 400;
-}
-.badge-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  justify-content: center;
-  margin-bottom: 3rem;
-}
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.3rem 0.75rem;
-  border-radius: 4px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  border: 1px solid;
-}
+@keyframes orb-ring { from { transform: scale(1); opacity: 0.3; } to { transform: scale(1.12); opacity: 0.8; } }
+@keyframes pulseRing { 0%,100% { transform:scale(1); opacity:0.5; } 50% { transform:scale(1.1); opacity:1; } }
+
+.hero-label { font-size: 0.72rem; letter-spacing: 0.22em; color: var(--accent2); text-transform: uppercase; margin-bottom: 1rem; font-weight: 500; }
+.hero h1 { font-size: clamp(2.4rem, 6vw, 4.5rem); font-weight: 800; color: var(--text-bright); line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 1.25rem; }
+.hero h1 em { font-style: normal; color: var(--accent1); }
+.hero-sub { max-width: 540px; color: #a8bde0; font-size: 0.95rem; line-height: 1.85; margin-bottom: 2.5rem; }
+.badge-row { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 3rem; }
+.badge { display: inline-flex; align-items: center; padding: 0.3rem 0.75rem; border-radius: 4px; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; border: 1px solid; }
 .badge-swift  { color: #FA7343; border-color: rgba(250,115,67,0.3);  background: rgba(250,115,67,0.06); }
 .badge-python { color: #4B9EE5; border-color: rgba(75,158,229,0.3);  background: rgba(75,158,229,0.06); }
 .badge-torch  { color: #EE4C2C; border-color: rgba(238,76,44,0.3);   background: rgba(238,76,44,0.06); }
 .badge-apple  { color: #aaaaaa; border-color: rgba(170,170,170,0.3); background: rgba(170,170,170,0.06); }
 .badge-flask  { color: var(--accent4); border-color: rgba(57,255,138,0.3); background: rgba(57,255,138,0.06); }
 
+/* ── PROJECT CARDS GRID ── */
 .project-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 1.25rem;
-  max-width: 860px;
+  max-width: 1100px;
   width: 100%;
 }
 .proj-card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1.75rem;
-  text-align: left;
-  text-decoration: none;
-  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
-  display: block;
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 12px;
+  padding: 1.75rem; text-align: left; text-decoration: none;
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s; display: block;
 }
-.proj-card:hover {
-  border-color: var(--accent1);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 40px rgba(26,111,255,0.12);
-}
+.proj-card:hover { border-color: var(--accent1); transform: translateY(-3px); box-shadow: 0 8px 40px rgba(26,111,255,0.12); }
+.proj-card.coming { border-style: dashed; opacity: 0.55; cursor: default; pointer-events: none; }
+.proj-card.coming:hover { transform: none; box-shadow: none; border-color: var(--border); }
 .proj-card-icon { font-size: 1.8rem; margin-bottom: 0.75rem; }
-.proj-card h3 {
-  font-family: var(--font-display);
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--text-bright);
-  margin-bottom: 0.5rem;
-}
-.proj-card p {
-  color: #9ab0d4;
-  font-size: 0.85rem;
-  line-height: 1.65;
-}
-.proj-card-tag {
-  display: inline-block;
-  margin-top: 1rem;
-  font-size: 0.65rem;
-  color: var(--accent1);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
+.proj-card h3 { font-size: 1.05rem; font-weight: 700; color: var(--text-bright); margin-bottom: 0.5rem; }
+.proj-card p { color: #9ab0d4; font-size: 0.85rem; line-height: 1.65; }
+.proj-card-tag { display: inline-block; margin-top: 1rem; font-size: 0.65rem; color: var(--accent1); letter-spacing: 0.1em; text-transform: uppercase; }
+.proj-card.coming .proj-card-tag { color: var(--text-dim); }
 
-/* ── SECTION WRAPPER ── */
-.section {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 5rem 2rem;
-}
-.section-divider {
-  width: 100%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border2), transparent);
-  margin: 0 auto;
-}
-
-/* ── PROJECT HEADER ── */
-.project-header {
-  padding: 6rem 2rem 2rem;
-  max-width: 900px;
-  margin: 0 auto;
-}
-.project-number {
-  font-size: 0.68rem;
-  letter-spacing: 0.22em;
-  color: var(--accent2);
-  text-transform: uppercase;
-  margin-bottom: 0.75rem;
-  font-weight: 500;
-}
-.project-header h2 {
-  font-family: var(--font-display);
-  font-size: clamp(1.8rem, 4vw, 3rem);
-  font-weight: 800;
-  color: var(--text-bright);
-  letter-spacing: -0.03em;
-  line-height: 1.1;
-  margin-bottom: 1rem;
-}
-.project-header h2 span { color: var(--accent1); }
-.project-desc {
-  color: #a8bde0;
-  font-size: 0.92rem;
-  max-width: 600px;
-  line-height: 1.85;
-  border-left: 2px solid var(--accent1);
-  padding-left: 1rem;
-  margin-bottom: 2rem;
-}
-
-/* ── TECH TABLE ── */
-.tech-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 0.75rem;
-  margin: 1.5rem 0;
-}
-.tech-item {
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-}
-.tech-item .tech-label {
-  font-size: 0.65rem;
-  color: var(--text-dim);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  margin-bottom: 0.25rem;
-}
-.tech-item .tech-val {
-  font-size: 0.8rem;
-  color: var(--text-bright);
-  font-weight: 600;
-}
-
-/* ── CHAPTERS ── */
-.chapter {
-  padding: 0 2rem 4rem;
-  max-width: 900px;
-  margin: 0 auto;
-}
-.chapter-title {
-  font-family: var(--font-display);
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--text-bright);
-  letter-spacing: -0.02em;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-.chapter-num {
-  font-size: 0.67rem;
-  color: var(--accent2);
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  font-family: var(--font-mono);
-  font-weight: 500;
-}
-h4 {
-  font-family: var(--font-display);
-  font-size: 0.98rem;
-  font-weight: 700;
-  color: var(--accent2);
-  margin: 1.75rem 0 0.75rem;
-  letter-spacing: -0.01em;
-}
-p {
-  color: var(--text);
-  font-size: 0.9rem;
-  line-height: 1.9;
-  margin-bottom: 1rem;
-}
-p strong { color: var(--text-bright); font-weight: 600; }
-
-/* ── CALLOUTS ── */
-.callout {
-  border-radius: 8px;
-  padding: 1rem 1.25rem;
-  margin: 1.25rem 0;
-  font-size: 0.82rem;
-  line-height: 1.7;
-  display: flex;
-  gap: 0.75rem;
-  align-items: flex-start;
-}
-.callout-tip  { background: rgba(0,200,255,0.06); border: 1px solid rgba(0,200,255,0.2); color: var(--accent2); }
-.callout-warn { background: rgba(255,200,64,0.06); border: 1px solid rgba(255,200,64,0.2); color: var(--yellow); }
-.callout-info { background: rgba(26,111,255,0.06); border: 1px solid rgba(26,111,255,0.2); color: #7aacff; }
-.callout-icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.1rem; }
-.callout-body { color: var(--text); }
-.callout-body strong { color: inherit; }
-
-/* ── CODE ── */
-pre {
-  background: var(--code-bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 1.25rem 1.5rem;
-  overflow-x: auto;
-  margin: 1rem 0 1.5rem;
-  position: relative;
-}
-pre code {
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  line-height: 1.75;
-  color: #b8d0f8;
-}
-.code-lang {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.75rem;
-  font-size: 0.6rem;
-  color: var(--text-dim);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-code {
-  font-family: var(--font-mono);
-  background: rgba(61,139,255,0.1);
-  border: 1px solid rgba(61,139,255,0.18);
-  border-radius: 4px;
-  padding: 0.1em 0.4em;
-  font-size: 0.82em;
-  color: #88baff;
-}
-pre code { background: none; border: none; padding: 0; font-size: inherit; color: inherit; }
-
-/* ── TABLES ── */
-.table-wrap { overflow-x: auto; margin: 1rem 0 1.5rem; border-radius: 8px; border: 1px solid var(--border); }
-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-thead tr { background: var(--bg3); }
-th {
-  padding: 0.75rem 1rem;
-  text-align: left;
-  font-size: 0.68rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #8fa3cc;
-  font-weight: 600;
-  border-bottom: 1px solid var(--border);
-}
-td {
-  padding: 0.7rem 1rem;
-  border-bottom: 1px solid var(--border);
-  color: var(--text);
-  vertical-align: top;
-}
-tr:last-child td { border-bottom: none; }
-tbody tr:hover { background: rgba(26,111,255,0.04); }
-td code { font-size: 0.75em; }
-
-/* ── BOOT SEQUENCE ── */
-.boot-seq {
-  counter-reset: boot;
-  list-style: none;
-  display: grid;
-  gap: 0.4rem;
-  margin: 1rem 0 1.5rem;
-}
-.boot-seq li {
-  counter-increment: boot;
-  display: flex;
-  gap: 1rem;
-  font-size: 0.84rem;
-  color: var(--text);
-  padding: 0.5rem 0.75rem;
-  border-radius: 6px;
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  align-items: flex-start;
-}
-.boot-seq li::before {
-  content: counter(boot, decimal-leading-zero);
-  color: var(--accent1);
-  font-weight: 700;
-  font-size: 0.7rem;
-  flex-shrink: 0;
-  padding-top: 0.1rem;
-  font-family: var(--font-mono);
-}
-
-/* ── ORB STYLES GRID ── */
-.orb-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 0.75rem;
-  margin: 1rem 0 1.5rem;
-}
-.orb-item {
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  transition: border-color 0.2s;
-}
-.orb-item:hover { border-color: var(--accent1); }
-.orb-num { font-size: 0.6rem; color: var(--text-dim); letter-spacing: 0.1em; }
-.orb-name { font-size: 0.85rem; font-weight: 600; color: var(--text-bright); }
-.orb-desc { font-size: 0.75rem; color: #8fa3cc; line-height: 1.55; }
-
-/* ── REWARD TABLE COLORS ── */
-.reward-pos { color: var(--accent4); font-weight: 600; }
-.reward-neg { color: var(--accent3); font-weight: 600; }
-
-/* ── PROJECT 2 ACCENT ── */
-.p2-accent { color: var(--accent3); }
-.p2 h4 { color: var(--accent3); }
-.p2 .chapter-num { color: var(--accent3); }
-.p2 pre { border-color: rgba(255,107,53,0.2); }
-.p2 .callout-tip { border-color: rgba(255,107,53,0.2); color: var(--accent3); }
-
-/* ── BUG CARDS ── */
-.bug-card {
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--accent3);
-  border-radius: 8px;
-  padding: 1.25rem 1.5rem;
-  margin: 1.25rem 0;
-}
-.bug-title {
-  font-family: var(--font-display);
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: var(--text-bright);
-  margin-bottom: 0.5rem;
-}
-.bug-file {
-  font-size: 0.7rem;
-  color: var(--text-dim);
-  margin-bottom: 0.75rem;
-}
-
-/* ── FOOTER ── */
-footer {
-  border-top: 1px solid var(--border);
-  padding: 3rem 2rem;
-  text-align: center;
-  color: var(--text-dim);
-  font-size: 0.75rem;
-}
+footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--text-dim); font-size: 0.75rem; }
 footer span { color: var(--accent1); }
 
-/* ── SCROLL REVEAL ── */
-.reveal {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-.reveal.visible {
-  opacity: 1;
-  transform: none;
-}
-
-/* ── RESPONSIVE ── */
-@media (max-width: 640px) {
-  .nav-links { display: none; }
-  .hero h1 { font-size: 2rem; }
-  .chapter, .project-header, .section { padding-left: 1.25rem; padding-right: 1.25rem; }
-}
-
-@keyframes pulseRing {
-  0%,100% { transform:scale(1);   opacity:0.5; }
-  50%      { transform:scale(1.1); opacity:1;   }
-}
-
-/* ── BUBBLE LAYER ── */
-#bubbleCanvas {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  pointer-events: none;
-  z-index: 0;
-}
+@media (max-width: 640px) { .nav-links { display: none; } .hero h1 { font-size: 2rem; } }
 </style>
 </head>
 <body>
-
-<!-- STARFIELD -->
 <div id="stars"></div>
 <canvas id="bubbleCanvas"></canvas>
 
 <div id="app">
-
-<!-- NAV -->
 <nav id="top">
   <div class="nav-brand">r<span>.</span>stahlb</div>
   <ul class="nav-links">
-    <li><a href="#george">George AI</a></li>
-    <li><a href="#llm">GPT from Scratch</a></li>
-    <li><a href="#other">Learning</a></li>
+    <li><a href="george.html">George AI</a></li>
+    <li><a href="gpt.html">GPT from Scratch</a></li>
+    <li><a href="learning.html">Learning</a></li>
+    <li><a href="llm_guide.html">LLM Guide</a></li>
     <li><a href="https://github.com/rstahlb" target="_blank">GitHub ↗</a></li>
   </ul>
 </nav>
 
-<!-- HERO -->
 <section class="hero">
-  <div id="heroWrap" style="position:relative;width:200px;height:200px;margin-bottom:2.5rem;">
-
-    <div class="hero-orb" id="heroOrb" style="width:200px;height:200px;margin-bottom:0;position:absolute;top:0;left:0;"></div>
-
-    <video id="vid1" playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_yyes.mp4" type="video/mp4"></video>
-    <video id="vid2" playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_yes.mp4" type="video/mp4"></video>
-    <video id="vid3" playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_01.mp4" type="video/mp4"></video>
-    <video id="vid4" playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_02.mp4" type="video/mp4"></video>
-    <video id="vid5" playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_03.mp4" type="video/mp4"></video>
-    <video id="vid6" playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_04.mp4" type="video/mp4"></video>
-    <video id="vid7" playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_05.mp4" type="video/mp4"></video>
-    <video id="vid8" playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_06.mp4" type="video/mp4"></video>
-    <video id="vid9" playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_07.mp4" type="video/mp4"></video>
-    <video id="vid10" playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_08.mp4" type="video/mp4"></video>
+  <!-- George orb with video player -->
+  <div id="heroWrap" style="position:relative;width:200px;height:200px;margin-bottom:2rem;">
+    <div class="hero-orb" id="heroOrb" style="position:absolute;top:0;left:0;width:200px;height:200px;margin-bottom:0;"></div>
+    <video id="vid1"  playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_yyes.mp4"  type="video/mp4"></video>
+    <video id="vid2"  playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_yes.mp4"   type="video/mp4"></video>
+    <video id="vid3"  playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_01.mp4"   type="video/mp4"></video>
+    <video id="vid4"  playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_02.mp4"   type="video/mp4"></video>
+    <video id="vid5"  playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_03.mp4"   type="video/mp4"></video>
+    <video id="vid6"  playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_04.mp4"   type="video/mp4"></video>
+    <video id="vid7"  playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_05.mp4"   type="video/mp4"></video>
+    <video id="vid8"  playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_06.mp4"   type="video/mp4"></video>
+    <video id="vid9"  playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_07.mp4"   type="video/mp4"></video>
+    <video id="vid10" playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_08.mp4"   type="video/mp4"></video>
     <video id="vid11" playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="ai/george_inter.mp4" type="video/mp4"></video>
-
     <div id="hearOverlay" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;z-index:99;background:rgba(5,8,16,0.5);backdrop-filter:blur(2px);transition:opacity 0.4s;">
       <div style="font-size:1.4rem;margin-bottom:0.3rem;">🔊</div>
       <div style="font-family:var(--font-display);font-size:0.58rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#f0f5ff;text-align:center;line-height:1.5;padding:0 0.5rem;">click to<br>hear george</div>
       <div style="position:absolute;inset:-6px;border-radius:50%;border:1.5px solid rgba(61,139,255,0.6);animation:pulseRing 1.8s ease-in-out infinite;"></div>
     </div>
-
   </div>
-
-  <!-- ↑ Back to top anchor — sits just below the sphere -->
-  <a href="#top" style="display:inline-flex;align-items:center;gap:0.4rem;margin-top:-1rem;margin-bottom:2rem;font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-dim);text-decoration:none;border:1px solid var(--border);padding:0.3rem 0.8rem;border-radius:20px;transition:color 0.2s,border-color 0.2s;" onmouseover="this.style.color='var(--accent2)';this.style.borderColor='var(--accent2)';" onmouseout="this.style.color='var(--text-dim)';this.style.borderColor='var(--border)';">↑ top</a>
 
   <div class="hero-label">AI/Random Projects Portfolio</div>
   <h1>Building AI<br><em>from scratch</em></h1>
-  <p class="hero-sub">Two personal AI projects built entirely on Apple Silicon M1 — a floating voice assistant with a chess engine and RL game player capable of learning due to using json as long term storage, and a GPT-style transformer trained from zero.</p>
+  <p class="hero-sub">Personal projects built on Apple Silicon M1 — a floating voice AI with chess engine and RL game player, a GPT-style transformer trained from zero, and a growing collection of experiments.</p>
   <div class="badge-row">
     <span class="badge badge-swift">Swift 5.9</span>
     <span class="badge badge-python">Python 3.12</span>
@@ -621,1222 +141,150 @@ footer span { color: var(--accent1); }
     <span class="badge badge-apple">Apple Silicon</span>
     <span class="badge badge-flask">Flask</span>
   </div>
+
   <div class="project-cards">
-    <a class="proj-card" href="#george">
+    <!-- ── REAL PROJECTS ── -->
+    <a class="proj-card" href="george.html">
       <div class="proj-card-icon">🤖</div>
       <h3>George AI</h3>
       <p>A floating AI orb for macOS. Voice-first, privacy-focused, local LLM + cloud fallback, chess engine, RL Arkanoid agent, persistent memory.</p>
       <span class="proj-card-tag">Swift + Python →</span>
     </a>
-    <a class="proj-card" href="#llm">
+    <a class="proj-card" href="gpt.html">
       <div class="proj-card-icon">🧠</div>
       <h3>GPT from Scratch</h3>
       <p>A GPT-style transformer trained from zero on TinyStories. Custom BPE tokenizer, full training pipeline, chat UI, LoRA fine-tuning.</p>
       <span class="proj-card-tag">PyTorch + Flask →</span>
     </a>
-    <a class="proj-card" href="#other">
+    <a class="proj-card" href="learning.html">
       <div class="proj-card-icon">🧪</div>
       <h3>Learning & Random Projects</h3>
       <p>Animations, 3D sculpts, game experiments, and one-off builds — the scratchpad where ideas get tested.</p>
       <span class="proj-card-tag">Experiments →</span>
     </a>
+
+    <!-- ── COMING SOON (8 placeholders) ── -->
+    <a class="proj-card" href="llm_guide.html">
+      <div class="proj-card-icon">🧬</div>
+      <h3>Fine-Tuning LLMs on M1</h3>
+      <p>In 2026, you don't build an LLM — you train one that already knows the world. A complete guide to LoRA fine-tuning, validation, and deploying a custom model in Ollama on Apple Silicon.</p>
+      <span class="proj-card-tag">MLX + LoRA + Ollama →</span>
+    </a>
+    <div class="proj-card coming">
+      <div class="proj-card-icon">⚡</div>
+      <h3>Coming Soon</h3>
+      <p>Next project in progress...</p>
+      <span class="proj-card-tag">Coming Soon</span>
+    </div>
+    <div class="proj-card coming">
+      <div class="proj-card-icon">🎮</div>
+      <h3>Coming Soon</h3>
+      <p>Next project in progress...</p>
+      <span class="proj-card-tag">Coming Soon</span>
+    </div>
+    <div class="proj-card coming">
+      <div class="proj-card-icon">🌐</div>
+      <h3>Coming Soon</h3>
+      <p>Next project in progress...</p>
+      <span class="proj-card-tag">Coming Soon</span>
+    </div>
+    <div class="proj-card coming">
+      <div class="proj-card-icon">🔬</div>
+      <h3>Coming Soon</h3>
+      <p>Next project in progress...</p>
+      <span class="proj-card-tag">Coming Soon</span>
+    </div>
+    <div class="proj-card coming">
+      <div class="proj-card-icon">🎨</div>
+      <h3>Coming Soon</h3>
+      <p>Next project in progress...</p>
+      <span class="proj-card-tag">Coming Soon</span>
+    </div>
+    <div class="proj-card coming">
+      <div class="proj-card-icon">🤝</div>
+      <h3>Coming Soon</h3>
+      <p>Next project in progress...</p>
+      <span class="proj-card-tag">Coming Soon</span>
+    </div>
+    <div class="proj-card coming">
+      <div class="proj-card-icon">🛠️</div>
+      <h3>Coming Soon</h3>
+      <p>Next project in progress...</p>
+      <span class="proj-card-tag">Coming Soon</span>
+    </div>
   </div>
 </section>
-
-<div class="section-divider"></div>
-
-<!-- ═══════════════════════════════════════════ -->
-<!-- PROJECT 1 — GEORGE AI                       -->
-<!-- ═══════════════════════════════════════════ -->
-<div id="george">
-
-<div class="project-header reveal">
-  <div class="project-number">Project 01</div>
-  <h2>George <span>AI</span></h2>
-  <p class="project-desc">A floating AI orb for macOS — voice-first, privacy-focused, built entirely in Swift + Python. Runs a local LLM on-device via Apple MLX, cascades to cloud APIs only when needed, plays chess, plays Arkanoid autonomously via reinforcement learning, and learns your preferences over time.</p>
-  <div class="tech-grid">
-    <div class="tech-item"><div class="tech-label">UI & App</div><div class="tech-val">Swift / SwiftUI / AppKit</div></div>
-    <div class="tech-item"><div class="tech-label">Local AI</div><div class="tech-val">MLX · Llama 3.2 3B 4-bit</div></div>
-    <div class="tech-item"><div class="tech-label">Cloud AI</div><div class="tech-val">OpenRouter → OpenAI → Gemini</div></div>
-    <div class="tech-item"><div class="tech-label">Backend</div><div class="tech-val">Python Flask · localhost:8765</div></div>
-    <div class="tech-item"><div class="tech-label">Speech In</div><div class="tech-val">SFSpeechRecognizer + AVAudioEngine</div></div>
-    <div class="tech-item"><div class="tech-label">Memory</div><div class="tech-val">Local JSON · never sent to cloud</div></div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════ -->
-<!-- GEORGE AI — MEDIA GALLERY                   -->
-<!-- Add/edit video cards below.                 -->
-<!-- To add a new video: copy a card block,      -->
-<!-- replace the mp4 filename and descriptions.  -->
-<!-- ═══════════════════════════════════════════ -->
-<div class="chapter reveal">
-  <h3 class="chapter-title"><span class="chapter-num">Media</span> George AI in Action</h3>
-
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem;">
-
-    <!-- ── CARD 1 — real video from ai/ folder ── -->
-    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-      <!-- ADD MP4 NAME HERE — currently: ai/george_inter.mp4 -->
-      <video controls playsinline style="width:100%;display:block;max-height:200px;object-fit:cover;background:#000;">
-        <source src="george_inter.mp4" type="video/mp4">
-      </video>
-      <div style="padding:1rem;">
-        <div style="font-size:0.7rem;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.3rem;">Demo</div>
-        <div style="font-size:0.9rem;font-weight:700;color:var(--text-bright);">George Interactive</div>
-        <!-- ADD DESCRIPTION HERE -->
-        <div style="font-size:0.78rem;color:#8fa3cc;margin-top:0.3rem;line-height:1.55;">George my llm conversing with me, he is able to see the screen and able to see desktop.He sees my flying bird and makes a comment. I store long term memory with json file, he has a long term memory.</div>
-      </div>
-    </div>
-
-    <!-- ── CARD 2 — coming soon ── -->
-    <div style="background:var(--bg2);border:1px dashed var(--border2);border-radius:12px;overflow:hidden;opacity:0.6;">
-      <!-- ADD MP4 NAME HERE — replace coming-soon placeholder with your filename e.g. ai/george_chess.mp4 -->
-      <div style="width:100%;height:200px;background:var(--bg3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.5rem;">
-        <div style="font-size:2rem;">🎬</div>
-        <div style="font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-dim);">Coming Soon</div>
-      </div>
-      <div style="padding:1rem;">
-        <!-- ADD CATEGORY HERE e.g. Demo / Feature / Chess -->
-        <div style="font-size:0.7rem;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.3rem;">Coming Soon</div>
-        <!-- ADD TITLE HERE -->
-        <div style="font-size:0.9rem;font-weight:700;color:var(--text-bright);">Video Title Here</div>
-        <!-- ADD DESCRIPTION HERE -->
-        <div style="font-size:0.78rem;color:#8fa3cc;margin-top:0.3rem;line-height:1.55;">Add your description here.</div>
-      </div>
-    </div>
-
-    <!-- ── CARD 3 — coming soon ── -->
-    <div style="background:var(--bg2);border:1px dashed var(--border2);border-radius:12px;overflow:hidden;opacity:0.6;">
-      <!-- ADD MP4 NAME HERE -->
-      <div style="width:100%;height:200px;background:var(--bg3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.5rem;">
-        <div style="font-size:2rem;">🎬</div>
-        <div style="font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-dim);">Coming Soon</div>
-      </div>
-      <div style="padding:1rem;">
-        <!-- ADD CATEGORY HERE -->
-        <div style="font-size:0.7rem;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.3rem;">Coming Soon</div>
-        <!-- ADD TITLE HERE -->
-        <div style="font-size:0.9rem;font-weight:700;color:var(--text-bright);">Video Title Here</div>
-        <!-- ADD DESCRIPTION HERE -->
-        <div style="font-size:0.78rem;color:#8fa3cc;margin-top:0.3rem;line-height:1.55;">Add your description here.</div>
-      </div>
-    </div>
-
-    <!-- ── CARD 4 — coming soon ── -->
-    <div style="background:var(--bg2);border:1px dashed var(--border2);border-radius:12px;overflow:hidden;opacity:0.6;">
-      <!-- ADD MP4 NAME HERE -->
-      <div style="width:100%;height:200px;background:var(--bg3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.5rem;">
-        <div style="font-size:2rem;">🎬</div>
-        <div style="font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-dim);">Coming Soon</div>
-      </div>
-      <div style="padding:1rem;">
-        <!-- ADD CATEGORY HERE -->
-        <div style="font-size:0.7rem;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.3rem;">Coming Soon</div>
-        <!-- ADD TITLE HERE -->
-        <div style="font-size:0.9rem;font-weight:700;color:var(--text-bright);">Video Title Here</div>
-        <!-- ADD DESCRIPTION HERE -->
-        <div style="font-size:0.78rem;color:#8fa3cc;margin-top:0.3rem;line-height:1.55;">Add your description here.</div>
-      </div>
-    </div>
-
-  </div><!-- /media grid -->
-</div>
-
-<!-- CH 1 -->
-<div class="chapter reveal">
-  <h3 class="chapter-title"><span class="chapter-num">Chapter 01</span> System Architecture & AI Routing</h3>
-
-  <p>George uses a two-tier intelligence model: a <strong>local on-device LLM</strong> running on Apple Silicon GPU via <code>mlx_lm</code> for fast, private answers, and a <strong>cascade of cloud APIs</strong> for questions requiring real-time data. A Python backend server routes all traffic between the Swift UI layer and the AI providers.</p>
-
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>File</th><th>Role</th></tr></thead>
-      <tbody>
-        <tr><td><code>GeorgeController.swift</code></td><td>Main Swift controller — mic, speech recognition, screen capture, TTS, all AI calls</td></tr>
-        <tr><td><code>server.py</code></td><td>Python HTTP server on localhost:8765 — LLM routing, local inference, cloud API calls</td></tr>
-        <tr><td><code>Agent.swift</code></td><td>Reinforcement learning layer — learns preferences and improves routing decisions over time</td></tr>
-        <tr><td><code>Memory.swift</code></td><td>Persistent memory of facts, conversation history, and user profile</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h4>Smart 3-Step Routing</h4>
-  <p>George does not blindly send every question to the cloud. It uses a 3-step system to decide whether to answer locally or make an outbound request.</p>
-
-  <p><strong>Step 1 — Fast Pattern Matching</strong> — Before invoking any model, <code>server.py</code> runs the query through compiled regex patterns. Zero tokens, zero API calls.</p>
-
-  <pre><code class="language-python"># server.py — fast_route()
-def fast_route(user_input, has_cloud):
-    if PERSONAL_LOCAL_PATTERNS.search(user_input): return 'LOCAL'
-    if not has_cloud: return 'LOCAL'
-    if FORCE_CLOUD_PATTERNS.search(user_input): return 'CLOUD'
-    if CLOUD_PATTERNS.search(user_input): return 'CLOUD'
-    if LOCAL_PATTERNS.search(user_input): return 'LOCAL'
-    return None  # ambiguous — go to Step 2</code><span class="code-lang">python</span></pre>
-
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Pattern</th><th>Triggers</th></tr></thead>
-      <tbody>
-        <tr><td><code>PERSONAL_LOCAL</code></td><td>Questions about you, your family, health, schedule — always local, never sent to cloud</td></tr>
-        <tr><td><code>FORCE_CLOUD</code></td><td>"use the internet", "search online", "google it" — bypasses local model entirely</td></tr>
-        <tr><td><code>CLOUD_PATTERNS</code></td><td>News, scores, stock prices, current events, today's weather</td></tr>
-        <tr><td><code>LOCAL_PATTERNS</code></td><td>Definitions, jokes, stories, math, general knowledge — anything timeless</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <p><strong>Step 2 — LLM Router</strong> — If pattern matching returns <code>None</code>, George uses its own local LLM to classify the query. A 4-token inference call at <code>temperature=0</code> returns only the word <code>LOCAL</code> or <code>CLOUD</code>. The routing decision never leaves your Mac.</p>
-
-  <p><strong>Step 3 — Cloud Cascade</strong> — When a query needs the internet, George tries providers in order:</p>
-
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Priority</th><th>Provider</th><th>Notes</th></tr></thead>
-      <tbody>
-        <tr><td>0</td><td>wttr.in</td><td>Weather queries bypass all LLMs — free, no API key</td></tr>
-        <tr><td>1</td><td>OpenRouter</td><td>Tries gpt-4o-mini, gemma-3, llama-3 in order</td></tr>
-        <tr><td>2</td><td>OpenAI</td><td>Direct fallback if OpenRouter fails</td></tr>
-        <tr><td>3</td><td>Gemini</td><td>Google Gemini 2.0 Flash as final fallback</td></tr>
-        <tr><td>4</td><td>Local fallback</td><td>Answers locally with a caveat if all cloud fails</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="callout callout-warn">
-    <span class="callout-icon">🟡</span>
-    <div class="callout-body">When any cloud provider answers, the orb displays a <strong>yellow ring</strong> — you always know when data left your Mac.</div>
-  </div>
-
-  <h4>Streaming Response Format</h4>
-  <p>The server uses HTTP chunked transfer encoding, streaming responses sentence-by-sentence. George starts speaking before it has finished generating the full answer.</p>
-  <pre><code>{"sentence": "Here is the first sentence.", "source": "local"}
-{"sentence": "And here is the second.",      "source": "cloud"}
-{"done": true, "full": "Complete text",      "source": "cloud"}</code><span class="code-lang">json</span></pre>
-</div>
-
-<!-- CH 2 -->
-<div class="chapter reveal">
-  <h3 class="chapter-title"><span class="chapter-num">Chapter 02</span> Screen Vision</h3>
-
-  <p>George can look at your screen on demand. Say <em>"Hey George, what's on my screen?"</em> and George takes a screenshot, encodes it, and sends it to a cloud vision model.</p>
-
-  <p><strong>Trigger phrases:</strong> "what's on my screen" · "describe my screen" · "what do you see" · "look at my screen" · "read the screen" · "summarize this page"</p>
-
-  <pre><code class="language-swift">// GeorgeController.swift — handleScreenVision()
-let path = "/tmp/george_screen.png"
-_ = await shell("screencapture -x " + path)
-
-// Sent as base64 inside the JSON request body
-{ "type": "image_url",
-  "image_url": { "url": "data:image/png;base64,..." } }</code><span class="code-lang">swift</span></pre>
-
-  <p>The screenshot is saved to <code>/tmp/george_screen.png</code> — a temporary file overwritten each use. It is <strong>not</strong> stored persistently on disk. George sends a voice-friendly vision prompt that produces 2–3 natural spoken sentences, streamed back and spoken aloud via <code>AVSpeechSynthesizer</code>.</p>
-
-  <div class="callout callout-info">
-    <span class="callout-icon">🔒</span>
-    <div class="callout-body">George <strong>never</strong> passively monitors your screen. Screen vision is triggered only when you explicitly ask. No background process, no timer, no event listener initiates it automatically. Screen Recording permission must be granted in <strong>System Settings → Privacy & Security → Screen Recording</strong>.</div>
-  </div>
-</div>
-
-<!-- CH 3 -->
-<div class="chapter reveal">
-  <h3 class="chapter-title"><span class="chapter-num">Chapter 03</span> Hardware Integration</h3>
-
-  <p>George integrates with macOS hardware through official Apple APIs and standard Unix tools — no kernel extensions, no custom drivers.</p>
-
-  <h4>Microphone</h4>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Framework</th><th>Role</th></tr></thead>
-      <tbody>
-        <tr><td><code>AVAudioEngine</code></td><td>Captures raw audio at 44.1kHz, streams buffers to the speech recognizer</td></tr>
-        <tr><td><code>SFSpeechRecognizer</code></td><td>On-device speech recognition. A second instance listens for "stop" / "shut up" while George is speaking</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <p>The mic is turned off while George is speaking to prevent it from hearing its own TTS output.</p>
-
-  <h4>GPU — Local AI Inference</h4>
-  <p>The local LLM runs on Apple Silicon GPU (M1/M2/M3/M4) using Apple's MLX framework via <code>mlx_lm</code>. Loaded into GPU memory at startup — the orb shows a "particles orbit" animation while local inference is running.</p>
-
-  <h4>Hardware Stats</h4>
-  <p>When you ask "check my hardware", George reads from standard macOS CLI tools — all read-only, no hardware modification:</p>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Data</th><th>Command</th></tr></thead>
-      <tbody>
-        <tr><td>CPU usage</td><td><code>ps -A -o %cpu | awk</code></td></tr>
-        <tr><td>RAM total / free</td><td><code>sysctl -n hw.memsize</code> / <code>vm_stat</code></td></tr>
-        <tr><td>Battery</td><td><code>pmset -g batt</code></td></tr>
-        <tr><td>Disk usage</td><td><code>df -h /</code></td></tr>
-        <tr><td>Network interface</td><td><code>route get default</code></td></tr>
-        <tr><td>Fan / CPU temp</td><td><code>istats fan speed</code> / <code>istats cpu temp</code> (optional)</td></tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<!-- CH 4 -->
-<div class="chapter reveal">
-  <h3 class="chapter-title"><span class="chapter-num">Chapter 04</span> Memory Engine</h3>
-
-  <p>George's memory system is what makes it feel like a real companion rather than a stateless chatbot. Everything lives in <code>~/.george/memory.json</code> — never sent to the cloud.</p>
-
-  <pre><code>{
-  "persona": { "name": "George", "traits": ["curious","warm","witty","direct","honest"] },
-  "history": [ /* last 80 conversation turns */ ],
-  "facts":   [ /* up to 300 plain-English facts about you */ ]
-}</code><span class="code-lang">json</span></pre>
-
-  <h4>Proactive Fact Mining</h4>
-  <p>Every user message is scanned by a regex-based fact extractor <strong>before</strong> it reaches the AI. George does not rely on the LLM to notice personal facts — it mines them proactively. Categories detected:</p>
-  <p>Name · Spouse/Partner · Children · Extended family · Job · Location · Age · Pets · Hobbies (21 types) · Music genres (27 types)</p>
-
-  <h4>Correction System</h4>
-  <p>If you say "correction", "remember I...", "actually I...", or "I don't listen to X", George removes the conflicting fact and stores the corrected version — including smart removal of multiple music genres in a single statement.</p>
-
-  <h4>System Prompt Injection</h4>
-  <p>Every inference call receives a system prompt injecting up to 40 recent facts + full conversation history. Key rules baked into every prompt:</p>
-
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Rule</th></tr></thead>
-      <tbody>
-        <tr><td>Voice-only output — no markdown, no asterisks, no bullet points</td></tr>
-        <tr><td>Keep replies to 1–3 sentences unless asked for detail</td></tr>
-        <tr><td>Naturally weave in past facts when they enrich the answer</td></tr>
-        <tr><td>Never invent facts, news, weather, or current events without real data</td></tr>
-        <tr><td>Never mention Claude, Anthropic, LLaMA, or that you're an AI — you ARE George</td></tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<!-- CH 5 -->
-<div class="chapter reveal">
-  <h3 class="chapter-title"><span class="chapter-num">Chapter 05</span> Orb Visual System</h3>
-
-  <p>The floating orb is a real-time status display that communicates George's internal state through animation, color, and behavior. Built in pure SwiftUI with <strong>11 distinct visual styles</strong>.</p>
-
-  <h4>The Five Orb States</h4>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>State</th><th>Visual Behavior</th></tr></thead>
-      <tbody>
-        <tr><td><code>.booting</code></td><td>Scale pulls in (0.92x), three animated dots cycle below showing loading progress</td></tr>
-        <tr><td><code>.idle</code></td><td>Slow breathing — scale oscillates 1.0 ↔ 1.07 over 3 seconds</td></tr>
-        <tr><td><code>.listening</code></td><td>Orb shrinks to 82%, ripple ring expands and fades, live transcription displayed</td></tr>
-        <tr><td><code>.thinking</code></td><td>Subtle nudge to 1.02x, 6 particles orbit the perimeter</td></tr>
-        <tr><td><code>.speaking</code></td><td>Rapid pulse between 1.0 and 1.26 scale — fast heartbeat effect</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h4>The 11 Orb Styles</h4>
-  <div class="orb-grid">
-    <div class="orb-item"><span class="orb-num">00</span><span class="orb-name">Classic Blue</span><span class="orb-desc">Radial gradient sphere with blue glow and orbiting particles</span></div>
-    <div class="orb-item"><span class="orb-num">01</span><span class="orb-name">Blue Flower</span><span class="orb-desc">8 rotating ellipse petals orbit the outside of the orb</span></div>
-    <div class="orb-item"><span class="orb-num">02</span><span class="orb-name">Plasma Arc</span><span class="orb-desc">3 partial arcs rotate at 120° offsets — electric effect</span></div>
-    <div class="orb-item"><span class="orb-num">03</span><span class="orb-name">Crystal Gem</span><span class="orb-desc">6 rotating diamond shapes with ice-white facets</span></div>
-    <div class="orb-item"><span class="orb-num">04</span><span class="orb-name">Deep Nebula</span><span class="orb-desc">4 rotating gradient nebula clouds + 12 star dots</span></div>
-    <div class="orb-item"><span class="orb-num">05</span><span class="orb-name">Matrix Rain</span><span class="orb-desc">Green globe with orbiting 0, 1, ▓, ░ characters</span></div>
-    <div class="orb-item"><span class="orb-num">06</span><span class="orb-name">Lava Lamp</span><span class="orb-desc">5 blurred orange/red blobs float and merge inside</span></div>
-    <div class="orb-item"><span class="orb-num">07</span><span class="orb-name">Ghost Light</span><span class="orb-desc">Three concentric rings breathing slowly around a white core</span></div>
-    <div class="orb-item"><span class="orb-num">08</span><span class="orb-name">Aurora</span><span class="orb-desc">5 blurred gradient bands rotating like aurora curtains</span></div>
-    <div class="orb-item"><span class="orb-num">09</span><span class="orb-name">Neon Pulse</span><span class="orb-desc">Hot pink globe with 3 concentric neon rings pulsing outward</span></div>
-    <div class="orb-item"><span class="orb-num">10</span><span class="orb-name">Vortex</span><span class="orb-desc">6 arc segments colored by hue rotation spin together</span></div>
-  </div>
-
-  <div class="callout callout-tip">
-    <span class="callout-icon">💡</span>
-    <div class="callout-body"><strong>Double-tap the orb</strong> to quit George. Single taps are ignored — voice is the primary input.</div>
-  </div>
-</div>
-
-<!-- CH 6 -->
-<div class="chapter reveal">
-  <h3 class="chapter-title"><span class="chapter-num">Chapter 06</span> Chess Engine</h3>
-
-  <p>George includes a complete, self-contained chess implementation in Swift with no external libraries — full rules, minimax search, alpha-beta pruning, and natural-language move commentary.</p>
-
-  <h4>Board Representation</h4>
-  <p>Pieces encoded as raw integers 0–12, stored as a flat 64-element array. <code>ChessBoard</code> is a Swift <strong>struct</strong> (value type) — every speculative move creates an independent copy with no risk of corrupting the real game state. No make/unmake logic needed.</p>
-
-  <pre><code class="language-swift">struct ChessBoard {
-    var squares: [ChessPiece] = Array(repeating: .empty, count: 64)
-    var whiteKingsideCastle  = true
-    var whiteQueensideCastle = true
-    var blackKingsideCastle  = true
-    var blackQueensideCastle = true
-    var enPassantSquare: Int = -1
-    var whiteToMove = true
-}</code><span class="code-lang">swift</span></pre>
-
-  <h4>Material Values</h4>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Piece</th><th>Value</th><th>Reasoning</th></tr></thead>
-      <tbody>
-        <tr><td>Pawn</td><td>100</td><td>Baseline unit</td></tr>
-        <tr><td>Knight</td><td>320</td><td>Slightly less than bishop</td></tr>
-        <tr><td>Bishop</td><td>330</td><td>Bishop pair advantage</td></tr>
-        <tr><td>Rook</td><td>500</td><td>Worth ~5 pawns</td></tr>
-        <tr><td>Queen</td><td>900</td><td>Worth ~9 pawns</td></tr>
-        <tr><td>King</td><td>20,000</td><td>Sentinel — game ends before capture</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h4>Minimax with Alpha-Beta Pruning</h4>
-  <p>Searches 4 moves deep. Without pruning: ~810,000 positions (30⁴). Alpha-beta reduces the effective branching factor from ~30 to ~7 — responses under one second on Apple Silicon.</p>
-
-  <pre><code class="language-swift">private static func alphabeta(_ board: ChessBoard, depth: Int,
-                                alpha: Int, beta: Int, maximising: Bool) -> Int {
-    if depth == 0 { return board.evaluate() }
-    // ...generate moves...
-    if b <= a { break }  // beta cutoff — prune remaining branches
-}</code><span class="code-lang">swift</span></pre>
-
-  <div class="callout callout-tip">
-    <span class="callout-icon">♟️</span>
-    <div class="callout-body">Sentinel values use <strong>±10,000,000</strong> instead of <code>Int.min</code>/<code>Int.max</code> to avoid overflow when evaluation adds position bonuses on ARM64.</div>
-  </div>
-</div>
-
-<!-- CH 7 -->
-<div class="chapter reveal">
-  <h3 class="chapter-title"><span class="chapter-num">Chapter 07</span> Reinforcement Learning Game Player</h3>
-
-  <p>George can play Arkanoid autonomously using a Q-learning agent. It watches the game screen via screenshot, infers state, chooses actions, and sends real keyboard inputs to control the paddle — all in real time. Say <em>"Hey George, play Arkanoid"</em> to launch it.</p>
-
-  <h4>Q-Learning Algorithm</h4>
-  <pre><code class="language-python"># Bellman equation — GamePlayer.swift updateQ()
-bestNext = max(qTable[nextState][action] for action in actions)
-updated  = current + α × (reward + γ × bestNext − current)
-qTable[state][action] = updated</code><span class="code-lang">swift</span></pre>
-
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Hyperparameter</th><th>Value</th><th>Reasoning</th></tr></thead>
-      <tbody>
-        <tr><td>Learning rate (α)</td><td>0.25</td><td>Conservative for noisy screen-based state</td></tr>
-        <tr><td>Discount factor (γ)</td><td>0.95</td><td>Longer horizon — brick hits are delayed by many frames</td></tr>
-        <tr><td>Epsilon (ε)</td><td>0.3 → 0.1</td><td>Explore freely at first, then mostly exploit learned strategy</td></tr>
-        <tr><td>Frame rate</td><td>50ms / loop</td><td>20 decisions per second</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h4>8-Dimensional State Space</h4>
-  <p>Velocity tracking (ball X/Y delta) was a key v7 improvement — without it the agent can only react. With velocity, George <em>leads</em> the ball and positions the paddle in advance.</p>
-
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Dimension</th><th>Description</th></tr></thead>
-      <tbody>
-        <tr><td>Ball X / Y</td><td>10 horizontal + 8 vertical buckets</td></tr>
-        <tr><td>Ball velocity X / Y</td><td>Left/center/right and up/center/down (derived from position delta)</td></tr>
-        <tr><td>Paddle X</td><td>10 horizontal buckets</td></tr>
-        <tr><td>Relative position</td><td>Ball X minus paddle X</td></tr>
-        <tr><td>Brick density</td><td>Approximate remaining brick count</td></tr>
-        <tr><td>Ball direction</td><td>Moving toward or away from paddle</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h4>Reward Function</h4>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Reward</th><th>Trigger</th></tr></thead>
-      <tbody>
-        <tr><td><span class="reward-pos">+2.0</span></td><td>Ball moving toward paddle AND paddle within 15% of ball — active chase</td></tr>
-        <tr><td><span class="reward-pos">+1.5</span></td><td>A brick was destroyed this frame</td></tr>
-        <tr><td><span class="reward-pos">+1.0</span></td><td>Ball velocity moving toward paddle (correct anticipation)</td></tr>
-        <tr><td><span class="reward-neg">-0.5</span></td><td>Ball moving toward paddle but paddle is far away</td></tr>
-        <tr><td><span class="reward-neg">-2.0</span></td><td>Ball reached the bottom edge (ball lost)</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="callout callout-tip">
-    <span class="callout-icon">💾</span>
-    <div class="callout-body">The Q-table is saved to <code>~/.george/qtable.json</code>. George gets smarter across sessions. On startup: <em>"Starting Arkanoid. I have 847 states learned."</em></div>
-  </div>
-</div>
-
-<!-- CH 8 -->
-<div class="chapter reveal">
-  <h3 class="chapter-title"><span class="chapter-num">Chapter 08</span> App Entry Point</h3>
-
-  <p><code>main.swift</code> is 46 lines. <code>AppDelegate.swift</code> is 42 lines. Small files, enormous consequences — every decision here affects how George behaves at the OS level.</p>
-
-  <h4>Activation Policy</h4>
-  <pre><code class="language-swift">app.setActivationPolicy(.accessory)
-// No Dock icon · Not in Cmd+Tab · No menu bar
-// George is ambient — always present, never intrusive</code><span class="code-lang">swift</span></pre>
-
-  <h4>NSPanel Configuration</h4>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Setting</th><th>Value</th><th>Why</th></tr></thead>
-      <tbody>
-        <tr><td><code>styleMask</code></td><td><code>.borderless</code> + <code>.nonactivatingPanel</code></td><td>No chrome; clicking orb doesn't steal focus from other apps</td></tr>
-        <tr><td><code>panel.level</code></td><td><code>.floating</code></td><td>Sits above all normal app windows</td></tr>
-        <tr><td><code>backgroundColor</code></td><td><code>.clear</code> + <code>isOpaque = false</code></td><td>Transparent background for the "floating in space" effect</td></tr>
-        <tr><td><code>hasShadow</code></td><td><code>false</code></td><td>Prevents a rectangular shadow artifact behind the transparent panel</td></tr>
-        <tr><td><code>collectionBehavior</code></td><td><code>.canJoinAllSpaces</code> + <code>.fullScreenAuxiliary</code></td><td>George appears on every Space and above full-screen apps</td></tr>
-        <tr><td><code>isMovableByWindowBackground</code></td><td><code>true</code></td><td>Drag the orb anywhere — no title bar to grab</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h4>Boot Sequence</h4>
-  <ol class="boot-seq">
-    <li>OS loads George binary → main.swift executes</li>
-    <li>installCrashHandlers() registers SIGBUS, SIGSEGV, SIGABRT, SIGILL, SIGFPE</li>
-    <li>NSApplication.shared creates the app singleton</li>
-    <li>AppDelegate() instantiated and wired to app</li>
-    <li>setActivationPolicy(.accessory) — hidden from Dock</li>
-    <li>app.run() — main run loop starts, never returns</li>
-    <li>applicationDidFinishLaunching fires</li>
-    <li>NSPanel created and configured (.borderless, .nonactivatingPanel)</li>
-    <li>Panel positioned bottom-right using NSScreen.main.visibleFrame</li>
-    <li>GeorgeController() created — Memory + Agent loaded from disk</li>
-    <li>OrbView SwiftUI view tree created</li>
-    <li>NSHostingView bridges SwiftUI into AppKit</li>
-    <li>panel.makeKeyAndOrderFront — orb appears on screen</li>
-    <li>Task { await george.boot() } scheduled async</li>
-    <li>Boot: requests mic + speech recognition permissions</li>
-    <li>Boot: launches server.py as child process</li>
-    <li>Boot: pings localhost:8765 until server responds</li>
-    <li>Boot: server.py loads local LLM into Apple Silicon GPU</li>
-    <li>Boot: state → .idle — breathing animation begins</li>
-    <li>Boot: AVAudioEngine starts streaming audio</li>
-    <li>George speaks a random greeting</li>
-    <li>Fully operational — listening for "Hey George"</li>
-  </ol>
-</div>
-
-<!-- CH 9 -->
-<div class="chapter reveal">
-  <h3 class="chapter-title"><span class="chapter-num">Chapter 09</span> Setup & Mobile UI</h3>
-
-  <h4>setup.sh — One-Command Installation</h4>
-  <p>A bash script that installs everything on a fresh Mac. Uses <code>set -e</code> — a failed step exits loudly rather than continuing silently into a broken state.</p>
-
-  <pre><code class="language-bash"># Full install — run once on a fresh Mac
-./setup.sh
-
-# The launcher on your Desktop — double-click to start George
-~/Desktop/George.command</code><span class="code-lang">bash</span></pre>
-
-  <p>8 steps: Verify prerequisites → Create <code>~/.george/</code> → Copy <code>server.py</code> → Enter API keys → Install <code>mlx-lm</code> → Install <code>yt-dlp</code> → <code>swift build -c release</code> → Download Llama 3.2 3B (~1.8 GB)</p>
-
-  <h4>Mobile Web UI</h4>
-  <p>A self-contained single-file web app served by <code>server.py</code> at <code>GET /</code>. Open it on any phone, tablet, or computer — no install required. Dark space theme, CSS-only animated orb, streaming text, voice input via Web Speech API.</p>
-
-  <div class="callout callout-info">
-    <span class="callout-icon">📱</span>
-    <div class="callout-body">You can be in another room, send George a query from your phone, and hear the response come out of your Mac speakers. The phone is just a remote control.</div>
-  </div>
-</div>
-
-</div><!-- /george -->
-
-<div class="section-divider"></div>
-
-<!-- ═══════════════════════════════════════════ -->
-<!-- PROJECT 2 — SMALL LLM                       -->
-<!-- ═══════════════════════════════════════════ -->
-<div id="llm" class="p2">
-
-<div class="project-header reveal">
-  <div class="project-number" style="color:var(--accent3)">Project 02</div>
-  <h2 style="color:var(--text-bright)">GPT from <span style="color:var(--accent3)">Scratch</span></h2>
-  <p class="project-desc" style="border-color:var(--accent3)">A complete hands-on implementation of a GPT-style transformer LLM — trained entirely from scratch on Apple Silicon M1. Built as a learning project to understand how large language models actually work under the hood.</p>
-  <div class="tech-grid">
-    <div class="tech-item"><div class="tech-label">Machine</div><div class="tech-val">MacBook Pro M1</div></div>
-    <div class="tech-item"><div class="tech-label">GPU</div><div class="tech-val">Apple Silicon MPS</div></div>
-    <div class="tech-item"><div class="tech-label">Python</div><div class="tech-val">3.12 (system framework)</div></div>
-    <div class="tech-item"><div class="tech-label">Dataset</div><div class="tech-val">TinyStories (HuggingFace)</div></div>
-    <div class="tech-item"><div class="tech-label">Model Size</div><div class="tech-val">30,142,848 parameters</div></div>
-    <div class="tech-item"><div class="tech-label">Key Libs</div><div class="tech-val">PyTorch · Transformers · Flask</div></div>
-  </div>
-</div>
-
-<!-- CH 1 -->
-<div class="chapter reveal">
-  <h3 class="chapter-title"><span class="chapter-num" style="color:var(--accent3)">Chapter 01</span> Environment Setup</h3>
-
-  <p>Installing dependencies failed immediately — the <code>yaml</code> module was missing. The PyPI package is <code>pyyaml</code> but imports as <code>yaml</code> — a common gotcha.</p>
-
-  <pre><code>ModuleNotFoundError: No module named 'yaml'</code></pre>
-
-  <pre><code class="language-bash"># Fix
-pip3 install pyyaml
-# Note: the package is 'pyyaml' but you import it as 'import yaml'
-
-# Full dependency install
-python3 -m pip install -q --break-system-packages \
-  torch transformers datasets tokenizers sentencepiece \
-  tqdm pyyaml numpy safetensors</code><span class="code-lang">bash</span></pre>
-
-  <div class="callout callout-tip" style="border-color:rgba(255,107,53,0.3);color:var(--accent3)">
-    <span class="callout-icon">💡</span>
-    <div class="callout-body">Your terminal's working directory points to an inode. Moving or trashing a folder in Finder does <strong>not</strong> change where your terminal thinks it is — stay there until you <code>cd</code> elsewhere.</div>
-  </div>
-</div>
-
-<!-- CH 2 -->
-<div class="chapter reveal">
-  <h3 class="chapter-title"><span class="chapter-num" style="color:var(--accent3)">Chapter 02</span> Bugs Found & Fixed</h3>
-
-  <p>A full audit of all pipeline scripts revealed <strong>4 bugs</strong>. All were fixed before training began.</p>
-
-  <div class="bug-card">
-    <div class="bug-title">Bug 1 — <code>actual_vocab_size</code> Undefined</div>
-    <div class="bug-file">train.py · line 392 · NameError</div>
-    <p>The variable was referenced in <code>GPTConfig</code> before it was assigned. The tokenizer needed to be loaded first to get the real vocab size.</p>
-    <pre><code class="language-python">from tokenizers import Tokenizer as _Tokenizer
-_tok_dir = Path(args.data_dir) / 'tokenizer'
-_tok = _Tokenizer.from_file(str(_tok_dir / 'tokenizer.json'))
-actual_vocab_size = _tok.get_vocab_size()
-
-config = GPTConfig(
-    vocab_size=actual_vocab_size,  # ✅ now defined
-    ...
-)</code><span class="code-lang">python</span></pre>
-  </div>
-
-  <div class="bug-card">
-    <div class="bug-title">Bug 2 — OpenWebText Not Implemented</div>
-    <div class="bug-file">prepare_data.py · NotImplementedError</div>
-    <p><code>openwebtext</code> was listed as a valid CLI option with no implementation. Added <code>download_openwebtext()</code>:</p>
-    <pre><code class="language-python">def download_openwebtext(output_dir: Path, max_chars: int = 50_000_000):
-    from datasets import load_dataset
-    print('Downloading OpenWebText (streaming)...')
-    ds = load_dataset('Skylion007/openwebtext', split='train',
-                      streaming=True, trust_remote_code=True)
-    chunks, total = [], 0
-    for row in ds:
-        t = row['text'].strip()
-        if not t:
-            continue
-        chunks.append(t)
-        total += len(t)
-        if total >= max_chars:
-            break
-    return '\n'.join(chunks)</code><span class="code-lang">python</span></pre>
-  </div>
-
-  <div class="bug-card">
-    <div class="bug-title">Bug 3 — Hardcoded Token IDs</div>
-    <div class="bug-file">export_hf.py · wrong vocab size</div>
-    <p><code>bos_token_id</code> and <code>eos_token_id</code> were hardcoded to GPT-2's value of <code>50256</code>. Our custom tokenizer has a different vocab size, producing a broken HuggingFace config.</p>
-    <pre><code class="language-python">actual_vocab_size = cfg.get('vocab_size', 50257)
-eos_token_id = actual_vocab_size - 1  # last token = endoftext
-
-hf_config = {
-    'vocab_size':   actual_vocab_size,  # was hardcoded 50257 ❌
-    'bos_token_id': eos_token_id,       # was hardcoded 50256 ❌
-    'eos_token_id': eos_token_id,       # was hardcoded 50256 ❌
-}</code><span class="code-lang">python</span></pre>
-  </div>
-
-  <div class="bug-card">
-    <div class="bug-title">Bug 4 — Broken Fallback Imports</div>
-    <div class="bug-file">train_tokenizer.py · ImportError</div>
-    <p>The <code>try</code> block imported <code>RobertaProcessing</code> which was never used. On the fallback path this import was missing, causing an <code>ImportError</code> on first install.</p>
-    <pre><code class="language-python"># BEFORE ❌
-from tokenizers import (Tokenizer, models, trainers,
-                        pre_tokenizers, decoders, processors)
-from tokenizers.processors import RobertaProcessing  # never used
-
-# AFTER ✅
-from tokenizers import Tokenizer, models, trainers, pre_tokenizers, decoders</code><span class="code-lang">python</span></pre>
-  </div>
-</div>
-
-<!-- CH 3 -->
-<div class="chapter reveal">
-  <h3 class="chapter-title"><span class="chapter-num" style="color:var(--accent3)">Chapter 03</span> Training</h3>
-
-  <pre><code class="language-bash"># tiny.yaml — much faster than the default small config
-python3 run_pipeline.py --config configs/tiny.yaml</code><span class="code-lang">bash</span></pre>
-
-  <pre><code class="language-yaml"># Model architecture (tiny config)
-n_layer: 4       # transformer blocks
-n_head:  4       # attention heads
-n_embd:  256     # embedding dimension
-epochs:  2
-batch_size: 8
-context_len: 512</code><span class="code-lang">yaml</span></pre>
-
-  <h4>Dataset — TinyStories</h4>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Split</th><th>Size</th></tr></thead>
-      <tbody>
-        <tr><td>Training set</td><td>47,500,000 characters</td></tr>
-        <tr><td>Validation set</td><td>2,500,000 characters</td></tr>
-        <tr><td>Tokenizer vocab</td><td>20,712 tokens (custom BPE)</td></tr>
-        <tr><td>Total parameters</td><td>30,142,848</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h4>Training Metrics</h4>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Metric</th><th>Meaning</th></tr></thead>
-      <tbody>
-        <tr><td><code>loss</code></td><td>Cross-entropy loss — lower is better; below 2.0 means coherent text generation</td></tr>
-        <tr><td><code>ppl</code></td><td>Perplexity — how "surprised" the model is by the next token</td></tr>
-        <tr><td><code>lr</code></td><td>Current learning rate (decays over time via scheduler)</td></tr>
-        <tr><td><code>step/s</code></td><td>Training throughput in steps per second</td></tr>
-        <tr><td><code>eta</code></td><td>Estimated time remaining</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="callout callout-tip" style="border-color:rgba(255,107,53,0.3);color:var(--accent3)">
-    <span class="callout-icon">💡</span>
-    <div class="callout-body">A loss of <strong>2.45</strong> after only 10% of training is healthy — the model is learning fast. Loss below 2.0 generally means the model can generate coherent text.</div>
-  </div>
-
-  <h4>Running Individual Steps</h4>
-  <pre><code class="language-bash"># Run only step 3 (tokenizer training)
-python3 run_pipeline.py --config configs/tiny.yaml --only-step 3
-
-# Run steps 4–11 sequentially
-for step in 4 5 6 7 8 9 10 11; do
-  python3 run_pipeline.py --config configs/tiny.yaml --only-step $step
-done</code><span class="code-lang">bash</span></pre>
-</div>
-
-<!-- CH 4 -->
-<div class="chapter reveal">
-  <h3 class="chapter-title"><span class="chapter-num" style="color:var(--accent3)">Chapter 04</span> Chat Interface</h3>
-
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>File</th><th>Purpose</th></tr></thead>
-      <tbody>
-        <tr><td><code>server.py</code></td><td>Flask server — loads the model and serves the UI</td></tr>
-        <tr><td><code>templates/index.html</code></td><td>Dark terminal-styled chat interface</td></tr>
-        <tr><td><code>finetune_from_logs.py</code></td><td>Retrains the model on logged conversations</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <pre><code class="language-bash">pip3 install flask --break-system-packages
-
-cd llm_chat
-python3 server.py \
-    --checkpoint ../BuildYourLLM_fixed/output/tiny/checkpoints/best.pt
-
-# Open → http://localhost:5000</code><span class="code-lang">bash</span></pre>
-
-  <h4>Conversation Log Format</h4>
-  <pre><code class="language-json">{
-  "timestamp":  "2026-03-06T14:30:00",
-  "session_id": "sess_abc123",
-  "prompt":     "Once upon a time there was",
-  "response":   "a little fox who lived in the forest..."
-}</code><span class="code-lang">json</span></pre>
-</div>
-
-<!-- CH 5 -->
-<div class="chapter reveal">
-  <h3 class="chapter-title"><span class="chapter-num" style="color:var(--accent3)">Chapter 05</span> Continuous Learning</h3>
-
-  <div class="callout callout-warn">
-    <span class="callout-icon">⚠️</span>
-    <div class="callout-body">The model does <strong>not</strong> learn while you talk to it — once training is complete, weights are frozen. This is true of all LLMs including ChatGPT. Production systems fine-tune periodically on collected data.</div>
-  </div>
-
-  <pre><code class="language-bash">cd llm_chat
-
-python3 finetune_from_logs.py \
-    --checkpoint ../BuildYourLLM_fixed/output/tiny/checkpoints/best.pt \
-    --logs logs/conversations.jsonl \
-    --epochs 1
-
-# Restart with the fine-tuned checkpoint
-python3 server.py \
-    --checkpoint .../finetuned_chat/finetuned_best.pt</code><span class="code-lang">bash</span></pre>
-
-  <p>Fine-tuning uses <strong>LoRA (Low-Rank Adaptation)</strong> — only ~1% of weights are updated, base weights are frozen (no catastrophic forgetting), and quality is close to full fine-tuning for most tasks.</p>
-
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Approach</th><th>How It Works</th><th>Best For</th></tr></thead>
-      <tbody>
-        <tr><td>Periodic LoRA</td><td>Fine-tune on conversation logs every N days</td><td>Most practical; low cost</td></tr>
-        <tr><td>Instruction tuning</td><td>Train on curated prompt/response JSONL pairs</td><td>Teaching Q&A behaviour</td></tr>
-        <tr><td>Full fine-tuning</td><td>Update all weights on new data</td><td>Maximum quality; high cost</td></tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<!-- CH 6 -->
-<div class="chapter reveal">
-  <h3 class="chapter-title"><span class="chapter-num" style="color:var(--accent3)">Chapter 06</span> Capabilities & Limitations</h3>
-
-  <div class="callout callout-info">
-    <span class="callout-icon">📖</span>
-    <div class="callout-body">This is a <strong>base language model</strong> trained on children's stories. It generates story-style text continuations — not answers to questions. It's not GROK — it was built to learn.</div>
-  </div>
-
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>✅ Can Do</th><th>❌ Cannot Do</th></tr></thead>
-      <tbody>
-        <tr><td>Continue a story from a prompt</td><td>Answer factual questions accurately</td></tr>
-        <tr><td>Generate fluent, grammatical text</td><td>Follow complex instructions</td></tr>
-        <tr><td>Produce children's story-style prose</td><td>Hold a coherent multi-turn conversation</td></tr>
-        <tr><td>Run entirely on-device (M1 Mac)</td><td>Reason or plan like a large model</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h4>Quick Reference</h4>
-  <pre><code class="language-bash"># Full pipeline
-python3 run_pipeline.py --config configs/tiny.yaml
-
-# Skip training, use existing checkpoint
-python3 run_pipeline.py --config configs/tiny.yaml --skip-train
-
-# Start chat server
-cd llm_chat && python3 server.py \
-    --checkpoint ../BuildYourLLM_fixed/output/tiny/checkpoints/best.pt
-
-# Fine-tune on logged conversations
-python3 finetune_from_logs.py \
-    --checkpoint .../best.pt \
-    --logs logs/conversations.jsonl --epochs 1</code><span class="code-lang">bash</span></pre>
-</div>
-
-</div><!-- /llm -->
-
-<div class="section-divider"></div>
-
-<!-- OTHER -->
-<div id="other" class="section reveal" style="padding: 5rem 2rem;">
-  <div style="max-width:900px;margin:0 auto;">
-
-    <div style="text-align:center;margin-bottom:3rem;">
-      <div style="font-size:0.72rem;letter-spacing:0.22em;color:var(--accent2);text-transform:uppercase;margin-bottom:0.75rem;font-weight:500;">Project 03</div>
-      <h2 style="font-family:var(--font-display);font-size:clamp(1.8rem,4vw,3rem);font-weight:800;color:var(--text-bright);letter-spacing:-0.03em;line-height:1.1;margin-bottom:1rem;">Learning &amp; <span style="color:var(--accent1);">Random Projects</span></h2>
-      <p style="color:#a8bde0;font-size:0.92rem;max-width:520px;margin:0 auto;line-height:1.85;">Animations, 3D sculpts, game experiments, and one-off builds — the scratchpad where ideas get tested and thrown at the wall.</p>
-    </div>
-
-    <!-- Media grid -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem;">
-
-      <!-- Ball Bounce -->
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-        <video controls playsinline style="width:100%;display:block;max-height:200px;object-fit:cover;background:#000;">
-          <source src="Screen_Recording_20260227_133802_BallBounce.mp4" type="video/mp4">
-        </video>
-        <div style="padding:1rem;">
-          <div style="font-size:0.7rem;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.3rem;">Animation</div>
-          <div style="font-size:0.9rem;font-weight:700;color:var(--text-bright);">Ball Bounce v1</div>
-          <div style="font-size:0.78rem;color:#8fa3cc;margin-top:0.3rem;line-height:1.55;">Python generated ball that has gravity and collisions on android</div>
-        </div>
-      </div>
-
-      <!-- Ball Bounce v2 -->
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-        <video controls playsinline style="width:100%;display:block;max-height:200px;object-fit:cover;background:#000;">
-          <source src="Screen_Recording_20260227_155034_Ball Bounce.mp4" type="video/mp4">
-        </video>
-        <div style="padding:1rem;">
-          <div style="font-size:0.7rem;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.3rem;">Animation</div>
-          <div style="font-size:0.9rem;font-weight:700;color:var(--text-bright);">Ball Bounce v2</div>
-          <div style="font-size:0.78rem;color:#8fa3cc;margin-top:0.3rem;line-height:1.55;">Another test on Android phone, balls have gravity and when you shake the phone they move around</div>
-        </div>
-      </div>
-
-      <!-- GIR Dance -->
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-        <video controls playsinline style="width:100%;display:block;max-height:200px;object-fit:cover;background:#000;">
-          <source src="dance_gir.mp4" type="video/mp4">
-        </video>
-        <div style="padding:1rem;">
-          <div style="font-size:0.7rem;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.3rem;">3D Animation</div>
-          <div style="font-size:0.9rem;font-weight:700;color:var(--text-bright);">GIR Dance</div>
-          <div style="font-size:0.78rem;color:#8fa3cc;margin-top:0.3rem;line-height:1.55;">A test of making a sprite sheet, a transparent background and a dancing Invaider Zim Character Gir :)</div>
-        </div>
-      </div>
-
-      <!-- GIR Dance .mov -->
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-        <video controls playsinline style="width:100%;display:block;max-height:200px;object-fit:cover;background:#000;">
-          <source src="gir_dance.mov" type="video/mp4">
-        </video>
-        <div style="padding:1rem;">
-          <div style="font-size:0.7rem;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.3rem;">3D Animation</div>
-          <div style="font-size:0.9rem;font-weight:700;color:var(--text-bright);">GIR Dance Alt</div>
-          <div style="font-size:0.78rem;color:#8fa3cc;margin-top:0.3rem;line-height:1.55;">html based sprite sheet editor, able to animate frames. Powderfinger achknowledged for the music.</div>
-        </div>
-      </div>
-
-      <!-- Lemmings -->
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-        <video controls playsinline style="width:100%;display:block;max-height:200px;object-fit:cover;background:#000;">
-          <source src="lemmings.mp4" type="video/mp4">
-        </video>
-        <div style="padding:1rem;">
-          <div style="font-size:0.7rem;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.3rem;">Game</div>
-          <div style="font-size:0.9rem;font-weight:700;color:var(--text-bright);">Lemmings</div>
-          <div style="font-size:0.78rem;color:#8fa3cc;margin-top:0.3rem;line-height:1.55;">POC to add sprite sheet animation to fall and walk on the top of the Mac Dock. Success. Lemming walking</div>
-        </div>
-      </div>
-
-      <!-- T-Bar Animation -->
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-        <video controls playsinline style="width:100%;display:block;max-height:200px;object-fit:cover;background:#000;">
-          <source src="tbar_animation.mp4" type="video/mp4">
-        </video>
-        <div style="padding:1rem;">
-          <div style="font-size:0.7rem;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.3rem;">Animation</div>
-          <div style="font-size:0.9rem;font-weight:700;color:var(--text-bright);">T-Bar Animation</div>
-          <div style="font-size:0.78rem;color:#8fa3cc;margin-top:0.3rem;line-height:1.55;">POC 2019 intel Macbook running Ubuntu Linux native metal, I wanted to prove i could put animations into the touchbar, success</div>
-        </div>
-      </div>
-
-      <!-- Max Head -->
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-        <video controls playsinline style="width:100%;display:block;max-height:200px;object-fit:cover;background:#000;">
-          <source src="maxhead.mp4" type="video/mp4">
-        </video>
-        <div style="padding:1rem;">
-          <div style="font-size:0.7rem;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.3rem;">3D Character</div>
-          <div style="font-size:0.9rem;font-weight:700;color:var(--text-bright);">Max Head</div>
-          <div style="font-size:0.78rem;color:#8fa3cc;margin-top:0.3rem;line-height:1.55;">POC for possible talking MaxHeadroom for Geroge AI. In progress</div>
-        </div>
-      </div>
-
-      <!-- Max Silly -->
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-        <video controls playsinline style="width:100%;display:block;max-height:200px;object-fit:cover;background:#000;">
-          <source src="maxsilly.mp4" type="video/mp4">
-        </video>
-        <div style="padding:1rem;">
-          <div style="font-size:0.7rem;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.3rem;">3D Character</div>
-          <div style="font-size:0.9rem;font-weight:700;color:var(--text-bright);">Max Silly</div>
-          <div style="font-size:0.78rem;color:#8fa3cc;margin-top:0.3rem;line-height:1.55;">POC a glitchy looking Max, controlled by George, AI heard the girl singing and sings along says " DIGITAL.....REBOOT.. ahhh"</div>
-        </div>
-      </div>
-
-      <!-- Sprite Max -->
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-        <video controls playsinline style="width:100%;display:block;max-height:200px;object-fit:cover;background:#000;">
-          <source src="sprite-max-px-36_1.mp4" type="video/mp4">
-        </video>
-        <div style="padding:1rem;">
-          <div style="font-size:0.7rem;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.3rem;">Sprite / Game Art</div>
-          <div style="font-size:0.9rem;font-weight:700;color:var(--text-bright);">Max Sprite (36px)</div>
-          <div style="font-size:0.78rem;color:#8fa3cc;margin-top:0.3rem;line-height:1.55;">POC for talking head, Using 10 seconds of voice i was able to get the head to sound like Mr Musk, I had it say junk for fun.</div>
-        </div>
-      </div>
-
-      <!-- Bubbles -->
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-        <video controls playsinline style="width:100%;display:block;max-height:200px;object-fit:cover;background:#000;">
-          <source src="bubbles.mp4" type="video/mp4">
-        </video>
-        <div style="padding:1rem;">
-          <div style="font-size:0.7rem;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.3rem;">Simulation</div>
-          <div style="font-size:0.9rem;font-weight:700;color:var(--text-bright);">Bubbles</div>
-          <div style="font-size:0.78rem;color:#8fa3cc;margin-top:0.3rem;line-height:1.55;">POC python goal was to make random bubbles that look real on mac desktop. SUCCESS!.</div>
-        </div>
-      </div>
-
-      <!-- ZBrush Robot -->
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-        <img src="zbrush_robot.png" alt="ZBrush Robot" style="width:100%;display:block;max-height:200px;object-fit:cover;">
-        <div style="padding:1rem;">
-          <div style="font-size:0.7rem;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.3rem;">3D Sculpt</div>
-          <div style="font-size:0.9rem;font-weight:700;color:var(--text-bright);">ZBrush Robot</div>
-          <div style="font-size:0.78rem;color:#8fa3cc;margin-top:0.3rem;line-height:1.55;">Learning ZBrush, Low Poly Robot.</div>
-        </div>
-      </div>
-
-      <!-- eeee.png -->
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
-        <img src="eeee.png" alt="Sketch / Art" style="width:100%;display:block;max-height:200px;object-fit:cover;">
-        <div style="padding:1rem;">
-          <div style="font-size:0.7rem;color:var(--accent2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.3rem;">Art</div>
-          <div style="font-size:0.9rem;font-weight:700;color:var(--text-bright);">Sketch</div>
-          <div style="font-size:0.78rem;color:#8fa3cc;margin-top:0.3rem;line-height:1.55;">POC EVEE Render code from Blender, adapted to run standalone as POC. SUCCESS, I can load objects and they render.</div>
-        </div>
-      </div>
-
-    </div><!-- /grid -->
-  </div>
-</div>
 
 <footer>
   <p>Built with <span>♥</span> on an M1 MacBook Pro &nbsp;·&nbsp; All projects run entirely on Apple Silicon</p>
 </footer>
-
-</div><!-- /app -->
+</div>
 
 <script>
 // Starfield
 const container = document.getElementById('stars');
 for (let i = 0; i < 120; i++) {
-  const s = document.createElement('div');
-  s.className = 'star';
+  const s = document.createElement('div'); s.className = 'star';
   const size = Math.random() * 2 + 0.5;
-  s.style.cssText = `
-    width:${size}px; height:${size}px;
-    left:${Math.random()*100}%;
-    top:${Math.random()*100}%;
-    --dur:${2 + Math.random()*4}s;
-    --min-op:${0.05 + Math.random()*0.1};
-    --max-op:${0.3 + Math.random()*0.5};
-    animation-delay:${Math.random()*5}s;
-  `;
+  s.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--dur:${2+Math.random()*4}s;--min-op:${0.05+Math.random()*0.1};--max-op:${0.3+Math.random()*0.5};animation-delay:${Math.random()*5}s;`;
   container.appendChild(s);
 }
 
-// Scroll reveal
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      e.target.classList.add('visible');
-      observer.unobserve(e.target);
-    }
-  });
-}, { threshold: 0.08 });
-document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-
-// ════════ FALLING BUBBLES ════════
+// Bubbles
 (function(){
-  var canvas = document.getElementById('bubbleCanvas');
-  var ctx    = canvas.getContext('2d');
-  var W, H;
-
-  function resize(){
-    W = canvas.width  = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  var COLORS = [
-    [160,200,255],[200,160,255],[160,255,220],
-    [255,210,160],[160,240,255],[255,170,210]
-  ];
-
-  function rnd(a,b){ return a + Math.random()*(b-a); }
-
-  function Bubble(){
-    this.reset(true);
-  }
-
-  Bubble.prototype.reset = function(fromRandom){
-    var size = Math.random();
-    if(size < 0.5)       this.r = rnd(8, 18);   // small
-    else if(size < 0.82) this.r = rnd(18, 36);  // medium
-    else                 this.r = rnd(36, 60);  // large
-
-    this.x       = rnd(this.r, W - this.r);
-    this.y       = fromRandom ? rnd(-200, H) : -this.r - rnd(10, 80);
-    this.vy      = rnd(0.18, 0.65) * (1 - this.r/120);  // bigger = slower
-    this.vx      = rnd(-0.25, 0.25);
-    this.drift   = rnd(0.003, 0.012);
-    this.driftOff= rnd(0, Math.PI*2);
-    this.hue     = Math.floor(rnd(0, COLORS.length));
-    this.shimmer = rnd(0, Math.PI*2);
-    this.shimmerS= rnd(0.012, 0.03);
-    this.alpha   = rnd(0.06, 0.16);  // very transparent
-    this.alive   = true;
+  var canvas=document.getElementById('bubbleCanvas'),ctx=canvas.getContext('2d'),W,H;
+  function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+  resize(); window.addEventListener('resize',resize);
+  var COLORS=[[160,200,255],[200,160,255],[160,255,220],[255,210,160],[160,240,255],[255,170,210]];
+  function rnd(a,b){return a+Math.random()*(b-a);}
+  function Bubble(){this.reset(true);}
+  Bubble.prototype.reset=function(fromRandom){
+    var size=Math.random();
+    if(size<0.5)this.r=rnd(8,18);else if(size<0.82)this.r=rnd(18,36);else this.r=rnd(36,60);
+    this.x=rnd(this.r,W-this.r);this.y=fromRandom?rnd(-200,H):-this.r-rnd(10,80);
+    this.vy=rnd(0.18,0.65)*(1-this.r/120);this.vx=rnd(-0.25,0.25);
+    this.drift=rnd(0.003,0.012);this.driftOff=rnd(0,Math.PI*2);
+    this.hue=Math.floor(rnd(0,COLORS.length));this.shimmer=rnd(0,Math.PI*2);
+    this.shimmerS=rnd(0.012,0.03);this.alpha=rnd(0.06,0.16);
   };
-
-  Bubble.prototype.update = function(dt){
-    this.shimmer += this.shimmerS;
-    this.driftOff += this.drift;
-    this.x += this.vx + Math.sin(this.driftOff) * 0.35;
-    this.y += this.vy;
-    if(this.y - this.r > H) this.reset(false);
-    if(this.x - this.r < 0 || this.x + this.r > W) {
-      this.vx *= -1;
-      this.x = Math.max(this.r, Math.min(W - this.r, this.x));
-    }
+  Bubble.prototype.update=function(){
+    this.shimmer+=this.shimmerS;this.driftOff+=this.drift;
+    this.x+=this.vx+Math.sin(this.driftOff)*0.35;this.y+=this.vy;
+    if(this.y-this.r>H)this.reset(false);
+    if(this.x-this.r<0||this.x+this.r>W){this.vx*=-1;this.x=Math.max(this.r,Math.min(W-this.r,this.x));}
   };
-
-  Bubble.prototype.draw = function(){
-    var r  = this.r;
-    var x  = this.x, y = this.y;
-    var sh = Math.sin(this.shimmer);
-    var c  = COLORS[this.hue];
-    var cr = c[0], cg = c[1], cb = c[2];
-    var a  = this.alpha;
-
-    // main bubble body
-    var g1 = ctx.createRadialGradient(x, y, r*0.1, x, y, r);
-    g1.addColorStop(0,    'rgba(255,255,255,0)');
-    g1.addColorStop(0.45, 'rgba('+cr+','+cg+','+cb+','+(a*0.5+0.02*sh)+')');
-    g1.addColorStop(0.8,  'rgba('+cr+','+cg+','+cb+','+(a*1.1)+')');
-    g1.addColorStop(1,    'rgba('+cr+','+cg+','+cb+','+(a*1.8)+')');
-    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2);
-    ctx.fillStyle = g1; ctx.fill();
-
-    // rim highlight
-    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2);
-    ctx.strokeStyle = 'rgba(255,255,255,'+(a*1.6+0.04*sh)+')';
-    ctx.lineWidth = 0.8; ctx.stroke();
-
-    // top-left specular
-    var sx = x - r*0.3, sy = y - r*0.35, sr = r*0.28;
-    var gs = ctx.createRadialGradient(sx, sy, 0, sx, sy, sr);
-    gs.addColorStop(0,   'rgba(255,255,255,'+(a*3.5)+')');
-    gs.addColorStop(0.5, 'rgba(255,255,255,'+(a*1.2)+')');
-    gs.addColorStop(1,   'rgba(255,255,255,0)');
-    ctx.beginPath(); ctx.ellipse(sx, sy, sr, sr*0.55, -0.4, 0, Math.PI*2);
-    ctx.fillStyle = gs; ctx.fill();
+  Bubble.prototype.draw=function(){
+    var r=this.r,x=this.x,y=this.y,sh=Math.sin(this.shimmer),c=COLORS[this.hue],a=this.alpha;
+    var g1=ctx.createRadialGradient(x,y,r*0.1,x,y,r);
+    g1.addColorStop(0,'rgba(255,255,255,0)');g1.addColorStop(0.45,'rgba('+c[0]+','+c[1]+','+c[2]+','+(a*0.5+0.02*sh)+')');
+    g1.addColorStop(0.8,'rgba('+c[0]+','+c[1]+','+c[2]+','+(a*1.1)+')');g1.addColorStop(1,'rgba('+c[0]+','+c[1]+','+c[2]+','+(a*1.8)+')');
+    ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=g1;ctx.fill();
+    ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.strokeStyle='rgba(255,255,255,'+(a*1.6+0.04*sh)+')';ctx.lineWidth=0.8;ctx.stroke();
+    var sx=x-r*0.3,sy=y-r*0.35,sr=r*0.28,gs=ctx.createRadialGradient(sx,sy,0,sx,sy,sr);
+    gs.addColorStop(0,'rgba(255,255,255,'+(a*3.5)+')');gs.addColorStop(0.5,'rgba(255,255,255,'+(a*1.2)+')');gs.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.beginPath();ctx.ellipse(sx,sy,sr,sr*0.55,-0.4,0,Math.PI*2);ctx.fillStyle=gs;ctx.fill();
   };
-
-  // collision
-  function collide(bubbles){
-    for(var i=0;i<bubbles.length;i++){
-      var a = bubbles[i];
-      for(var j=i+1;j<bubbles.length;j++){
-        var b = bubbles[j];
-        var dx = b.x-a.x, dy = b.y-a.y;
-        var dist = Math.sqrt(dx*dx+dy*dy);
-        var minD = a.r + b.r;
-        if(dist < minD && dist > 0.1){
-          var nx = dx/dist, ny = dy/dist;
-          var overlap = (minD-dist)*0.5;
-          a.x -= nx*overlap; a.y -= ny*overlap;
-          b.x += nx*overlap; b.y += ny*overlap;
-          var dvx = a.vx-b.vx, dvy = a.vy-b.vy;
-          var dot = dvx*nx + dvy*ny;
-          if(dot > 0){
-            var ma = a.r*a.r, mb = b.r*b.r, tot = ma+mb;
-            var imp = 2*dot/tot;
-            a.vx -= imp*mb*nx; a.vy -= imp*mb*ny;
-            b.vx += imp*ma*nx; b.vy += imp*ma*ny;
-          }
-        }
-      }
-    }
-  }
-
-  // init ~35 bubbles spread across full page
-  var bubbles = [];
-  for(var i=0;i<35;i++){
-    var b = new Bubble();
-    bubbles.push(b);
-  }
-
-  var lastT = 0;
-  function loop(ts){
-    var dt = Math.min((ts-lastT)/1000, 0.05);
-    lastT = ts;
-
-    ctx.clearRect(0,0,W,H);
-
-    for(var i=0;i<bubbles.length;i++) bubbles[i].update(dt);
-    collide(bubbles);
-
-    // draw small first (behind large)
-    var sorted = bubbles.slice().sort(function(a,b){ return a.r-b.r; });
-    for(var i=0;i<sorted.length;i++) sorted[i].draw();
-
-    requestAnimationFrame(loop);
-  }
-  requestAnimationFrame(function(t){ lastT=t; requestAnimationFrame(loop); });
+  var bubbles=[];for(var i=0;i<35;i++)bubbles.push(new Bubble());
+  var lastT=0;
+  function loop(ts){var dt=Math.min((ts-lastT)/1000,0.05);lastT=ts;ctx.clearRect(0,0,W,H);
+    bubbles.forEach(function(b){b.update(dt);});
+    bubbles.slice().sort(function(a,b){return a.r-b.r;}).forEach(function(b){b.draw();});
+    requestAnimationFrame(loop);}
+  requestAnimationFrame(function(t){lastT=t;requestAnimationFrame(loop);});
 })();
-// ════════════════════════════════════
 
-
-
-// ════════ GEORGE VIDEO PLAYER ════════
+// George video orb
 (function(){
-  var orb     = document.getElementById('heroOrb');
-  var overlay = document.getElementById('hearOverlay');
-  var allVids = [];
-  for(var i=1; i<=11; i++){
-    allVids.push(document.getElementById('vid'+i));
-  }
-
-  var unlocked   = false;
-  var shuffled   = [];
-  var shuffleIdx = 0;
-
-  // Fisher-Yates shuffle
-  function shuffle(arr){
-    var a = arr.slice();
-    for(var i=a.length-1; i>0; i--){
-      var j = Math.floor(Math.random()*(i+1));
-      var tmp=a[i]; a[i]=a[j]; a[j]=tmp;
-    }
-    return a;
-  }
-
-  function nextVid(){
-    if(shuffleIdx >= shuffled.length){
-      // reshuffle when we've played them all - avoid same video twice in a row at boundary
-      var last = shuffled[shuffled.length-1];
-      shuffled = shuffle(allVids);
-      if(shuffled[0] === last) {
-        shuffled.push(shuffled.shift()); // rotate first to end
-      }
-      shuffleIdx = 0;
-    }
-    return shuffled[shuffleIdx++];
-  }
-
-  // ── click overlay to unlock sound ──
-  overlay.addEventListener('click', function(e){
-    e.stopPropagation();
-    unlocked = true;
-    overlay.style.opacity = '0';
-    overlay.style.pointerEvents = 'none';
-    allVids.forEach(function(v){ if(!v.paused){ v.muted=false; v.volume=1; } });
-    console.log('George: audio unlocked');
-  });
-
-  function showOrb(){
-    orb.style.opacity = '1';
-    allVids.forEach(function(v){ v.style.opacity='0'; v.onended=null; });
-  }
-
-  function play(vid, cb){
-    orb.style.opacity = '0';
-    allVids.forEach(function(v){ v.style.opacity='0'; });
-    vid.currentTime = 0;
-    vid.muted  = !unlocked;
-    vid.volume = 1;
-    vid.style.opacity = '1';
-    vid.onended = cb;
-    vid.play().catch(function(){ vid.muted=true; vid.play(); });
-  }
-
-  function playNext(){
-    play(nextVid(), function(){ playNext(); });
-  }
-
-  // ── START: init shuffle then play continuously ──
-  window.addEventListener('load', function(){
-    shuffled = shuffle(allVids);
-    shuffleIdx = 0;
-    setTimeout(playNext, 800);
-  });
+  var orb=document.getElementById('heroOrb'),overlay=document.getElementById('hearOverlay');
+  var allVids=[];for(var i=1;i<=11;i++)allVids.push(document.getElementById('vid'+i));
+  var unlocked=false,shuffled=[],shuffleIdx=0;
+  function shuffle(arr){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+  function nextVid(){if(shuffleIdx>=shuffled.length){var last=shuffled[shuffled.length-1];shuffled=shuffle(allVids);if(shuffled[0]===last)shuffled.push(shuffled.shift());shuffleIdx=0;}return shuffled[shuffleIdx++];}
+  overlay.addEventListener('click',function(e){e.stopPropagation();unlocked=true;overlay.style.opacity='0';overlay.style.pointerEvents='none';allVids.forEach(function(v){if(!v.paused){v.muted=false;v.volume=1;}});});
+  function play(vid,cb){orb.style.opacity='0';allVids.forEach(function(v){v.style.opacity='0';});vid.currentTime=0;vid.muted=!unlocked;vid.volume=1;vid.style.opacity='1';vid.onended=cb;vid.play().catch(function(){vid.muted=true;vid.play();});}
+  function playNext(){play(nextVid(),function(){playNext();});}
+  window.addEventListener('load',function(){shuffled=shuffle(allVids);shuffleIdx=0;setTimeout(playNext,800);});
 })();
-// ════════════════════════════════════
-
 </script>
 </body>
 </html>

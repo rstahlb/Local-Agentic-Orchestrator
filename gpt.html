@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GPT from Scratch — r.stahlb</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Geist+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #050810; --bg2: #080d1a; --bg3: #0d1425;
+  --border: #1e2d4a; --border2: #28385e;
+  --text: #dde6f8; --text-dim: #8fa3cc; --text-bright: #f0f5ff;
+  --accent1: #3d8bff; --accent2: #18d4ff; --accent3: #ff7a47; --accent4: #3dffa0;
+  --yellow: #ffd166; --code-bg: #070c18;
+  --font-display: 'Inter', sans-serif; --font-mono: 'Geist Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-display); font-size: 15px; line-height: 1.75; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+#stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.star { position: absolute; border-radius: 50%; background: white; animation: twinkle var(--dur) ease-in-out infinite alternate; opacity: 0; }
+@keyframes twinkle { from { opacity: var(--min-op); } to { opacity: var(--max-op); } }
+#bubbleCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+#app { position: relative; z-index: 1; }
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 56px; background: rgba(5,8,16,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
+.nav-brand { font-weight: 800; font-size: 1.05rem; color: var(--text-bright); letter-spacing: -0.02em; }
+.nav-brand span { color: var(--accent1); }
+.nav-links { display: flex; gap: 0.25rem; list-style: none; }
+.nav-links a { color: var(--text-dim); text-decoration: none; font-size: 0.8rem; font-weight: 500; padding: 0.35rem 0.85rem; border-radius: 6px; transition: color 0.2s, background 0.2s; }
+.nav-links a:hover { color: var(--text-bright); background: var(--bg3); }
+.back-link { color: var(--accent2) !important; }
+.page-hero { padding: 7rem 2rem 2rem; max-width: 900px; margin: 0 auto; text-align: center; }
+.page-hero .project-number { font-size: 0.68rem; letter-spacing: 0.22em; color: var(--accent3); text-transform: uppercase; margin-bottom: 0.75rem; font-weight: 500; }
+.page-hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; color: var(--text-bright); letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 1rem; }
+.page-hero h1 span { color: var(--accent3); }
+.page-hero .project-desc { color: #a8bde0; font-size: 0.92rem; max-width: 600px; line-height: 1.85; border-left: 2px solid var(--accent3); padding-left: 1rem; margin: 0 auto 2rem; text-align: left; }
+.tech-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; margin: 1.5rem auto; padding: 0 2rem; max-width: 900px; }
+.tech-item { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem 1rem; }
+.tech-item .tech-label { font-size: 0.65rem; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.25rem; }
+.tech-item .tech-val { font-size: 0.8rem; color: var(--text-bright); font-weight: 600; }
+.section-divider { width: 100%; height: 1px; background: linear-gradient(90deg, transparent, var(--border2), transparent); }
+.chapter { padding: 0 2rem 4rem; max-width: 900px; margin: 0 auto; }
+.chapter-title { font-size: 1.4rem; font-weight: 700; color: var(--text-bright); letter-spacing: -0.02em; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; }
+.chapter-num { font-size: 0.67rem; color: var(--accent3); letter-spacing: 0.15em; text-transform: uppercase; font-family: var(--font-mono); font-weight: 500; }
+h4 { font-size: 0.98rem; font-weight: 700; color: var(--accent3); margin: 1.75rem 0 0.75rem; letter-spacing: -0.01em; }
+p { color: var(--text); font-size: 0.9rem; line-height: 1.9; margin-bottom: 1rem; }
+p strong { color: var(--text-bright); font-weight: 600; }
+.callout { border-radius: 8px; padding: 1rem 1.25rem; margin: 1.25rem 0; font-size: 0.82rem; line-height: 1.7; display: flex; gap: 0.75rem; align-items: flex-start; }
+.callout-tip  { background: rgba(255,107,53,0.06); border: 1px solid rgba(255,107,53,0.3); color: var(--accent3); }
+.callout-warn { background: rgba(255,200,64,0.06); border: 1px solid rgba(255,200,64,0.2); color: var(--yellow); }
+.callout-info { background: rgba(26,111,255,0.06); border: 1px solid rgba(26,111,255,0.2); color: #7aacff; }
+.callout-icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.1rem; }
+.callout-body { color: var(--text); }
+.callout-body strong { color: inherit; }
+pre { background: var(--code-bg); border: 1px solid rgba(255,107,53,0.2); border-radius: 8px; padding: 1.25rem 1.5rem; overflow-x: auto; margin: 1rem 0 1.5rem; position: relative; }
+pre code { font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.75; color: #b8d0f8; }
+.code-lang { position: absolute; top: 0.5rem; right: 0.75rem; font-size: 0.6rem; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; }
+code { font-family: var(--font-mono); background: rgba(255,107,53,0.1); border: 1px solid rgba(255,107,53,0.18); border-radius: 4px; padding: 0.1em 0.4em; font-size: 0.82em; color: #ffaa7f; }
+pre code { background: none; border: none; padding: 0; font-size: inherit; color: inherit; }
+.table-wrap { overflow-x: auto; margin: 1rem 0 1.5rem; border-radius: 8px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead tr { background: var(--bg3); }
+th { padding: 0.75rem 1rem; text-align: left; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: #8fa3cc; font-weight: 600; border-bottom: 1px solid var(--border); }
+td { padding: 0.7rem 1rem; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: rgba(255,107,53,0.04); }
+td code { font-size: 0.75em; }
+.bug-card { background: var(--bg3); border: 1px solid var(--border); border-left: 3px solid var(--accent3); border-radius: 8px; padding: 1.25rem 1.5rem; margin: 1.25rem 0; }
+.bug-title { font-size: 0.9rem; font-weight: 700; color: var(--text-bright); margin-bottom: 0.5rem; }
+.bug-file { font-size: 0.7rem; color: var(--text-dim); margin-bottom: 0.75rem; }
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--text-dim); font-size: 0.75rem; }
+footer span { color: var(--accent3); }
+footer a { color: var(--accent2); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+@media (max-width: 640px) { .nav-links { display: none; } .chapter { padding-left: 1.25rem; padding-right: 1.25rem; } }
+</style>
+</head>
+<body>
+<div id="stars"></div>
+<canvas id="bubbleCanvas"></canvas>
+<div id="app">
+<nav>
+  <div class="nav-brand">r<span>.</span>stahlb</div>
+  <ul class="nav-links">
+    <li><a href="index.html" class="back-link">← Home</a></li>
+    <li><a href="george.html">George AI</a></li>
+    <li><a href="learning.html">Learning</a></li>
+    <li><a href="https://github.com/rstahlb" target="_blank">GitHub ↗</a></li>
+  </ul>
+</nav>
+
+<div class="page-hero reveal">
+  <div class="project-number">Project 02</div>
+  <h1>GPT from <span>Scratch</span></h1>
+  <p class="project-desc">A complete hands-on implementation of a GPT-style transformer LLM — trained entirely from scratch on Apple Silicon M1. Built as a learning project to understand how large language models actually work under the hood.</p>
+</div>
+
+<div class="tech-grid reveal">
+  <div class="tech-item"><div class="tech-label">Machine</div><div class="tech-val">MacBook Pro M1</div></div>
+  <div class="tech-item"><div class="tech-label">GPU</div><div class="tech-val">Apple Silicon MPS</div></div>
+  <div class="tech-item"><div class="tech-label">Python</div><div class="tech-val">3.12 (system framework)</div></div>
+  <div class="tech-item"><div class="tech-label">Dataset</div><div class="tech-val">TinyStories (HuggingFace)</div></div>
+  <div class="tech-item"><div class="tech-label">Model Size</div><div class="tech-val">30,142,848 parameters</div></div>
+  <div class="tech-item"><div class="tech-label">Key Libs</div><div class="tech-val">PyTorch · Transformers · Flask</div></div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- CH 1 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 01</span> Environment Setup</h3>
+  <p>Installing dependencies failed immediately — the <code>yaml</code> module was missing. The PyPI package is <code>pyyaml</code> but imports as <code>yaml</code> — a common gotcha.</p>
+  <pre><code>ModuleNotFoundError: No module named 'yaml'</code></pre>
+  <pre><code class="language-bash"># Fix
+pip3 install pyyaml
+# Note: the package is 'pyyaml' but you import it as 'import yaml'
+
+# Full dependency install
+python3 -m pip install -q --break-system-packages \
+  torch transformers datasets tokenizers sentencepiece \
+  tqdm pyyaml numpy safetensors</code><span class="code-lang">bash</span></pre>
+  <div class="callout callout-tip"><span class="callout-icon">💡</span><div class="callout-body">Your terminal's working directory points to an inode. Moving or trashing a folder in Finder does <strong>not</strong> change where your terminal thinks it is — stay there until you <code>cd</code> elsewhere.</div></div>
+</div>
+
+<!-- CH 2 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 02</span> Bugs Found & Fixed</h3>
+  <p>A full audit of all pipeline scripts revealed <strong>4 bugs</strong>. All were fixed before training began.</p>
+  <div class="bug-card">
+    <div class="bug-title">Bug 1 — <code>actual_vocab_size</code> Undefined</div>
+    <div class="bug-file">train.py · line 392 · NameError</div>
+    <p>The variable was referenced in <code>GPTConfig</code> before it was assigned. The tokenizer needed to be loaded first to get the real vocab size.</p>
+    <pre><code class="language-python">from tokenizers import Tokenizer as _Tokenizer
+_tok = _Tokenizer.from_file(str(_tok_dir / 'tokenizer.json'))
+actual_vocab_size = _tok.get_vocab_size()
+config = GPTConfig(vocab_size=actual_vocab_size, ...)  # ✅ now defined</code><span class="code-lang">python</span></pre>
+  </div>
+  <div class="bug-card">
+    <div class="bug-title">Bug 2 — OpenWebText Not Implemented</div>
+    <div class="bug-file">prepare_data.py · NotImplementedError</div>
+    <p><code>openwebtext</code> was listed as a valid CLI option with no implementation. Added <code>download_openwebtext()</code> using streaming to avoid loading the full dataset into memory.</p>
+  </div>
+  <div class="bug-card">
+    <div class="bug-title">Bug 3 — Hardcoded Token IDs</div>
+    <div class="bug-file">export_hf.py · wrong vocab size</div>
+    <p><code>bos_token_id</code> and <code>eos_token_id</code> were hardcoded to GPT-2's value of <code>50256</code>. Our custom tokenizer has a different vocab size.</p>
+    <pre><code class="language-python">actual_vocab_size = cfg.get('vocab_size', 50257)
+eos_token_id = actual_vocab_size - 1  # last token = endoftext</code><span class="code-lang">python</span></pre>
+  </div>
+  <div class="bug-card">
+    <div class="bug-title">Bug 4 — Broken Fallback Imports</div>
+    <div class="bug-file">train_tokenizer.py · ImportError</div>
+    <p>The <code>try</code> block imported <code>RobertaProcessing</code> which was never used. On the fallback path this import was missing, causing an <code>ImportError</code> on first install.</p>
+    <pre><code class="language-python"># AFTER ✅
+from tokenizers import Tokenizer, models, trainers, pre_tokenizers, decoders</code><span class="code-lang">python</span></pre>
+  </div>
+</div>
+
+<!-- CH 3 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 03</span> Training</h3>
+  <pre><code class="language-bash">python3 run_pipeline.py --config configs/tiny.yaml</code><span class="code-lang">bash</span></pre>
+  <pre><code class="language-yaml"># Model architecture (tiny config)
+n_layer: 4       # transformer blocks
+n_head:  4       # attention heads
+n_embd:  256     # embedding dimension
+epochs:  2
+batch_size: 8
+context_len: 512</code><span class="code-lang">yaml</span></pre>
+  <h4>Dataset — TinyStories</h4>
+  <div class="table-wrap"><table><thead><tr><th>Split</th><th>Size</th></tr></thead><tbody>
+    <tr><td>Training set</td><td>47,500,000 characters</td></tr>
+    <tr><td>Validation set</td><td>2,500,000 characters</td></tr>
+    <tr><td>Tokenizer vocab</td><td>20,712 tokens (custom BPE)</td></tr>
+    <tr><td>Total parameters</td><td>30,142,848</td></tr>
+  </tbody></table></div>
+  <h4>Training Metrics</h4>
+  <div class="table-wrap"><table><thead><tr><th>Metric</th><th>Meaning</th></tr></thead><tbody>
+    <tr><td><code>loss</code></td><td>Cross-entropy loss — lower is better; below 2.0 means coherent text generation</td></tr>
+    <tr><td><code>ppl</code></td><td>Perplexity — how "surprised" the model is by the next token</td></tr>
+    <tr><td><code>lr</code></td><td>Current learning rate (decays over time via scheduler)</td></tr>
+    <tr><td><code>step/s</code></td><td>Training throughput in steps per second</td></tr>
+    <tr><td><code>eta</code></td><td>Estimated time remaining</td></tr>
+  </tbody></table></div>
+  <div class="callout callout-tip"><span class="callout-icon">💡</span><div class="callout-body">A loss of <strong>2.45</strong> after only 10% of training is healthy — the model is learning fast. Loss below 2.0 generally means the model can generate coherent text.</div></div>
+  <h4>Running Individual Steps</h4>
+  <pre><code class="language-bash"># Run only step 3 (tokenizer training)
+python3 run_pipeline.py --config configs/tiny.yaml --only-step 3
+
+# Run steps 4–11 sequentially
+for step in 4 5 6 7 8 9 10 11; do
+  python3 run_pipeline.py --config configs/tiny.yaml --only-step $step
+done</code><span class="code-lang">bash</span></pre>
+</div>
+
+<!-- CH 4 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 04</span> Chat Interface</h3>
+  <div class="table-wrap"><table><thead><tr><th>File</th><th>Purpose</th></tr></thead><tbody>
+    <tr><td><code>server.py</code></td><td>Flask server — loads the model and serves the UI</td></tr>
+    <tr><td><code>templates/index.html</code></td><td>Dark terminal-styled chat interface</td></tr>
+    <tr><td><code>finetune_from_logs.py</code></td><td>Retrains the model on logged conversations</td></tr>
+  </tbody></table></div>
+  <pre><code class="language-bash">pip3 install flask --break-system-packages
+cd llm_chat
+python3 server.py --checkpoint ../BuildYourLLM_fixed/output/tiny/checkpoints/best.pt
+# Open → http://localhost:5000</code><span class="code-lang">bash</span></pre>
+  <h4>Conversation Log Format</h4>
+  <pre><code class="language-json">{
+  "timestamp":  "2026-03-06T14:30:00",
+  "session_id": "sess_abc123",
+  "prompt":     "Once upon a time there was",
+  "response":   "a little fox who lived in the forest..."
+}</code><span class="code-lang">json</span></pre>
+</div>
+
+<!-- CH 5 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 05</span> Continuous Learning</h3>
+  <div class="callout callout-warn"><span class="callout-icon">⚠️</span><div class="callout-body">The model does <strong>not</strong> learn while you talk to it — once training is complete, weights are frozen. This is true of all LLMs including ChatGPT. Production systems fine-tune periodically on collected data.</div></div>
+  <pre><code class="language-bash">cd llm_chat
+python3 finetune_from_logs.py \
+    --checkpoint ../BuildYourLLM_fixed/output/tiny/checkpoints/best.pt \
+    --logs logs/conversations.jsonl --epochs 1
+python3 server.py --checkpoint .../finetuned_chat/finetuned_best.pt</code><span class="code-lang">bash</span></pre>
+  <p>Fine-tuning uses <strong>LoRA (Low-Rank Adaptation)</strong> — only ~1% of weights are updated, base weights are frozen (no catastrophic forgetting).</p>
+  <div class="table-wrap"><table><thead><tr><th>Approach</th><th>How It Works</th><th>Best For</th></tr></thead><tbody>
+    <tr><td>Periodic LoRA</td><td>Fine-tune on conversation logs every N days</td><td>Most practical; low cost</td></tr>
+    <tr><td>Instruction tuning</td><td>Train on curated prompt/response JSONL pairs</td><td>Teaching Q&A behaviour</td></tr>
+    <tr><td>Full fine-tuning</td><td>Update all weights on new data</td><td>Maximum quality; high cost</td></tr>
+  </tbody></table></div>
+</div>
+
+<!-- CH 6 -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 06</span> Capabilities & Limitations</h3>
+  <div class="callout callout-info"><span class="callout-icon">📖</span><div class="callout-body">This is a <strong>base language model</strong> trained on children's stories. It generates story-style text continuations — not answers to questions. It was built to learn.</div></div>
+  <div class="table-wrap"><table><thead><tr><th>✅ Can Do</th><th>❌ Cannot Do</th></tr></thead><tbody>
+    <tr><td>Continue a story from a prompt</td><td>Answer factual questions accurately</td></tr>
+    <tr><td>Generate fluent, grammatical text</td><td>Follow complex instructions</td></tr>
+    <tr><td>Produce children's story-style prose</td><td>Hold a coherent multi-turn conversation</td></tr>
+    <tr><td>Run entirely on-device (M1 Mac)</td><td>Reason or plan like a large model</td></tr>
+  </tbody></table></div>
+  <h4>Quick Reference</h4>
+  <pre><code class="language-bash"># Full pipeline
+python3 run_pipeline.py --config configs/tiny.yaml
+
+# Skip training, use existing checkpoint
+python3 run_pipeline.py --config configs/tiny.yaml --skip-train
+
+# Start chat server
+cd llm_chat && python3 server.py \
+    --checkpoint ../BuildYourLLM_fixed/output/tiny/checkpoints/best.pt
+
+# Fine-tune on logged conversations
+python3 finetune_from_logs.py \
+    --checkpoint .../best.pt \
+    --logs logs/conversations.jsonl --epochs 1</code><span class="code-lang">bash</span></pre>
+</div>
+
+<footer>
+  <p>Built with <span>♥</span> on an M1 MacBook Pro &nbsp;·&nbsp; <a href="index.html">← Back to Portfolio</a></p>
+</footer>
+</div>
+
+<script>
+const container = document.getElementById('stars');
+for (let i = 0; i < 120; i++) {
+  const s = document.createElement('div'); s.className = 'star';
+  const size = Math.random() * 2 + 0.5;
+  s.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--dur:${2+Math.random()*4}s;--min-op:${0.05+Math.random()*0.1};--max-op:${0.3+Math.random()*0.5};animation-delay:${Math.random()*5}s;`;
+  container.appendChild(s);
+}
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+(function(){
+  var canvas=document.getElementById('bubbleCanvas'),ctx=canvas.getContext('2d'),W,H;
+  function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+  resize(); window.addEventListener('resize',resize);
+  var COLORS=[[160,200,255],[200,160,255],[160,255,220],[255,210,160],[160,240,255],[255,170,210]];
+  function rnd(a,b){return a+Math.random()*(b-a);}
+  function Bubble(){this.reset(true);}
+  Bubble.prototype.reset=function(f){var s=Math.random();if(s<0.5)this.r=rnd(8,18);else if(s<0.82)this.r=rnd(18,36);else this.r=rnd(36,60);this.x=rnd(this.r,W-this.r);this.y=f?rnd(-200,H):-this.r-rnd(10,80);this.vy=rnd(0.18,0.65)*(1-this.r/120);this.vx=rnd(-0.25,0.25);this.drift=rnd(0.003,0.012);this.driftOff=rnd(0,Math.PI*2);this.hue=Math.floor(rnd(0,COLORS.length));this.shimmer=rnd(0,Math.PI*2);this.shimmerS=rnd(0.012,0.03);this.alpha=rnd(0.06,0.16);};
+  Bubble.prototype.update=function(){this.shimmer+=this.shimmerS;this.driftOff+=this.drift;this.x+=this.vx+Math.sin(this.driftOff)*0.35;this.y+=this.vy;if(this.y-this.r>H)this.reset(false);if(this.x-this.r<0||this.x+this.r>W){this.vx*=-1;this.x=Math.max(this.r,Math.min(W-this.r,this.x));}};
+  Bubble.prototype.draw=function(){var r=this.r,x=this.x,y=this.y,sh=Math.sin(this.shimmer),c=COLORS[this.hue],a=this.alpha;var g1=ctx.createRadialGradient(x,y,r*0.1,x,y,r);g1.addColorStop(0,'rgba(255,255,255,0)');g1.addColorStop(0.45,'rgba('+c[0]+','+c[1]+','+c[2]+','+(a*0.5+0.02*sh)+')');g1.addColorStop(0.8,'rgba('+c[0]+','+c[1]+','+c[2]+','+(a*1.1)+')');g1.addColorStop(1,'rgba('+c[0]+','+c[1]+','+c[2]+','+(a*1.8)+')');ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=g1;ctx.fill();ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.strokeStyle='rgba(255,255,255,'+(a*1.6+0.04*sh)+')';ctx.lineWidth=0.8;ctx.stroke();};
+  var bubbles=[];for(var i=0;i<35;i++)bubbles.push(new Bubble());
+  var lastT=0;function loop(ts){var dt=Math.min((ts-lastT)/1000,0.05);lastT=ts;ctx.clearRect(0,0,W,H);bubbles.forEach(function(b){b.update();});bubbles.slice().sort(function(a,b){return a.r-b.r;}).forEach(function(b){b.draw();});requestAnimationFrame(loop);}
+  requestAnimationFrame(function(t){lastT=t;requestAnimationFrame(loop);});
+})();
+</script>
+</body>
+</html>
