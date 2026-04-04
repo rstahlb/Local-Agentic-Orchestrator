@@ -29,10 +29,10 @@ body { background: var(--bg); color: var(--text); font-family: var(--font-displa
 .gir-dancer {
   position: absolute;
   pointer-events: none;
-  border-radius: 4px;
-  overflow: hidden;
+  background: transparent;
+  mix-blend-mode: screen;
 }
-.gir-dancer video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gir-dancer video { width: 100%; height: 100%; object-fit: cover; display: block; background: #050810; mix-blend-mode: screen; }
 
 #app { position: relative; z-index: 1; }
 

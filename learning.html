@@ -39,6 +39,8 @@ nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; a
 .media-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s; }
 .media-card:hover { border-color: var(--accent1); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(26,111,255,0.1); }
 .media-card video, .media-card img { width: 100%; display: block; max-height: 200px; object-fit: cover; background: #000; }
+.media-card.gir-card { background: var(--bg); }
+.media-card.gir-card video { background: var(--bg); mix-blend-mode: screen; }
 .media-card-body { padding: 1rem; }
 .media-card-cat { font-size: 0.7rem; color: var(--accent2); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.3rem; }
 .media-card-title { font-size: 0.9rem; font-weight: 700; color: var(--text-bright); }
@@ -102,8 +104,8 @@ footer a:hover { text-decoration: underline; }
   </div>
 
   <!-- ADD MP4 NAME HERE — currently: dance_gir.mp4 -->
-  <div class="media-card">
-    <video controls playsinline style="mix-blend-mode:screen;background:#050810;"><source src="dance_gir.mp4" type="video/mp4"></video>
+  <div class="media-card gir-card">
+    <video controls playsinline><source src="dance_gir.mp4" type="video/mp4"></video>
     <div class="media-card-body">
       <div class="media-card-cat">3D Animation</div>
       <div class="media-card-title">GIR Dance</div>
