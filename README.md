@@ -14,11 +14,14 @@
 
 ---
 
+
+
 ## 📍 Table of Contents
 
 - [🤖 Project 1 — George AI (Floating Mac Assistant)](#-project-1--george-ai)
 - [🧠 Project 2 — Building a GPT-style LLM from Scratch](#-project-2--building-a-gpt-style-llm-from-scratch)
 - [🧪 Learning & Random Projects](#-learning--random-projects)
+- [📄 License](#-license)
 
 ---
 
@@ -817,6 +820,17 @@ python3 finetune_from_logs.py \
 # 🧪 Learning & Random Projects
 
 *Coming soon — smaller experiments and one-off builds.*
+
+---
+
+---
+
+## 📄 License
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
+
+Copyright (c) 2026 rstahlb — released under the [MIT License](./LICENSE).
+Free to use, modify, and distribute with attribution. No warranty or liability of any kind.
 
 ---
 
