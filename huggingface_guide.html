@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hugging Face LLM Guide — r.stahlb</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Geist+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #050810; --bg2: #080d1a; --bg3: #0d1425;
+  --border: #1e2d4a; --border2: #28385e;
+  --text: #dde6f8; --text-dim: #8fa3cc; --text-bright: #f0f5ff;
+  --accent1: #3d8bff; --accent2: #18d4ff; --accent3: #ff7a47; --accent4: #c084fc;
+  --yellow: #ffd166; --code-bg: #070c18;
+  --font-display: 'Inter', sans-serif; --font-mono: 'Geist Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-display); font-size: 15px; line-height: 1.75; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+
+#stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.star { position: absolute; border-radius: 50%; background: white; animation: twinkle var(--dur) ease-in-out infinite alternate; opacity: 0; }
+@keyframes twinkle { from { opacity: var(--min-op); } to { opacity: var(--max-op); } }
+
+#bgCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+#app { position: relative; z-index: 1; }
+
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 56px; background: rgba(5,8,16,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
+.nav-brand { font-weight: 800; font-size: 1.05rem; color: var(--text-bright); letter-spacing: -0.02em; }
+.nav-brand span { color: var(--accent1); }
+.nav-links { display: flex; gap: 0.25rem; list-style: none; }
+.nav-links a { color: var(--text-dim); text-decoration: none; font-size: 0.8rem; font-weight: 500; padding: 0.35rem 0.85rem; border-radius: 6px; transition: color 0.2s, background 0.2s; }
+.nav-links a:hover { color: var(--text-bright); background: var(--bg3); }
+.back-link { color: var(--accent2) !important; }
+
+.page-hero { padding: 7rem 2rem 2rem; max-width: 900px; margin: 0 auto; text-align: center; }
+.page-hero .project-number { font-size: 0.68rem; letter-spacing: 0.22em; color: var(--accent3); text-transform: uppercase; margin-bottom: 0.75rem; font-weight: 500; }
+.page-hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; color: var(--text-bright); letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 1rem; }
+.page-hero h1 span { color: var(--accent3); }
+.page-hero .project-desc { color: #a8bde0; font-size: 0.92rem; max-width: 640px; line-height: 1.85; border-left: 2px solid var(--accent3); padding-left: 1rem; margin: 0 auto 2rem; text-align: left; }
+
+.why-box { max-width: 900px; margin: 0 auto 2rem; padding: 0 2rem; }
+.why-inner { background: linear-gradient(135deg, rgba(255,122,71,0.05), rgba(192,132,252,0.05)); border: 1px solid rgba(255,122,71,0.25); border-radius: 12px; padding: 1.75rem 2rem; }
+.why-inner h2 { font-size: 1rem; font-weight: 700; color: var(--accent3); margin-bottom: 0.75rem; letter-spacing: 0.02em; }
+.why-inner p { font-size: 0.88rem; color: #a8bde0; line-height: 1.85; margin-bottom: 0.75rem; }
+.why-inner p:last-child { margin-bottom: 0; }
+.why-inner strong { color: var(--text-bright); }
+
+.tech-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; margin: 1.5rem auto; padding: 0 2rem; max-width: 900px; }
+.tech-item { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem 1rem; }
+.tech-item .tech-label { font-size: 0.65rem; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.25rem; }
+.tech-item .tech-val { font-size: 0.8rem; color: var(--text-bright); font-weight: 600; }
+
+.section-divider { width: 100%; height: 1px; background: linear-gradient(90deg, transparent, var(--border2), transparent); margin: 2rem 0; }
+
+.chapter { padding: 0 2rem 4rem; max-width: 900px; margin: 0 auto; }
+.chapter-title { font-size: 1.4rem; font-weight: 700; color: var(--text-bright); letter-spacing: -0.02em; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; }
+.chapter-num { font-size: 0.67rem; color: var(--accent3); letter-spacing: 0.15em; text-transform: uppercase; font-family: var(--font-mono); font-weight: 500; }
+h4 { font-size: 0.98rem; font-weight: 700; color: var(--accent3); margin: 1.75rem 0 0.75rem; letter-spacing: -0.01em; }
+p { color: var(--text); font-size: 0.9rem; line-height: 1.9; margin-bottom: 1rem; }
+p strong { color: var(--text-bright); font-weight: 600; }
+
+.callout { border-radius: 8px; padding: 1rem 1.25rem; margin: 1.25rem 0; font-size: 0.82rem; line-height: 1.7; display: flex; gap: 0.75rem; align-items: flex-start; }
+.callout-tip    { background: rgba(255,122,71,0.06);  border: 1px solid rgba(255,122,71,0.3);   color: var(--accent3); }
+.callout-warn   { background: rgba(255,200,64,0.06);  border: 1px solid rgba(255,200,64,0.2);   color: var(--yellow); }
+.callout-info   { background: rgba(26,111,255,0.06);  border: 1px solid rgba(26,111,255,0.2);   color: #7aacff; }
+.callout-purple { background: rgba(192,132,252,0.06); border: 1px solid rgba(192,132,252,0.25); color: var(--accent4); }
+.callout-green  { background: rgba(61,255,160,0.06);  border: 1px solid rgba(61,255,160,0.25);  color: #3dffa0; }
+.callout-icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.1rem; }
+.callout-body { color: var(--text); }
+.callout-body strong { color: inherit; }
+
+pre { background: var(--code-bg); border: 1px solid rgba(255,122,71,0.18); border-radius: 8px; padding: 1.25rem 1.5rem; overflow-x: auto; margin: 1rem 0 1.5rem; position: relative; }
+pre code { font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.75; color: #b8d0f8; }
+.code-lang { position: absolute; top: 0.5rem; right: 0.75rem; font-size: 0.6rem; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; font-family: var(--font-mono); }
+code { font-family: var(--font-mono); background: rgba(255,122,71,0.08); border: 1px solid rgba(255,122,71,0.15); border-radius: 4px; padding: 0.1em 0.4em; font-size: 0.82em; color: #ffb08a; }
+pre code { background: none; border: none; padding: 0; font-size: inherit; color: inherit; }
+
+.table-wrap { overflow-x: auto; margin: 1rem 0 1.5rem; border-radius: 8px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead tr { background: var(--bg3); }
+th { padding: 0.75rem 1rem; text-align: left; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: #8fa3cc; font-weight: 600; border-bottom: 1px solid var(--border); }
+td { padding: 0.7rem 1rem; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: rgba(255,122,71,0.03); }
+td code { font-size: 0.75em; }
+
+.pipeline-flow { display: flex; flex-direction: column; gap: 0.6rem; margin: 1.5rem 0; }
+.pipeline-step { display: flex; align-items: flex-start; gap: 1rem; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.25rem; transition: border-color 0.2s; }
+.pipeline-step:hover { border-color: var(--accent3); }
+.step-num { font-family: var(--font-mono); font-size: 0.65rem; color: var(--accent3); font-weight: 600; letter-spacing: 0.1em; min-width: 2rem; padding-top: 0.1rem; }
+.step-title { font-size: 0.88rem; font-weight: 700; color: var(--text-bright); }
+.step-desc { font-size: 0.8rem; color: var(--text-dim); line-height: 1.55; margin-top: 0.2rem; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0 1.5rem; }
+.info-box { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; }
+.info-box h5 { font-size: 0.8rem; font-weight: 700; color: var(--accent3); margin-bottom: 0.6rem; letter-spacing: 0.05em; }
+.info-box p { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 0; line-height: 1.6; }
+
+.checklist { list-style: none; margin: 0.5rem 0 1.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.checklist li { font-size: 0.86rem; color: var(--text-dim); padding-left: 1.5rem; position: relative; }
+.checklist li::before { content: '✓'; position: absolute; left: 0; color: #3dffa0; font-size: 0.9rem; }
+
+.question-list { list-style: none; margin: 0.75rem 0 1.5rem; display: flex; flex-direction: column; gap: 0.6rem; }
+.question-list li { font-size: 0.86rem; color: var(--text-dim); padding: 0.75rem 1rem 0.75rem 2.5rem; position: relative; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; line-height: 1.6; transition: border-color 0.2s; }
+.question-list li:hover { border-color: var(--accent3); }
+.question-list li::before { content: '?'; position: absolute; left: 0.85rem; top: 0.75rem; color: var(--accent3); font-weight: 800; font-size: 0.9rem; font-family: var(--font-mono); }
+.question-list li strong { color: var(--text-bright); display: block; margin-bottom: 0.2rem; }
+
+.decision-box { background: linear-gradient(135deg, rgba(192,132,252,0.05), rgba(61,139,255,0.05)); border: 1px solid rgba(192,132,252,0.3); border-radius: 10px; padding: 1.25rem 1.5rem; margin: 1.25rem 0; }
+.decision-box .decision-label { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent4); font-family: var(--font-mono); font-weight: 600; margin-bottom: 0.5rem; }
+.decision-box p { font-size: 0.85rem; color: var(--text-dim); margin: 0; line-height: 1.75; }
+.decision-box p strong { color: var(--text-bright); }
+
+.use-case-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin: 1.25rem 0 1.5rem; }
+.use-case-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; transition: border-color 0.2s, transform 0.2s; }
+.use-case-card:hover { border-color: var(--accent1); transform: translateY(-2px); }
+.use-case-card .uc-icon { font-size: 1.6rem; margin-bottom: 0.6rem; }
+.use-case-card h5 { font-size: 0.9rem; font-weight: 700; color: var(--text-bright); margin-bottom: 0.4rem; }
+.use-case-card p { font-size: 0.78rem; color: var(--text-dim); line-height: 1.6; margin: 0; }
+.use-case-card .uc-tag { display: inline-block; margin-top: 0.6rem; font-size: 0.62rem; color: var(--accent1); letter-spacing: 0.1em; text-transform: uppercase; font-family: var(--font-mono); }
+
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+
+footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--text-dim); font-size: 0.75rem; }
+footer span { color: var(--accent3); }
+footer a { color: var(--accent2); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+@media (max-width: 640px) { .nav-links { display: none; } .chapter { padding-left: 1.25rem; padding-right: 1.25rem; } .two-col { grid-template-columns: 1fr; } .use-case-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div id="stars"></div>
+<canvas id="bgCanvas"></canvas>
+
+<div id="app">
+<nav>
+  <div class="nav-brand">r<span>.</span>stahlb</div>
+  <ul class="nav-links">
+    <li><a href="index.html" class="back-link">← Home</a></li>
+    <li><a href="george.html">George AI</a></li>
+    <li><a href="rag_engineering.html">George RAG</a></li>
+    <li><a href="lidar_deep_dive.html">LiDAR</a></li>
+    <li><a href="https://github.com/rstahlb" target="_blank">GitHub ↗</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="page-hero reveal">
+  <div class="project-number">🤗 Complete Beginner's Guide</div>
+  <h1>Hugging Face LLMs<br><span>From Zero to Fine-Tuned</span></h1>
+  <p class="project-desc">A practical, no-fluff guide to choosing a large language model on Hugging Face, setting up your local environment, downloading a model, preparing data, and fine-tuning it for your specific use case — written for people who are new to the whole pipeline.</p>
+</div>
+
+<div class="why-box reveal">
+  <div class="why-inner">
+    <h2>📋 What This Guide Covers</h2>
+    <p>This guide walks the complete path from <strong>zero knowledge</strong> to running and retraining a real LLM locally. We cover the questions to ask before picking any model, how to create your Hugging Face account, download a model with the CLI, set up your Python environment, understand what data you can use, and walk through concrete retraining use cases.</p>
+    <p><strong>Read sequentially if you are completely new.</strong> Experienced practitioners can jump to any chapter — each is self-contained. All code is tested on Python 3.10+ and works on both CUDA (NVIDIA) and Apple Silicon (MPS).</p>
+  </div>
+</div>
+
+<div class="tech-grid reveal">
+  <div class="tech-item"><div class="tech-label">Python Version</div><div class="tech-val">3.10 or 3.11 recommended</div></div>
+  <div class="tech-item"><div class="tech-label">Core Library</div><div class="tech-val">transformers · datasets · peft</div></div>
+  <div class="tech-item"><div class="tech-label">Training Framework</div><div class="tech-val">PyTorch (+ optionally MLX on Apple)</div></div>
+  <div class="tech-item"><div class="tech-label">Efficient Fine-tuning</div><div class="tech-val">LoRA / QLoRA via PEFT</div></div>
+  <div class="tech-item"><div class="tech-label">Experiment Tracking</div><div class="tech-val">Weights & Biases or TensorBoard</div></div>
+  <div class="tech-item"><div class="tech-label">Model Hub</div><div class="tech-val">huggingface.co</div></div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- CHAPTER 1: QUESTIONS TO ASK YOURSELF -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 01</span> Questions to Ask Before Choosing Any Model</h3>
+
+  <p>Picking the wrong model wastes weeks. Before opening Hugging Face, answer these questions honestly. There are no wrong answers — only answers that point you to the right model family.</p>
+
+  <h4>1.1 What Problem Are You Solving?</h4>
+  <ul class="question-list">
+    <li><strong>What is the task?</strong> Text generation, summarisation, classification, question answering, code generation, translation, image captioning, or something else? Each has dominant model families.</li>
+    <li><strong>What is the input and output format?</strong> Text in → text out is straightforward. Text in → structured JSON out requires a model that follows instructions well. Audio or image inputs require multimodal models.</li>
+    <li><strong>How long are typical inputs and outputs?</strong> A model's context window (e.g. 4K, 8K, 128K tokens) determines the maximum length it can process in one call. Legal documents and codebases need large windows. Short Q&A does not.</li>
+    <li><strong>Does the answer need to be factually grounded, or can it be creative?</strong> Factual tasks may need retrieval augmentation (RAG). Creative tasks benefit from higher temperature and less constrained models.</li>
+  </ul>
+
+  <h4>1.2 What Are Your Hardware Constraints?</h4>
+  <ul class="question-list">
+    <li><strong>How much VRAM / unified memory do you have?</strong> A rough rule: 7B parameter models need ~7GB in 4-bit, ~14GB in 16-bit. 13B needs ~13GB / ~26GB. 70B is impractical without multi-GPU or quantisation.</li>
+    <li><strong>Are you on NVIDIA (CUDA), Apple Silicon (MPS), or CPU only?</strong> CUDA gives the widest library support. MPS supports most things but some ops fall back to CPU. CPU-only is viable for small models with GGUF/llama.cpp.</li>
+    <li><strong>Is inference speed a hard requirement?</strong> If you need real-time responses (&lt;1s), a 70B model is almost certainly out unless you have A100/H100-class hardware.</li>
+    <li><strong>Are you running this on a server or a laptop?</strong> Servers allow quantisation at scale. Laptops benefit from GGUF models via Ollama or llama.cpp.</li>
+  </ul>
+
+  <h4>1.3 What Are Your Long-Term Goals?</h4>
+  <ul class="question-list">
+    <li><strong>Do you want to deploy this, or just experiment?</strong> Deployment brings licensing concerns (MIT vs non-commercial licences). Llama models are non-commercial by default unless you qualify for Meta's commercial licence.</li>
+    <li><strong>Will the model ever see user data in production?</strong> If yes, you need to understand the model's licence, the data's privacy implications, and whether you can run fully on-premise.</li>
+    <li><strong>Do you plan to fine-tune, or use the base model as-is?</strong> Base models are not instruction-following. If you need it to answer questions in a specific format, you need either an instruction-tuned variant or your own fine-tuning.</li>
+    <li><strong>Is your use case domain-specific?</strong> Medical, legal, financial, and scientific domains often benefit enormously from fine-tuning on domain text — a generic 7B fine-tuned beats a generic 13B base on domain-specific tasks.</li>
+    <li><strong>What is your maintenance appetite?</strong> Models get better fast. Picking a model that is easily swappable (via a config file) versus hard-coded saves you weeks of refactoring in six months.</li>
+  </ul>
+
+  <h4>1.4 What Are Your Data and Privacy Constraints?</h4>
+  <ul class="question-list">
+    <li><strong>Can your data leave your machine?</strong> If not, you need a locally-running model. Cloud APIs (OpenAI, Anthropic) are off the table.</li>
+    <li><strong>Is your training data labelled or unlabelled?</strong> Supervised fine-tuning needs labelled pairs (prompt → response). Continued pre-training works on raw unlabelled text. RLHF needs human preference rankings.</li>
+    <li><strong>How much training data do you have?</strong> LoRA fine-tuning can work meaningfully with as few as 500–1,000 high-quality examples. Full fine-tuning needs tens of thousands.</li>
+  </ul>
+
+  <div class="callout callout-tip">
+    <span class="callout-icon">💡</span>
+    <div class="callout-body"><strong>The most common mistake:</strong> Picking the largest model available and then being surprised it won't fit in memory or is too slow. Always start with the smallest model that could plausibly work, get it running end-to-end, then scale up if needed.</div>
+  </div>
+</div>
+
+<!-- CHAPTER 2: HOW TO CHOOSE A MODEL -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 02</span> Best Practices for Choosing a Model</h3>
+
+  <h4>2.1 Understand Model Families</h4>
+  <p>Hugging Face hosts hundreds of thousands of models, but most derive from a small set of foundation families. Knowing the families shortcuts the search dramatically.</p>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Family</th><th>Best For</th><th>Sizes Available</th><th>Licence</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Llama 3 / 3.1 / 3.2</strong> (Meta)</td><td>General-purpose, instruction following, coding, reasoning</td><td>1B, 3B, 8B, 70B, 405B</td><td>Llama Community (non-commercial &lt;700M users)</td></tr>
+      <tr><td><strong>Mistral / Mixtral</strong></td><td>Fast inference, European language support, MoE efficiency</td><td>7B, 8×7B, 8×22B</td><td>Apache 2.0 (fully open)</td></tr>
+      <tr><td><strong>Phi-3 / Phi-4</strong> (Microsoft)</td><td>Tiny but capable: on-device, constrained hardware</td><td>3.8B, 7B, 14B</td><td>MIT</td></tr>
+      <tr><td><strong>Qwen 2.5</strong> (Alibaba)</td><td>Multilingual, math, code, long-context</td><td>0.5B–72B</td><td>Apache 2.0</td></tr>
+      <tr><td><strong>Gemma 2</strong> (Google)</td><td>Safe, efficient, strong benchmarks at small sizes</td><td>2B, 9B, 27B</td><td>Gemma Terms (custom open)</td></tr>
+      <tr><td><strong>DeepSeek-R1 / V3</strong></td><td>Reasoning, math, code</td><td>7B–671B</td><td>MIT</td></tr>
+      <tr><td><strong>BERT / RoBERTa / DeBERTa</strong></td><td>Classification, NER, embeddings (encoder-only)</td><td>110M–435M</td><td>Apache 2.0</td></tr>
+      <tr><td><strong>Whisper</strong> (OpenAI)</td><td>Audio → text transcription</td><td>tiny to large-v3</td><td>MIT</td></tr>
+    </tbody>
+  </table></div>
+
+  <h4>2.2 Instruction-Tuned vs Base Models</h4>
+  <div class="two-col">
+    <div class="info-box">
+      <h5>🔤 Base Models</h5>
+      <p>Pre-trained on raw text. They complete text — they don't follow instructions. Use these as the starting point for your own fine-tuning pipeline. Examples: <code>meta-llama/Llama-3.1-8B</code>, <code>mistralai/Mistral-7B-v0.1</code>.</p>
+    </div>
+    <div class="info-box">
+      <h5>💬 Instruction-Tuned Models</h5>
+      <p>Fine-tuned to follow prompts and chat. Use these for immediate deployment or as a starting point for task-specific fine-tuning. Examples: <code>meta-llama/Llama-3.1-8B-Instruct</code>, <code>mistralai/Mistral-7B-Instruct-v0.3</code>.</p>
+    </div>
+  </div>
+
+  <h4>2.3 How to Read a Model Card</h4>
+  <div class="pipeline-flow">
+    <div class="pipeline-step"><span class="step-num">①</span><div><div class="step-title">Check the Licence</div><div class="step-desc">First thing. Apache 2.0 and MIT are fully permissive. Llama Community is non-commercial under certain conditions. Always read the licence tab before anything else if you plan to deploy.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">②</span><div><div class="step-title">Check Benchmarks</div><div class="step-desc">Look at MMLU, HellaSwag, HumanEval (for code), and MT-Bench scores. Compare within size class. A well-fine-tuned 7B can beat a base 13B on specific tasks.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">③</span><div><div class="step-title">Check Context Length</div><div class="step-desc">Listed as "max_position_embeddings" in config.json. 4K is limiting. 8K is comfortable. 128K opens document-level tasks.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">④</span><div><div class="step-title">Check Available Quantisations</div><div class="step-desc">Look at community forks with "GGUF" or "AWQ" or "GPTQ" in the name. These are smaller, memory-efficient versions that sacrifice minimal quality for dramatic size reduction.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">⑤</span><div><div class="step-title">Check Downloads & Community Activity</div><div class="step-desc">High download counts and active discussions in the Community tab mean bugs are caught, documentation is better, and library support is tested.</div></div></div>
+  </div>
+
+  <h4>2.4 Model Size vs Hardware — Quick Reference</h4>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Model Size</th><th>4-bit (VRAM)</th><th>16-bit (VRAM)</th><th>Minimum Hardware</th></tr></thead>
+    <tbody>
+      <tr><td>1–3B params</td><td>~1–2 GB</td><td>~3–6 GB</td><td>Any modern laptop, M1 8GB</td></tr>
+      <tr><td>7–8B params</td><td>~5–6 GB</td><td>~14–16 GB</td><td>M1 Pro 16GB, RTX 3060</td></tr>
+      <tr><td>13B params</td><td>~9 GB</td><td>~26 GB</td><td>M2 Max 32GB, RTX 3090</td></tr>
+      <tr><td>34–40B params</td><td>~22 GB</td><td>~70 GB</td><td>M2 Ultra 64GB, A6000</td></tr>
+      <tr><td>70B params</td><td>~40 GB</td><td>~140 GB</td><td>Multi-GPU, A100 80GB</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-warn">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-body"><strong>Memory overhead:</strong> These numbers are for inference only. Fine-tuning requires additional memory for gradients and optimiser states — even with LoRA, budget an extra 2–4 GB on top of the model size.</div>
+  </div>
+</div>
+
+<!-- CHAPTER 3: GET AN ACCOUNT -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 03</span> Getting a Hugging Face Account</h3>
+
+  <h4>3.1 Sign Up</h4>
+  <div class="pipeline-flow">
+    <div class="pipeline-step"><span class="step-num">①</span><div><div class="step-title">Go to huggingface.co</div><div class="step-desc">Click "Sign Up" in the top right. You can register with email or sign in with GitHub/Google. GitHub is recommended if you plan to push model weights or datasets.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">②</span><div><div class="step-title">Verify Your Email</div><div class="step-desc">Unverified accounts cannot download gated models (Llama, Gemma, etc.) or push to the Hub. Verify immediately after signup.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">③</span><div><div class="step-title">Create an Access Token</div><div class="step-desc">Go to Settings → Access Tokens → New Token. Create a token with "Read" scope for downloading, or "Write" scope if you want to push your own models. Copy and save it — it won't be shown again.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">④</span><div><div class="step-title">Request Access for Gated Models (if needed)</div><div class="step-desc">Models like Llama 3 require you to agree to their licence on the model page. Click "Access repository", fill in the form, and wait for approval (usually instant to a few hours).</div></div></div>
+  </div>
+
+  <h4>3.2 Install the Hugging Face CLI</h4>
+
+<pre><span class="code-lang">Bash</span><code># Install the CLI (comes with the huggingface_hub package)
+pip install huggingface_hub
+
+# Log in — this saves your token to ~/.cache/huggingface/token
+huggingface-cli login
+
+# Paste your token when prompted.
+# Your token is now saved — no need to pass it to every API call.
+
+# Verify you're logged in
+huggingface-cli whoami</code></pre>
+
+  <h4>3.3 Understand the Cache</h4>
+  <p>Downloaded models are stored in <code>~/.cache/huggingface/hub/</code> by default. Each model is stored once and shared across all scripts that reference it. You can change the location with the environment variable:</p>
+
+<pre><span class="code-lang">Bash</span><code># Change the cache directory (add to your .zshrc or .bashrc)
+export HF_HOME=/path/to/your/drive/huggingface_cache
+
+# For large models (70B+), point this to an external SSD</code></pre>
+
+  <div class="callout callout-info">
+    <span class="callout-icon">ℹ️</span>
+    <div class="callout-body"><strong>Storage planning:</strong> A 7B model in float16 is ~14 GB. A 70B model is ~140 GB. Plan your disk space before downloading. Use an external SSD for anything over 13B.</div>
+  </div>
+</div>
+
+<!-- CHAPTER 4: DOWNLOAD A MODEL -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 04</span> Downloading a Model Locally</h3>
+
+  <h4>4.1 Three Ways to Download</h4>
+
+  <p><strong>Method 1 — CLI Snapshot Download (recommended for first-timers)</strong></p>
+<pre><span class="code-lang">Bash</span><code># Download an entire model to a local folder
+huggingface-cli download meta-llama/Llama-3.2-3B-Instruct \
+  --local-dir ./models/llama-3.2-3b-instruct
+
+# Download a specific file only (e.g. the config)
+huggingface-cli download meta-llama/Llama-3.2-3B-Instruct config.json</code></pre>
+
+  <p><strong>Method 2 — Python API (most flexible)</strong></p>
+<pre><span class="code-lang">Python</span><code>from huggingface_hub import snapshot_download
+
+# Downloads to ~/.cache/huggingface/hub/ automatically
+# Subsequent calls use the cache — no re-download
+model_path = snapshot_download(
+    repo_id="mistralai/Mistral-7B-Instruct-v0.3",
+    ignore_patterns=["*.pt", "*.ot"],  # skip legacy weights if present
+)
+print(f"Model cached at: {model_path}")</code></pre>
+
+  <p><strong>Method 3 — via transformers (laziest, good for prototyping)</strong></p>
+<pre><span class="code-lang">Python</span><code>from transformers import AutoTokenizer, AutoModelForCausalLM
+import torch
+
+model_id = "microsoft/Phi-3.5-mini-instruct"
+
+tokenizer = AutoTokenizer.from_pretrained(model_id)
+model = AutoModelForCausalLM.from_pretrained(
+    model_id,
+    torch_dtype=torch.float16,   # use bfloat16 on newer hardware
+    device_map="auto",           # auto-detects CUDA, MPS, or CPU
+)
+
+# Quick test
+inputs = tokenizer("Hello, who are you?", return_tensors="pt").to(model.device)
+outputs = model.generate(**inputs, max_new_tokens=100)
+print(tokenizer.decode(outputs[0], skip_special_tokens=True))</code></pre>
+
+  <h4>4.2 Download Quantised Models (for limited memory)</h4>
+  <p>If your hardware can't fit the full model, use a quantised version. The easiest way is via <code>bitsandbytes</code> for CUDA or pre-quantised GGUF files via <code>llama-cpp-python</code> for Apple Silicon.</p>
+
+<pre><span class="code-lang">Python</span><code># 4-bit quantisation on load (CUDA / bitsandbytes)
+from transformers import BitsAndBytesConfig
+
+bnb_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_use_double_quant=True,
+    bnb_4bit_quant_type="nf4",       # NF4 is best quality 4-bit
+    bnb_4bit_compute_dtype=torch.bfloat16,
+)
+
+model = AutoModelForCausalLM.from_pretrained(
+    "meta-llama/Llama-3.1-8B-Instruct",
+    quantization_config=bnb_config,
+    device_map="auto",
+)</code></pre>
+
+<pre><span class="code-lang">Bash</span><code># Apple Silicon: use GGUF via Ollama (easiest local setup)
+# Install: https://ollama.com
+ollama pull llama3.2:3b
+ollama run llama3.2:3b</code></pre>
+
+  <h4>4.3 Verify the Download</h4>
+<pre><span class="code-lang">Python</span><code>from transformers import AutoConfig
+
+# Check config loads without errors
+config = AutoConfig.from_pretrained("./models/llama-3.2-3b-instruct")
+print(f"Architecture: {config.architectures}")
+print(f"Context length: {config.max_position_embeddings}")
+print(f"Hidden size: {config.hidden_size}")
+print(f"Layers: {config.num_hidden_layers}")</code></pre>
+</div>
+
+<!-- CHAPTER 5: DATA -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 05</span> What Data Can You Use?</h3>
+
+  <h4>5.1 Data Types for LLM Training</h4>
+
+  <div class="table-wrap"><table>
+    <thead><tr><th>Data Type</th><th>Used For</th><th>Format</th><th>Minimum Quantity</th></tr></thead>
+    <tbody>
+      <tr><td>Instruction pairs</td><td>Supervised fine-tuning (SFT)</td><td><code>{"prompt": "...", "response": "..."}</code></td><td>500–2,000 high quality</td></tr>
+      <tr><td>Conversation threads</td><td>Chat fine-tuning</td><td>ShareGPT / ChatML format</td><td>1,000+ turns</td></tr>
+      <tr><td>Raw domain text</td><td>Continued pre-training</td><td>Plain text, JSONL</td><td>Millions of tokens</td></tr>
+      <tr><td>Preference pairs</td><td>DPO / RLHF alignment</td><td><code>{"chosen": "...", "rejected": "..."}</code></td><td>1,000+ pairs</td></tr>
+      <tr><td>Classification labels</td><td>Fine-tuning classifiers</td><td><code>{"text": "...", "label": 0}</code></td><td>500+ per class</td></tr>
+    </tbody>
+  </table></div>
+
+  <h4>5.2 Where to Find Datasets</h4>
+
+  <div class="pipeline-flow">
+    <div class="pipeline-step"><span class="step-num">①</span><div><div class="step-title">Hugging Face Datasets Hub</div><div class="step-desc">huggingface.co/datasets — over 100,000 public datasets. Filter by task, language, and licence. Use <code>datasets</code> library to load any of them in one line.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">②</span><div><div class="step-title">Your Own Data</div><div class="step-desc">Internal documents, support tickets, product manuals, code repositories, customer emails (anonymised). This is almost always the most valuable data source for domain-specific fine-tuning.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">③</span><div><div class="step-title">Synthetic Data (Model-Generated)</div><div class="step-desc">Use a large model (GPT-4, Llama-3.1-70B) to generate instruction-response pairs from seed examples or documents. Works well for bootstrapping when you have few real examples.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">④</span><div><div class="step-title">Public Web Corpora</div><div class="step-desc">Common Crawl, The Pile, RedPajama, FineWeb. These are for continued pre-training, not SFT. Very large — filter aggressively for quality before using.</div></div></div>
+  </div>
+
+  <h4>5.3 Data Licensing — Critical Checklist</h4>
+  <ul class="checklist">
+    <li>Data scraped from websites may not be legally usable for commercial model training — check the site's Terms of Service.</li>
+    <li>Synthetic data generated by OpenAI models cannot be used to train competing models per their Terms of Service.</li>
+    <li>Synthetic data generated by open-licensed models (Llama, Mistral) is generally fine — check the model's specific licence.</li>
+    <li>Data containing personal information (PII) needs explicit consent or anonymisation before use.</li>
+    <li>Copyrighted text (books, articles) in training data is legally contested — consult a lawyer for commercial deployments.</li>
+    <li>Research use has broader fair-use protections in many jurisdictions than commercial deployment.</li>
+  </ul>
+
+  <h4>5.4 Data Quality Over Quantity</h4>
+
+  <div class="callout callout-purple">
+    <span class="callout-icon">🔬</span>
+    <div class="callout-body"><strong>The LIMA finding:</strong> A 2023 paper showed that fine-tuning Llama on just 1,000 carefully curated instruction pairs produced results competitive with models fine-tuned on hundreds of thousands of noisy examples. Quality of examples matters far more than raw count. Spend time on data curation — it's the highest-leverage activity in fine-tuning.</div>
+  </div>
+
+  <p>What "quality" means for instruction data: clear, unambiguous instructions; responses that are complete and correct; diversity across topics and styles; no contradictions within the dataset; no degenerate examples (empty strings, encoding errors, repetitive loops).</p>
+
+<pre><span class="code-lang">Python</span><code>from datasets import load_dataset
+
+# Load a popular instruction dataset from the Hub
+ds = load_dataset("HuggingFaceH4/ultrachat_200k")
+
+# Load your own JSONL file
+ds = load_dataset("json", data_files={"train": "my_data.jsonl"})
+
+# Basic quality checks
+print(f"Total examples: {len(ds['train'])}")
+print(f"Columns: {ds['train'].column_names}")
+print(f"First example: {ds['train'][0]}")
+
+# Filter out short responses (likely low quality)
+ds = ds.filter(lambda x: len(x["response"]) > 100)</code></pre>
+</div>
+
+<!-- CHAPTER 6: ENVIRONMENT SETUP -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 06</span> Setting Up Your Training Environment</h3>
+
+  <h4>6.1 Install Python and Create a Virtual Environment</h4>
+
+<pre><span class="code-lang">Bash</span><code># Python 3.10 or 3.11 recommended (3.12 has some library gaps)
+python --version
+
+# Create a dedicated environment for LLM work
+python -m venv llm_env
+source llm_env/bin/activate       # Linux / macOS
+# llm_env\Scripts\activate        # Windows
+
+# Or with conda (easier for CUDA management)
+conda create -n llm_env python=3.11
+conda activate llm_env</code></pre>
+
+  <h4>6.2 Core Package Installation</h4>
+
+<pre><span class="code-lang">Bash</span><code># Core Hugging Face stack
+pip install transformers datasets accelerate peft trl
+
+# Weights & Biases for experiment tracking (optional but recommended)
+pip install wandb
+
+# For NVIDIA GPU (CUDA 12.1 — match your CUDA version)
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+# For Apple Silicon (MPS backend is built into PyTorch)
+pip install torch torchvision torchaudio
+
+# For 4-bit quantisation on CUDA (bitsandbytes)
+pip install bitsandbytes
+
+# For Flash Attention 2 (speeds up training significantly on CUDA)
+pip install flash-attn --no-build-isolation</code></pre>
+
+  <h4>6.3 Verify Your Setup</h4>
+
+<pre><span class="code-lang">Python</span><code>import torch
+import transformers
+
+# Check PyTorch version and device availability
+print(f"PyTorch: {torch.__version__}")
+print(f"Transformers: {transformers.__version__}")
+print(f"CUDA available: {torch.cuda.is_available()}")
+print(f"MPS available:  {torch.backends.mps.is_available()}")
+
+# Should print device info — not "cpu" if you have a GPU
+device = (
+    "cuda" if torch.cuda.is_available()
+    else "mps" if torch.backends.mps.is_available()
+    else "cpu"
+)
+print(f"Using device: {device}")
+
+# Quick GPU memory check (CUDA only)
+if torch.cuda.is_available():
+    print(f"GPU: {torch.cuda.get_device_name(0)}")
+    print(f"VRAM: {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f} GB")</code></pre>
+
+  <h4>6.4 Project Directory Structure</h4>
+
+<pre><span class="code-lang">Shell</span><code>my_llm_project/
+├── data/
+│   ├── raw/          # original source files
+│   ├── processed/    # cleaned JSONL ready for training
+│   └── splits/       # train / val / test splits
+├── models/
+│   └── base/         # downloaded base model (or symlink to HF cache)
+├── checkpoints/      # saved during training
+├── outputs/          # final merged model weights
+├── scripts/
+│   ├── prepare_data.py
+│   ├── train.py
+│   └── evaluate.py
+├── configs/
+│   └── lora_config.yaml
+└── requirements.txt</code></pre>
+
+  <div class="callout callout-green">
+    <span class="callout-icon">✅</span>
+    <div class="callout-body"><strong>Pro tip:</strong> Add <code>.env</code> to your <code>.gitignore</code> and store your HF token there. Load it with <code>python-dotenv</code>. Never commit access tokens to version control — even private repos.</div>
+  </div>
+</div>
+
+<!-- CHAPTER 7: FINE-TUNING WITH LORA -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 07</span> Fine-Tuning with LoRA — Step by Step</h3>
+
+  <p>LoRA (Low-Rank Adaptation) is the standard fine-tuning technique for LLMs on consumer hardware. Instead of updating all billions of parameters, LoRA injects small trainable weight matrices at key layers. This reduces memory by 10–100× with minimal quality loss.</p>
+
+  <h4>7.1 LoRA Config Explained</h4>
+
+<pre><span class="code-lang">Python</span><code>from peft import LoraConfig, TaskType
+
+lora_config = LoraConfig(
+    task_type=TaskType.CAUSAL_LM,  # or SEQ_CLS for classification
+    r=16,           # rank: higher = more capacity, more memory (try 8–64)
+    lora_alpha=32,  # scaling factor — rule of thumb: 2× rank
+    lora_dropout=0.05,
+    # Which layers to target — these are standard for most LLaMA-family models
+    target_modules=[
+        "q_proj", "k_proj", "v_proj", "o_proj",
+        "gate_proj", "up_proj", "down_proj",
+    ],
+    bias="none",
+)</code></pre>
+
+  <h4>7.2 Complete Training Script</h4>
+
+<pre><span class="code-lang">Python</span><code>from transformers import AutoTokenizer, AutoModelForCausalLM, TrainingArguments
+from peft import get_peft_model, LoraConfig, TaskType
+from trl import SFTTrainer
+from datasets import load_dataset
+import torch
+
+MODEL_ID   = "meta-llama/Llama-3.2-3B-Instruct"
+DATA_PATH  = "./data/processed/train.jsonl"
+OUTPUT_DIR = "./checkpoints"
+
+# 1. Load tokenizer and model
+tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
+tokenizer.pad_token = tokenizer.eos_token  # required for batching
+
+model = AutoModelForCausalLM.from_pretrained(
+    MODEL_ID,
+    torch_dtype=torch.bfloat16,
+    device_map="auto",
+)
+
+# 2. Apply LoRA
+lora_config = LoraConfig(
+    r=16, lora_alpha=32, lora_dropout=0.05,
+    task_type=TaskType.CAUSAL_LM,
+    target_modules=["q_proj","k_proj","v_proj","o_proj",
+                    "gate_proj","up_proj","down_proj"],
+)
+model = get_peft_model(model, lora_config)
+model.print_trainable_parameters()
+# Prints: trainable params: 41,943,040 || all params: 3,254,878,208 || 1.29%
+
+# 3. Load dataset
+dataset = load_dataset("json", data_files={"train": DATA_PATH})
+
+def format_prompt(example):
+    return {"text": f"### Instruction:\n{example['prompt']}\n\n### Response:\n{example['response']}"}
+
+dataset = dataset.map(format_prompt)
+
+# 4. Training arguments
+args = TrainingArguments(
+    output_dir=OUTPUT_DIR,
+    num_train_epochs=3,
+    per_device_train_batch_size=2,
+    gradient_accumulation_steps=8,   # effective batch = 16
+    warmup_ratio=0.03,
+    learning_rate=2e-4,
+    bf16=True,                        # bfloat16 on modern hardware
+    logging_steps=10,
+    save_strategy="epoch",
+    report_to="wandb",                # or "none" to disable
+)
+
+# 5. Train
+trainer = SFTTrainer(
+    model=model,
+    tokenizer=tokenizer,
+    args=args,
+    train_dataset=dataset["train"],
+    dataset_text_field="text",
+    max_seq_length=2048,
+)
+
+trainer.train()
+
+# 6. Save LoRA adapter (small — only a few hundred MB)
+model.save_pretrained("./outputs/lora_adapter")
+tokenizer.save_pretrained("./outputs/lora_adapter")</code></pre>
+
+  <h4>7.3 Merge the Adapter Back into the Base Model</h4>
+
+<pre><span class="code-lang">Python</span><code>from peft import PeftModel
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+# Load base model + adapter, then merge
+base_model = AutoModelForCausalLM.from_pretrained(
+    "meta-llama/Llama-3.2-3B-Instruct",
+    torch_dtype=torch.float16,
+    device_map="cpu",  # merge on CPU to avoid VRAM spike
+)
+model = PeftModel.from_pretrained(base_model, "./outputs/lora_adapter")
+merged = model.merge_and_unload()     # fuses adapter weights into base
+
+# Save the complete merged model
+merged.save_pretrained("./outputs/merged_model")
+AutoTokenizer.from_pretrained("./outputs/lora_adapter").save_pretrained(
+    "./outputs/merged_model"
+)</code></pre>
+
+  <h4>7.4 Key Hyperparameters for New Fine-Tuners</h4>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Parameter</th><th>Recommended Start</th><th>Effect of Increasing</th></tr></thead>
+    <tbody>
+      <tr><td><code>r</code> (LoRA rank)</td><td>8–16</td><td>More capacity, more memory, slower training</td></tr>
+      <tr><td><code>learning_rate</code></td><td>2e-4</td><td>Too high → loss diverges. Too low → slow convergence</td></tr>
+      <tr><td><code>num_train_epochs</code></td><td>2–5</td><td>Too many → overfitting (model memorises training data)</td></tr>
+      <tr><td><code>max_seq_length</code></td><td>1024–2048</td><td>More context, but quadratic memory cost</td></tr>
+      <tr><td><code>gradient_accumulation_steps</code></td><td>4–8</td><td>Simulates larger batch without extra VRAM</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-warn">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-body"><strong>Watch for overfitting:</strong> If your training loss keeps dropping but your validation loss starts rising, stop early. Use <code>load_best_model_at_end=True</code> in TrainingArguments to automatically keep the best checkpoint.</div>
+  </div>
+</div>
+
+<!-- CHAPTER 8: USE CASES -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 08</span> Use Cases — Models and When to Retrain</h3>
+
+  <p>Fine-tuning is not always the right answer. This chapter maps common use cases to the appropriate model choice and training strategy.</p>
+
+  <h4>8.1 Use Case Landscape</h4>
+  <div class="use-case-grid">
+    <div class="use-case-card">
+      <div class="uc-icon">🩺</div>
+      <h5>Medical / Clinical NLP</h5>
+      <p>Summarising clinical notes, ICD coding, drug interaction QA. Use BioMedLM or fine-tune Mistral-7B on PubMed + MIMIC. Domain vocabulary drifts heavily from general pre-training.</p>
+      <span class="uc-tag">Fine-tune recommended</span>
+    </div>
+    <div class="use-case-card">
+      <div class="uc-icon">⚖️</div>
+      <h5>Legal Document Analysis</h5>
+      <p>Contract clause extraction, case summarisation, precedent search. Fine-tune on LexGLUE or proprietary contracts. Instruction-tuned general models struggle with precise legal phrasing.</p>
+      <span class="uc-tag">Fine-tune + RAG</span>
+    </div>
+    <div class="use-case-card">
+      <div class="uc-icon">💻</div>
+      <h5>Code Generation & Review</h5>
+      <p>Auto-complete, bug detection, test generation. DeepSeek-Coder and CodeLlama are already specialised. Fine-tune on your codebase for proprietary APIs and internal conventions.</p>
+      <span class="uc-tag">Specialised model first</span>
+    </div>
+    <div class="use-case-card">
+      <div class="uc-icon">🛎️</div>
+      <h5>Customer Support Chatbot</h5>
+      <p>Answer FAQs, route tickets, escalate appropriately. Fine-tune on historical ticket/resolution pairs. A 3B model fine-tuned on your data beats GPT-4 on your specific ticket vocabulary.</p>
+      <span class="uc-tag">Small model + fine-tune</span>
+    </div>
+    <div class="use-case-card">
+      <div class="uc-icon">📄</div>
+      <h5>Document Summarisation</h5>
+      <p>Summarise reports, emails, research papers. Long-context models (8K+) work out-of-the-box. Only fine-tune if you need a specific summary format or domain style.</p>
+      <span class="uc-tag">Base instruct model</span>
+    </div>
+    <div class="use-case-card">
+      <div class="uc-icon">🌍</div>
+      <h5>Low-Resource Language</h5>
+      <p>Models trained primarily on English underperform on Swahili, Welsh, Tagalog, etc. Continued pre-training on target-language text dramatically improves quality.</p>
+      <span class="uc-tag">Continued pre-training</span>
+    </div>
+    <div class="use-case-card">
+      <div class="uc-icon">🏷️</div>
+      <h5>Named Entity Recognition</h5>
+      <p>Extracting people, organisations, locations, custom entities from text. Fine-tune a BERT/DeBERTa encoder — much smaller and faster than a generative model for pure classification.</p>
+      <span class="uc-tag">Encoder model (BERT)</span>
+    </div>
+    <div class="use-case-card">
+      <div class="uc-icon">🎙️</div>
+      <h5>Voice Transcription & QA</h5>
+      <p>Transcribe audio with Whisper, then feed into an LLM for Q&A or summarisation. Fine-tune Whisper on domain-specific speech (accents, jargon, background noise).</p>
+      <span class="uc-tag">Whisper + LLM pipeline</span>
+    </div>
+    <div class="use-case-card">
+      <div class="uc-icon">🔎</div>
+      <h5>Semantic Search / RAG</h5>
+      <p>Embed documents and retrieve relevant chunks at query time. Use sentence-transformers (BAAI/bge, E5) for the embedding model. Often more effective than fine-tuning for knowledge retrieval.</p>
+      <span class="uc-tag">Embedding model + RAG</span>
+    </div>
+  </div>
+
+  <h4>8.2 Decision Tree — To Fine-Tune or Not?</h4>
+
+  <div class="pipeline-flow">
+    <div class="pipeline-step"><span class="step-num">①</span><div><div class="step-title">Try the base instruct model first</div><div class="step-desc">Prompt-engineer a good system prompt. Test on 50–100 real examples. Measure quality. Many tasks don't need fine-tuning — a well-crafted prompt is enough.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">②</span><div><div class="step-title">Add RAG if the problem is knowledge retrieval</div><div class="step-desc">If the model is good at reasoning but lacks specific facts (your company's docs, recent events, proprietary knowledge), add a retrieval layer before reaching for fine-tuning.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">③</span><div><div class="step-title">Fine-tune if output format or style is wrong</div><div class="step-desc">If the model consistently produces the wrong format, uses wrong tone, or fails domain-specific tasks even with good prompts, fine-tuning fixes the behaviour permanently.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">④</span><div><div class="step-title">Consider continued pre-training for deep domain shift</div><div class="step-desc">If your domain uses vocabulary and concepts the model has never seen (novel scientific field, proprietary jargon), continued pre-training on domain text before SFT gives the best results.</div></div></div>
+  </div>
+</div>
+
+<!-- CHAPTER 9: AFTER TRAINING -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 09</span> After Training — Evaluation & Deployment</h3>
+
+  <h4>9.1 Evaluate Your Fine-Tuned Model</h4>
+
+<pre><span class="code-lang">Python</span><code>from transformers import pipeline
+import json
+
+# Load your merged model
+pipe = pipeline(
+    "text-generation",
+    model="./outputs/merged_model",
+    torch_dtype=torch.bfloat16,
+    device_map="auto",
+)
+
+# Load a held-out test set (never seen during training)
+with open("./data/splits/test.jsonl") as f:
+    test_examples = [json.loads(l) for l in f]
+
+# Run inference and compare
+results = []
+for ex in test_examples[:100]:
+    output = pipe(ex["prompt"], max_new_tokens=200, do_sample=False)[0]
+    results.append({
+        "prompt":    ex["prompt"],
+        "expected":  ex["response"],
+        "generated": output["generated_text"],
+    })
+
+# Save for human review or automated scoring
+with open("eval_results.jsonl", "w") as f:
+    for r in results:
+        f.write(json.dumps(r) + "\n")</code></pre>
+
+  <h4>9.2 Evaluation Metrics to Track</h4>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Metric</th><th>Use When</th><th>Library</th></tr></thead>
+    <tbody>
+      <tr><td>ROUGE-L</td><td>Summarisation tasks</td><td><code>evaluate</code> (HF)</td></tr>
+      <tr><td>BLEU</td><td>Translation</td><td><code>sacrebleu</code></td></tr>
+      <tr><td>Exact Match / F1</td><td>QA with ground truth</td><td><code>evaluate</code></td></tr>
+      <tr><td>Perplexity</td><td>Language model quality</td><td><code>transformers</code></td></tr>
+      <tr><td>Human eval / LLM-as-judge</td><td>Open-ended generation</td><td>Custom or GPT-4 scoring</td></tr>
+      <tr><td>Task-specific accuracy</td><td>Classification</td><td><code>sklearn</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <h4>9.3 Push Your Model to the Hub</h4>
+
+<pre><span class="code-lang">Python</span><code>from transformers import AutoModelForCausalLM, AutoTokenizer
+
+model = AutoModelForCausalLM.from_pretrained("./outputs/merged_model")
+tokenizer = AutoTokenizer.from_pretrained("./outputs/merged_model")
+
+# Push to your personal hub (creates repo automatically)
+model.push_to_hub("your-username/my-finetuned-llama-3b")
+tokenizer.push_to_hub("your-username/my-finetuned-llama-3b")
+
+# Or push just the LoRA adapter (much smaller — recommended)
+from peft import PeftModel
+adapter_model = PeftModel.from_pretrained(base_model, "./outputs/lora_adapter")
+adapter_model.push_to_hub("your-username/my-lora-adapter")</code></pre>
+
+  <h4>9.4 Serve the Model Locally</h4>
+
+<pre><span class="code-lang">Bash</span><code># Option 1: vLLM (fastest, CUDA only)
+pip install vllm
+python -m vllm.entrypoints.openai.api_server \
+  --model ./outputs/merged_model \
+  --port 8000
+
+# Option 2: Ollama (easiest, supports Apple Silicon)
+# Convert to GGUF first, then:
+ollama create my-model -f ./Modelfile
+ollama run my-model
+
+# Option 3: Hugging Face Text Generation Inference (TGI)
+docker run --gpus all ghcr.io/huggingface/text-generation-inference \
+  --model-id ./outputs/merged_model \
+  --port 8080</code></pre>
+
+  <div class="callout callout-tip">
+    <span class="callout-icon">💡</span>
+    <div class="callout-body"><strong>The OpenAI-compatible API:</strong> Both vLLM and Ollama expose an OpenAI-compatible endpoint. Any app built against the OpenAI SDK works with your local model by just changing the <code>base_url</code> to <code>http://localhost:8000/v1</code>. Zero application code changes.</div>
+  </div>
+</div>
+
+<!-- CHAPTER 10: COMMON MISTAKES -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 10</span> Common Mistakes & How to Avoid Them</h3>
+
+  <div class="two-col">
+    <div class="info-box">
+      <h5>❌ Training on raw base model</h5>
+      <p>Base models are not instruction-following. Always use an instruct-tuned checkpoint as your starting point for SFT unless you are doing continued pre-training.</p>
+    </div>
+    <div class="info-box">
+      <h5>❌ Not separating train/val/test</h5>
+      <p>Hold out at least 10% of data for validation and 10% for final test. Never evaluate on training data — it will always look better than it actually is.</p>
+    </div>
+    <div class="info-box">
+      <h5>❌ Learning rate too high</h5>
+      <p>2e-4 is a safe default for LoRA. Going to 1e-3 or higher will often cause the loss to spike. Start conservative and tune upward if training is slow.</p>
+    </div>
+    <div class="info-box">
+      <h5>❌ Training too many epochs</h5>
+      <p>3 epochs is often enough for SFT. After 5+, many models start memorising training examples verbatim rather than generalising. Monitor validation loss.</p>
+    </div>
+    <div class="info-box">
+      <h5>❌ Ignoring chat templates</h5>
+      <p>Each instruct model has a specific chat template (ChatML, Llama-3, etc.). Using the wrong format at inference will cause poor outputs even from a well-trained model. Use <code>tokenizer.apply_chat_template()</code>.</p>
+    </div>
+    <div class="info-box">
+      <h5>❌ Mixing data quality</h5>
+      <p>One bad example in 10 is not a problem. One bad example in 100 starts to matter. One bad pattern repeated 50 times will dominate your model's outputs. Curate aggressively.</p>
+    </div>
+  </div>
+
+  <h4>10.1 Final Checklist Before You Start Training</h4>
+  <ul class="checklist">
+    <li>Licence of base model is compatible with your intended use</li>
+    <li>Dataset is cleaned, deduplicated, and held-out splits are created</li>
+    <li>Chat template is correct for your chosen base model</li>
+    <li>Environment verification script runs without errors</li>
+    <li>A small smoke test (10 steps) completes without OOM or NaN loss</li>
+    <li>Experiment tracking (wandb or TensorBoard) is configured</li>
+    <li>Checkpointing is enabled so you can recover from crashes</li>
+    <li>You have a baseline — evaluated the un-fine-tuned model on your test set</li>
+  </ul>
+
+  <div class="callout callout-green">
+    <span class="callout-icon">🚀</span>
+    <div class="callout-body"><strong>You're ready:</strong> With this guide, a Hugging Face account, Python installed, and a GPU with at least 8 GB of VRAM (or an M-series Mac), you have everything you need to go from a downloaded model to a domain-specific fine-tuned LLM. The loop is always the same: get data → clean data → train → evaluate → iterate.</div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- CHAPTER 11: APPLE SILICON PERFORMANCE -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 11</span> Apple Silicon — Getting Maximum Performance</h3>
+
+  <p>Apple Silicon (M1 through M4) is uniquely suited for on-device LLM work. Unified memory means the GPU and CPU share the same physical pool — a 64 GB M2 Max can hold models that exceed a 24 GB NVIDIA card's limit. But MPS and MLX have different strengths, and knowing which to reach for saves hours of debugging.</p>
+
+  <h4>11.1 MPS vs MLX — Pick the Right Tool</h4>
+  <div class="two-col">
+    <div class="info-box">
+      <h5>🔷 PyTorch MPS</h5>
+      <p>The MPS backend plugs into the Hugging Face ecosystem you already know — transformers, PEFT, SFTTrainer all work out of the box. Fastest for batch training workloads. Some ops silently fall back to CPU; bitsandbytes 4-bit quantisation is not supported on MPS.</p>
+    </div>
+    <div class="info-box">
+      <h5>🍎 MLX (Apple-native)</h5>
+      <p>Purpose-built by Apple for Apple Silicon. No device management needed — unified memory means tensors just exist. Faster than MPS for <strong>inference</strong> and <strong>single-item prediction</strong>. The go-to for running quantised models and LoRA fine-tuning when bitsandbytes is not an option.</p>
+    </div>
+  </div>
+
+  <div class="callout callout-info">
+    <span class="callout-icon">ℹ️</span>
+    <div class="callout-body"><strong>Performance reality:</strong> Benchmarks show PyTorch MPS can outperform MLX on batch training tasks. MLX leads on inference startup latency and single-item throughput. For fine-tuning on consumer Macs, MLX LoRA is the most practical starting point — bitsandbytes does not support MPS, so QLoRA is unavailable in the PyTorch path.</div>
+  </div>
+
+  <h4>11.2 Using PyTorch MPS Correctly</h4>
+<pre><span class="code-lang">Python</span><code>import os
+import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM
+
+# Tell accelerate to use MPS when device_map="auto"
+os.environ["ACCELERATE_USE_MPS_DEVICE"] = "True"
+# Allow unsupported ops to fall back to CPU instead of crashing
+os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
+
+# Verify MPS is active before loading anything
+assert torch.backends.mps.is_available(), "MPS not available — check macOS and PyTorch versions"
+assert torch.backends.mps.is_built(),     "PyTorch was not built with MPS support"
+
+# Quick sanity check
+x = torch.ones(3, device="mps")
+print(f"Tensor lives on: {x.device}")   # → mps:0
+
+# Load a model — use device_map="auto" (not "mps", which is not a valid map value)
+tokenizer = AutoTokenizer.from_pretrained("microsoft/Phi-3.5-mini-instruct")
+model = AutoModelForCausalLM.from_pretrained(
+    "microsoft/Phi-3.5-mini-instruct",
+    torch_dtype=torch.float16,   # float16 works on MPS; bfloat16 support varies
+    device_map="auto",           # accelerate will route to MPS via env var above
+)
+
+# Or for small models, manually place on MPS device:
+# model = model.to(torch.device("mps"))
+
+# Confirm layers are actually on MPS
+first_layer_device = next(model.parameters()).device
+print(f"Model on: {first_layer_device}")   # should show mps:0, not cpu</code></pre>
+
+  <h4>11.3 MLX — Native Apple Silicon Stack</h4>
+  <p>MLX is Apple's own array framework. The <code>mlx-lm</code> package provides a complete pipeline for running and fine-tuning LLMs. There is no device management — all tensors share unified memory automatically.</p>
+
+<pre><span class="code-lang">Bash</span><code># Install MLX and the LLM wrapper (Apple Silicon only — pip will reject on Intel/CUDA)
+pip install mlx mlx-lm
+
+# Run a quantised model — downloads from mlx-community on Hugging Face Hub
+mlx_lm.generate \
+  --model mlx-community/Llama-3.2-3B-Instruct-4bit \
+  --prompt "Explain attention mechanisms in one paragraph" \
+  --max-tokens 300
+
+# Fine-tune with LoRA — replace bitsandbytes QLoRA on Apple Silicon
+mlx_lm.lora \
+  --model mlx-community/Mistral-7B-Instruct-v0.3-4bit \
+  --train \
+  --data ./data/processed \
+  --iters 1000 \
+  --batch-size 4 \
+  --lora-layers 16 \
+  --learning-rate 1e-5
+
+# Convert any Hugging Face model to MLX format yourself
+mlx_lm.convert \
+  --hf-path meta-llama/Llama-3.2-3B-Instruct \
+  --mlx-path ./models/llama-3.2-3b-mlx \
+  --quantize \
+  --q-bits 4</code></pre>
+
+<pre><span class="code-lang">Python</span><code>from mlx_lm import load, generate
+
+# Load — no device placement needed, unified memory handles it
+model, tokenizer = load("mlx-community/Llama-3.2-3B-Instruct-4bit")
+
+# Generate — verbose=True prints live tokens/sec
+response = generate(
+    model,
+    tokenizer,
+    prompt="What is the difference between SFT and DPO?",
+    max_tokens=300,
+    verbose=True,    # prints token speed as output streams
+)
+print(response)</code></pre>
+
+  <h4>11.4 Ollama — Zero-Config Local Inference</h4>
+  <p>If your goal is just running models locally without configuring Python, Ollama is the fastest path. It uses llama.cpp with Metal acceleration and exposes an OpenAI-compatible API out of the box.</p>
+
+<pre><span class="code-lang">Bash</span><code># Install via Homebrew (or download from https://ollama.com)
+brew install ollama
+
+# Start the background server
+ollama serve
+
+# Pull models — fully Metal-accelerated on Apple Silicon
+ollama pull llama3.2:3b       # ~2 GB on disk
+ollama pull mistral:7b        # ~4.1 GB
+ollama pull phi4:14b          # ~8.5 GB
+
+# Chat interactively
+ollama run llama3.2:3b
+
+# Or call the OpenAI-compatible REST API — works with any OpenAI SDK app
+curl http://localhost:11434/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{"model":"llama3.2:3b","messages":[{"role":"user","content":"Hello!"}]}'</code></pre>
+
+  <h4>11.5 Memory Tiers — Which Mac Can Run What</h4>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Mac Config</th><th>Unified Memory</th><th>Max Model (4-bit)</th><th>Best Path</th></tr></thead>
+    <tbody>
+      <tr><td>M1 / M2 base</td><td>8 GB</td><td>1–3B params</td><td>Ollama or MLX with Phi-3.5-mini-instruct</td></tr>
+      <tr><td>M1 Pro / M2 Pro</td><td>16 GB</td><td>7–8B params</td><td>MLX with Mistral-7B or Llama-3.2-3B comfortably</td></tr>
+      <tr><td>M1 Max / M2 Max</td><td>32–38 GB</td><td>13–14B params</td><td>Phi-4-14B or Llama-3.1-8B with headroom for fine-tuning</td></tr>
+      <tr><td>M2 Ultra / M3 Max</td><td>64–96 GB</td><td>34–40B params</td><td>Llama-3.3-70B in 4-bit, QwQ-32B</td></tr>
+      <tr><td>M2 Ultra (192 GB)</td><td>192 GB</td><td>70B+ params</td><td>Llama-3.1-70B in 8-bit, full fine-tuning of 13B models</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout callout-tip">
+    <span class="callout-icon">💡</span>
+    <div class="callout-body"><strong>Activity Monitor check:</strong> Open Activity Monitor → GPU History while a model runs. If GPU usage sits near 0%, your model is running on CPU — something is wrong with your device setup. You should see sustained 60–100% GPU utilisation during inference and training on Apple Silicon.</div>
+  </div>
+
+  <h4>11.6 MLX LoRA Fine-Tuning — Data Format</h4>
+  <p>MLX LoRA expects your data in a specific JSONL format inside a folder. Both <code>train.jsonl</code> and <code>valid.jsonl</code> must exist.</p>
+<pre><span class="code-lang">Python</span><code">import json, os
+
+os.makedirs("./data/processed", exist_ok=True)
+
+# Each line must be a JSON object with a "text" field
+# Apply your model's chat template before saving
+from mlx_lm import load
+model, tokenizer = load("mlx-community/Mistral-7B-Instruct-v0.3-4bit")
+
+examples = [
+    {"prompt": "What is LoRA?",  "response": "LoRA is Low-Rank Adaptation..."},
+    {"prompt": "Define fine-tuning.", "response": "Fine-tuning is..."},
+    # ... your data
+]
+
+def to_mlx_format(ex):
+    msgs = [
+        {"role": "user",      "content": ex["prompt"]},
+        {"role": "assistant", "content": ex["response"]},
+    ]
+    return {"text": tokenizer.apply_chat_template(msgs, tokenize=False)}
+
+formatted = [to_mlx_format(e) for e in examples]
+
+# 90/10 train/val split
+split = int(len(formatted) * 0.9)
+for fname, rows in [("train.jsonl", formatted[:split]), ("valid.jsonl", formatted[split:])]:
+    with open(f"./data/processed/{fname}", "w") as f:
+        for row in rows:
+            f.write(json.dumps(row) + "\n")
+
+print(f"Train: {split} examples | Val: {len(formatted)-split} examples")</code></pre>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- CHAPTER 12: PERFORMANCE GAINS -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 12</span> Performance Gains — Speed, Memory &amp; Throughput</h3>
+
+  <p>Whether you're on NVIDIA or Apple Silicon, these techniques are additive — stack them in order of effort for the highest return. None of them require changing your model or your data.</p>
+
+  <h4>12.1 The Optimisation Stack — Apply in This Order</h4>
+  <div class="pipeline-flow">
+    <div class="pipeline-step"><span class="step-num">①</span><div><div class="step-title">Switch to bfloat16 — one word, instant win</div><div class="step-desc">bfloat16 has a wider dynamic range than float16, meaning fewer NaN/inf errors during training. Every A100, H100, and M-series chip supports it natively. Change torch_dtype=torch.float16 to torch.bfloat16 everywhere.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">②</span><div><div class="step-title">Quantise the base model — fit a larger model in your VRAM</div><div class="step-desc">4-bit NF4 (via bitsandbytes on CUDA) or 4-bit GGUF/MLX (on Apple) cuts model size by 4×. A 7B model drops from ~14 GB to ~4–5 GB with less than 2% quality loss on most tasks.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">③</span><div><div class="step-title">Enable gradient checkpointing — trade 20% compute for 30–40% less VRAM</div><div class="step-desc">Instead of storing all intermediate activations during the forward pass, recompute them during backprop. One flag in TrainingArguments. Essential for fine-tuning on consumer GPUs and MPS Macs.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">④</span><div><div class="step-title">Gradient accumulation — simulate large batches on small hardware</div><div class="step-desc">Run N forward passes before each optimiser step. Effective batch = per_device_batch × accumulation_steps. Use a small per-device batch (1–2) and accumulate 8–16 steps.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">⑤</span><div><div class="step-title">Flash Attention 2 (CUDA only) — free 2–4× speed in attention layers</div><div class="step-desc">Rewrites the attention computation to be IO-bound rather than memory-bound. One line to enable. MPS does not support Flash Attention — use sequence packing instead for throughput on Apple Silicon.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">⑥</span><div><div class="step-title">Sequence packing — eliminate wasted padding</div><div class="step-desc">If your examples are short (under 512 tokens), packing multiple examples into one sequence removes padding waste and can 2–4× your training throughput. Works on both CUDA and MPS.</div></div></div>
+  </div>
+
+  <h4>12.2 Quantisation Options Compared</h4>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Method</th><th>Bits</th><th>Quality Loss</th><th>Hardware</th><th>Best For</th></tr></thead>
+    <tbody>
+      <tr><td><strong>NF4 (bitsandbytes)</strong></td><td>4-bit</td><td>~1–2%</td><td>CUDA only</td><td>QLoRA training, CUDA inference</td></tr>
+      <tr><td><strong>GPTQ</strong></td><td>4-bit</td><td>~1–2%</td><td>CUDA</td><td>Fast CUDA inference, pre-quantised Hub models</td></tr>
+      <tr><td><strong>AWQ</strong></td><td>4-bit</td><td>~0.5%</td><td>CUDA</td><td>Best quality 4-bit on CUDA</td></tr>
+      <tr><td><strong>GGUF Q4_K_M</strong></td><td>4-bit</td><td>~1%</td><td>CPU + MPS + CUDA</td><td>Apple Silicon via Ollama/llama.cpp</td></tr>
+      <tr><td><strong>GGUF Q8_0</strong></td><td>8-bit</td><td>&lt;0.5%</td><td>CPU + MPS + CUDA</td><td>Higher quality, 2× size of Q4</td></tr>
+      <tr><td><strong>MLX 4-bit</strong></td><td>4-bit</td><td>~1%</td><td>Apple Silicon only</td><td>MLX inference and LoRA fine-tuning on Mac</td></tr>
+    </tbody>
+  </table></div>
+
+  <h4>12.3 Key Training Flags — All in One Place</h4>
+<pre><span class="code-lang">Python</span><code>from transformers import TrainingArguments
+
+args = TrainingArguments(
+    output_dir="./checkpoints",
+
+    # --- Memory ---
+    gradient_checkpointing=True,        # recompute activations, saves 30-40% VRAM
+    gradient_accumulation_steps=8,      # effective batch = per_device x 8
+    per_device_train_batch_size=2,      # raise until you hit OOM, then lower by 1
+
+    # --- Precision ---
+    bf16=True,                          # bfloat16: safer than fp16, same speed
+    # fp16=True,                        # use instead on older GPUs without bf16
+
+    # --- Speed (CUDA) ---
+    # attn_implementation="flash_attention_2"  # set in model.from_pretrained instead
+    dataloader_num_workers=4,           # parallel data loading (set 0 on Windows)
+    dataloader_pin_memory=True,         # faster CPU->GPU transfers (CUDA only)
+
+    # --- Eval memory safety ---
+    per_device_eval_batch_size=1,
+    eval_accumulation_steps=4,
+
+    # --- Logging and saving ---
+    logging_steps=10,
+    save_strategy="epoch",
+    load_best_model_at_end=True,        # auto-keeps best checkpoint by val loss
+    metric_for_best_model="eval_loss",
+    report_to="wandb",                  # or "none" to disable tracking
+)</code></pre>
+
+  <h4>12.4 Flash Attention 2 — CUDA Only, One Line</h4>
+<pre><span class="code-lang">Python</span><code># pip install flash-attn --no-build-isolation (CUDA only, not MPS)
+from transformers import AutoModelForCausalLM
+import torch
+
+model = AutoModelForCausalLM.from_pretrained(
+    "meta-llama/Llama-3.1-8B-Instruct",
+    torch_dtype=torch.bfloat16,
+    device_map="auto",
+    attn_implementation="flash_attention_2",   # ← the entire change
+)
+
+# Verify it took effect
+print(model.config._attn_implementation)      # → flash_attention_2</code></pre>
+
+  <h4>12.5 Sequence Packing — Works on CUDA and MPS</h4>
+<pre><span class="code-lang">Python</span><code>from trl import SFTTrainer
+
+trainer = SFTTrainer(
+    model=model,
+    tokenizer=tokenizer,
+    args=training_args,
+    train_dataset=dataset["train"],
+    dataset_text_field="text",
+    max_seq_length=2048,
+    packing=True,   # packs multiple short examples into one sequence
+                    # set False if your examples are already near max_seq_length
+)
+# Rule of thumb: if average example is under 30% of max_seq_length, packing helps</code></pre>
+
+  <h4>12.6 torch.compile — Free Speed on PyTorch 2.x</h4>
+<pre><span class="code-lang">Python</span><code>import torch
+
+# First call compiles (slow — up to several minutes). All subsequent calls are fast.
+model = torch.compile(model, mode="reduce-overhead")
+
+# mode options:
+# "default"          → safe, ~10-20% speedup, wide compatibility
+# "reduce-overhead"  → reduces Python overhead, good for LLMs, ~20-40% faster
+# "max-autotune"     → aggressive compile, fastest runtime, CUDA only
+# fullgraph=False    → safer if model has dynamic control flow</code></pre>
+
+  <h4>12.7 Monitor What Your Hardware Is Actually Doing</h4>
+<pre><span class="code-lang">Bash</span><code># NVIDIA — live GPU stats every 0.5 seconds
+watch -n 0.5 nvidia-smi
+
+# Better NVIDIA monitor (pip install nvitop)
+nvitop
+
+# Apple Silicon — command-line GPU power and utilisation
+sudo powermetrics --samplers gpu_power -i 1000 -n 10
+
+# Cross-platform Python memory snapshot during training
+import torch
+print(f"Allocated : {torch.cuda.memory_allocated()/1e9:.2f} GB")
+print(f"Reserved  : {torch.cuda.memory_reserved()/1e9:.2f} GB")
+print(f"Peak alloc: {torch.cuda.max_memory_allocated()/1e9:.2f} GB")
+
+# Reset peak tracking between runs
+torch.cuda.reset_peak_memory_stats()</code></pre>
+
+  <div class="callout callout-warn">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-body"><strong>GPU under 60% utilisation during training?</strong> Your data loader is the bottleneck. Pre-tokenise your dataset once and save it with <code>dataset.save_to_disk()</code>. Then load the pre-tokenised version at training time — never re-tokenise on each epoch. Also increase <code>dataloader_num_workers</code> to 4.</div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- CHAPTER 13: FINE-TUNING FOR NEW USERS -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Chapter 13</span> Fine-Tuning Fundamentals — What Every New User Must Know</h3>
+
+  <p>Fine-tuning looks simple from the outside — load a model, run a trainer, save weights. The reality has a dozen invisible traps that silently produce a worse model while the loss curve looks fine. This chapter is everything you need internalised before running a single training step.</p>
+
+  <h4>13.1 The Core Mental Model</h4>
+  <div class="decision-box">
+    <div class="decision-label">What Fine-Tuning Actually Does</div>
+    <p>A base model has already learned <strong>how language works</strong> — grammar, reasoning, world knowledge — from hundreds of billions of tokens. Fine-tuning <strong>does not inject new knowledge</strong>. It teaches the model <strong>how to behave</strong>: which format to use, which tone to adopt, which vocabulary to prioritise. If you want it to know new facts → use RAG. If you want it to act differently → fine-tune.</p>
+  </div>
+
+  <h4>13.2 The Four Training Modes</h4>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Mode</th><th>What It Teaches</th><th>Data Needed</th><th>When to Use It</th></tr></thead>
+    <tbody>
+      <tr><td><strong>SFT (Supervised Fine-Tuning)</strong></td><td>Follow a specific instruction format and style</td><td>Prompt → Response pairs (500–10K)</td><td>First step for almost every use case</td></tr>
+      <tr><td><strong>Continued Pre-Training</strong></td><td>New domain vocabulary and concepts</td><td>Raw domain text (millions of tokens)</td><td>Deeply specialised domains — medical, legal, novel languages</td></tr>
+      <tr><td><strong>DPO (Direct Preference Optimisation)</strong></td><td>Prefer one response style over another</td><td>Chosen / rejected pairs (1K+)</td><td>After SFT, to align tone, safety, or output quality</td></tr>
+      <tr><td><strong>LoRA / QLoRA</strong></td><td>Same as SFT — but via efficient adapter layers</td><td>Same as SFT</td><td>Consumer hardware — almost always your first choice</td></tr>
+    </tbody>
+  </table></div>
+
+  <h4>13.3 Data Preparation — Where 80% of Failures Come From</h4>
+<pre><span class="code-lang">Python</span><code>import json
+from datasets import Dataset
+
+# STEP 1: Define one format and apply it 100% consistently
+def format_example(prompt: str, response: str) -> dict:
+    return {
+        "text": (
+            f"### Instruction:\n{prompt}\n\n"
+            f"### Response:\n{response}"
+        )
+    }
+
+# STEP 2: Validate every example — the model learns your bugs too
+def validate(ex: dict) -> list:
+    issues = []
+    if not ex.get("prompt") or len(ex["prompt"].strip()) < 10:
+        issues.append("prompt too short or empty")
+    if not ex.get("response") or len(ex["response"].strip()) < 20:
+        issues.append("response too short or empty")
+    if ex.get("prompt") == ex.get("response"):
+        issues.append("prompt equals response")
+    if len(ex.get("response", "")) > 6000:
+        issues.append("response suspiciously long — possible duplicate or corruption")
+    return issues
+
+# STEP 3: Load, audit, fix
+raw = [json.loads(l) for l in open("my_data.jsonl")]
+bad = [(i, validate(ex)) for i, ex in enumerate(raw) if validate(ex)]
+print(f"Total: {len(raw)} | Bad: {len(bad)}")
+for idx, issues in bad[:10]:
+    print(f"  Row {idx}: {issues}")
+
+# STEP 4: Filter and format clean examples only
+clean = [format_example(ex["prompt"], ex["response"])
+         for ex in raw if not validate(ex)]
+dataset = Dataset.from_list(clean)</code></pre>
+
+  <h4>13.4 Chat Templates — The Invisible Bug</h4>
+  <p>Every instruct model was trained with a specific prompt format. Using the wrong one is one of the most common silent failures — the model degrades with no error message.</p>
+<pre><span class="code-lang">Python</span><code>from transformers import AutoTokenizer
+
+tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-3B-Instruct")
+
+# WRONG: hand-rolled format almost certainly mismatches what the model expects
+wrong = "### Instruction:\nWhat is LoRA?\n\n### Response:\n"
+
+# RIGHT: apply_chat_template always produces the exact format the model expects
+messages = [
+    {"role": "system", "content": "You are a helpful ML assistant."},
+    {"role": "user",   "content": "What is LoRA?"},
+]
+correct = tokenizer.apply_chat_template(
+    messages,
+    tokenize=False,
+    add_generation_prompt=True,   # adds the assistant turn opener
+)
+print(correct)
+# <|begin_of_text|><|start_header_id|>system<|end_header_id|>\nYou are...
+
+# Apply at data-prep time — not at inference time inside the training loop
+def format_with_template(example):
+    msgs = [
+        {"role": "user",      "content": example["prompt"]},
+        {"role": "assistant", "content": example["response"]},
+    ]
+    return {"text": tokenizer.apply_chat_template(msgs, tokenize=False)}
+
+dataset = dataset.map(format_with_template)</code></pre>
+
+  <h4>13.5 Train / Val / Test Split — Non-Negotiable</h4>
+<pre><span class="code-lang">Python</span><code>from datasets import Dataset
+import random
+
+random.seed(42)
+data = list(dataset)
+random.shuffle(data)
+
+n = len(data)
+train = data[:int(n * 0.80)]
+val   = data[int(n * 0.80):int(n * 0.90)]
+test  = data[int(n * 0.90):]
+
+# Save to disk before any training — never mix splits
+Dataset.from_list(train).save_to_disk("./data/splits/train")
+Dataset.from_list(val).save_to_disk("./data/splits/val")
+Dataset.from_list(test).save_to_disk("./data/splits/test")
+print(f"Train: {len(train)} | Val: {len(val)} | Test: {len(test)}")</code></pre>
+
+  <div class="callout callout-warn">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-body"><strong>Split before any preprocessing.</strong> If you deduplicate after splitting, examples from your test set may have leaked into training. Split first, then process each split independently.</div>
+  </div>
+
+  <h4>13.6 Reading Your Loss Curves</h4>
+  <div class="use-case-grid">
+    <div class="use-case-card"><div class="uc-icon">📉</div><h5>Both losses drop together</h5><p>Healthy training — the model is generalising. Continue or stop when val loss plateaus.</p><span class="uc-tag">✅ Keep going</span></div>
+    <div class="use-case-card"><div class="uc-icon">📈</div><h5>Val rises, train drops</h5><p>Overfitting — the model is memorising. Stop here and use the checkpoint where val was lowest.</p><span class="uc-tag">🛑 Stop early</span></div>
+    <div class="use-case-card"><div class="uc-icon">🔀</div><h5>Loss spikes suddenly</h5><p>Learning rate too high or a corrupted batch. Halve the learning rate and relaunch.</p><span class="uc-tag">⚠️ Lower LR</span></div>
+    <div class="use-case-card"><div class="uc-icon">📊</div><h5>Loss stalls from step 1</h5><p>LR too low, frozen layers, or wrong LoRA target_modules. Check your config.</p><span class="uc-tag">⚠️ Check config</span></div>
+    <div class="use-case-card"><div class="uc-icon">🎯</div><h5>Val loss = NaN</h5><p>Data issue — empty batch, bad label, or zero-length sequence. Add pre-training validation logging.</p><span class="uc-tag">🐛 Debug data</span></div>
+    <div class="use-case-card"><div class="uc-icon">🏁</div><h5>Both losses floor out</h5><p>The model has learned everything in your data. More epochs won't help — get more diverse data.</p><span class="uc-tag">✅ Evaluate now</span></div>
+  </div>
+
+  <h4>13.7 The Fastest Path from Idea to Working Fine-Tune</h4>
+  <div class="pipeline-flow">
+    <div class="pipeline-step"><span class="step-num">①</span><div><div class="step-title">Always start from an instruct-tuned checkpoint, not a base model</div><div class="step-desc">Llama-3.2-3B-Instruct, Phi-3.5-mini-instruct, Mistral-7B-Instruct — these already follow instructions. Your SFT only needs to adjust behaviour, not teach instruction-following from scratch. Base models require far more data to be useful.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">②</span><div><div class="step-title">Write 200 examples by hand before touching any training code</div><div class="step-desc">If you cannot write 200 clear prompt → response pairs yourself, your task is not well-defined enough to fine-tune. This is not a suggestion. Good data beats good code every time. Spend a day on this.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">③</span><div><div class="step-title">Run a 10-step smoke test before committing to a full run</div><div class="step-desc">Set max_steps=10 in TrainingArguments. If you see OOM, NaN loss, or no GPU activity, fix it now — not after 6 hours. Confirm: loss is not NaN, a checkpoint saves, and your monitor shows GPU activity.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">④</span><div><div class="step-title">Train 1 epoch, evaluate fully, then decide on more epochs</div><div class="step-desc">Many tasks are done after one epoch. Evaluate on your held-out test set before spending more compute. You will often be surprised how little training is needed — especially with LoRA.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">⑤</span><div><div class="step-title">Keep the LoRA adapter, not the merged model, until you are satisfied</div><div class="step-desc">A LoRA adapter is a few hundred MB. The merged model is full size. Adapters can be re-merged anytime. Keep adapters from each epoch and only merge the winner after your evaluation is done.</div></div></div>
+  </div>
+
+  <h4>13.8 Sanity Checks Before You Ship Anything</h4>
+  <ul class="checklist">
+    <li>Run 20 prompts manually — read every output yourself, metrics lie, human eyes catch format drift</li>
+    <li>Test the exact use cases that motivated the fine-tune — tone, format, domain vocab — those should clearly win vs the base model</li>
+    <li>Test a prompt not in your dataset — if the model fails on novel inputs, it overfitted</li>
+    <li>Compare directly against the un-fine-tuned base model on your test set — your model must clearly win</li>
+    <li>Check for repetition loops — a sign of too many epochs or bad training data</li>
+    <li>Check output length distribution — if the model always stops short or always runs to max tokens, your response format may be wrong</li>
+    <li>Ask it something clearly outside its training domain — it should say it doesn't know, not hallucinate confidently</li>
+  </ul>
+
+  <div class="callout callout-purple">
+    <span class="callout-icon">🧠</span>
+    <div class="callout-body"><strong>The mindset that separates fast learners:</strong> Treat your first fine-tune as a debugging exercise, not a production run. The goal is to get the full loop working — data in, model trained, evaluation completed — with any result at all. A model that trains without crashing and produces coherent (even if imperfect) output is a success. From that baseline, iterate on data quality. Everything else is tuning noise.</div>
+  </div>
+</div>
+
+<footer>
+  <p>Hugging Face LLM Guide — From Zero to Fine-Tuned &nbsp;·&nbsp; Python · transformers · peft · trl &nbsp;·&nbsp; <a href="index.html">← Back to Portfolio</a></p>
+</footer>
+</div>
+
+<script>
+// Starfield
+const container = document.getElementById('stars');
+for (let i = 0; i < 120; i++) {
+  const s = document.createElement('div'); s.className = 'star';
+  const size = Math.random() * 2 + 0.5;
+  s.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--dur:${2+Math.random()*4}s;--min-op:${0.05+Math.random()*0.1};--max-op:${0.3+Math.random()*0.5};animation-delay:${Math.random()*5}s;`;
+  container.appendChild(s);
+}
+
+// HF-themed background — flowing knowledge nodes and connection arcs
+(function(){
+  var canvas = document.getElementById('bgCanvas'), ctx = canvas.getContext('2d'), W, H;
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+  function rnd(a,b){ return a + Math.random()*(b-a); }
+
+  // Floating knowledge nodes
+  function KNode() { this.reset(true); }
+  KNode.prototype.reset = function(fromRandom) {
+    this.x = rnd(0, W); this.y = fromRandom ? rnd(0, H) : rnd(0, H*0.2);
+    this.vx = rnd(-0.12, 0.12); this.vy = rnd(0.08, 0.3);
+    this.r = rnd(2, 5); this.alpha = rnd(0.05, 0.18);
+    var t = Math.random();
+    this.col = t < 0.33 ? [255,210,102] : t < 0.66 ? [61,139,255] : [192,132,252];
+  };
+  KNode.prototype.update = function() {
+    this.x += this.vx; this.y += this.vy;
+    if (this.y > H+10 || this.x < -20 || this.x > W+20) this.reset(false);
+  };
+  KNode.prototype.draw = function() {
+    var c = this.col;
+    var g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r*5);
+    g.addColorStop(0, 'rgba('+c[0]+','+c[1]+','+c[2]+','+(this.alpha*2.5)+')');
+    g.addColorStop(1, 'rgba('+c[0]+','+c[1]+','+c[2]+',0)');
+    ctx.beginPath(); ctx.arc(this.x, this.y, this.r*5, 0, Math.PI*2);
+    ctx.fillStyle = g; ctx.fill();
+  };
+
+  // Flowing arcs — represent data flowing through a model
+  function Arc() { this.reset(true); }
+  Arc.prototype.reset = function(fromRandom) {
+    this.x = rnd(0, W); this.y = fromRandom ? rnd(0, H) : rnd(0, H*0.3);
+    this.angle = rnd(-Math.PI/5, Math.PI/5);
+    this.speed = rnd(0.8, 2.5); this.len = rnd(40, 120);
+    this.life = 1; this.decay = rnd(0.012, 0.035);
+    this.col = Math.random() > 0.5 ? [255,210,102] : [61,255,160];
+  };
+  Arc.prototype.update = function() {
+    this.x += Math.sin(this.angle)*this.speed;
+    this.y += Math.cos(this.angle)*this.speed;
+    this.life -= this.decay;
+    if (this.life <= 0 || this.y > H+60) this.reset(false);
+  };
+  Arc.prototype.draw = function() {
+    var c = this.col, a = this.life * 0.35;
+    ctx.beginPath();
+    ctx.moveTo(this.x, this.y);
+    ctx.lineTo(this.x - Math.sin(this.angle)*this.len, this.y - Math.cos(this.angle)*this.len);
+    var g = ctx.createLinearGradient(this.x, this.y, this.x-Math.sin(this.angle)*this.len, this.y-Math.cos(this.angle)*this.len);
+    g.addColorStop(0, 'rgba('+c[0]+','+c[1]+','+c[2]+','+a+')');
+    g.addColorStop(1, 'rgba('+c[0]+','+c[1]+','+c[2]+',0)');
+    ctx.strokeStyle = g; ctx.lineWidth = 1.5; ctx.stroke();
+  };
+
+  var nodes = []; for(var i=0;i<100;i++) nodes.push(new KNode());
+  var arcs = [];  for(var i=0;i<20;i++)  arcs.push(new Arc());
+
+  function loop() {
+    ctx.clearRect(0,0,W,H);
+    nodes.forEach(function(n){ n.update(); n.draw(); });
+    arcs.forEach(function(a){ a.update(); a.draw(); });
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); observer.unobserve(e.target); } });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
