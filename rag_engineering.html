@@ -121,6 +121,13 @@ footer span { color: var(--accent3); }
 footer a { color: var(--accent2); text-decoration: none; }
 footer a:hover { text-decoration: underline; }
 @media (max-width: 640px) { .nav-links { display: none; } .chapter { padding-left: 1.25rem; padding-right: 1.25rem; } .two-col { grid-template-columns: 1fr; } .stat-row { grid-template-columns: 1fr 1fr; } }
+
+.video-inner { background: var(--bg3); border: 1px solid var(--border2); border-radius: 12px; overflow: hidden; }
+.video-header { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1.25rem; border-bottom: 1px solid var(--border); }
+.video-tag { font-size: 0.65rem; font-family: var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent3); background: rgba(255,122,71,0.1); border: 1px solid rgba(255,122,71,0.25); border-radius: 4px; padding: 0.2em 0.6em; }
+.video-title { font-size: 0.85rem; font-weight: 600; color: var(--text-bright); }
+.video-inner video { width: 100%; display: block; max-height: 520px; background: #000; }
+.video-caption { font-size: 0.78rem; color: var(--text-dim); padding: 0.75rem 1.25rem; margin: 0; border-top: 1px solid var(--border); line-height: 1.6; }
 </style>
 </head>
 <body>
@@ -159,6 +166,21 @@ footer a:hover { text-decoration: underline; }
   <div class="stat-card"><div class="stat-val">100%</div><div class="stat-lbl">Retrieval Accuracy</div></div>
   <div class="stat-card"><div class="stat-val">0.98ms</div><div class="stat-lbl">Query Latency</div></div>
   <div class="stat-card"><div class="stat-val">3</div><div class="stat-lbl">Lines Changed in Swift</div></div>
+</div>
+
+<!-- VIDEO CARD -->
+<div class="video-card reveal" style="max-width:900px;margin:0 auto 2rem;padding:0 2rem;">
+  <div class="video-inner">
+    <div class="video-header">
+      <span class="video-tag">▶ Demo</span>
+      <span class="video-title">RAG System — Live Walkthrough</span>
+    </div>
+    <video controls preload="metadata" poster="">
+      <source src="https://raw.githubusercontent.com/rstahlb/Local-Agentic-Orchestrator/main/rag_video.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    <p class="video-caption">End-to-end demo: indexing a story file, querying the RAG server, and observing targeted context injection in George's LLM prompt.</p>
+  </div>
 </div>
 
 <div class="tech-grid reveal">
