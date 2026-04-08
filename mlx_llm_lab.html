@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MLX LLM Lab — Deep Dive Technical Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Geist+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #050810; --bg2: #080d1a; --bg3: #0d1425;
+  --border: #1e2d4a; --border2: #28385e;
+  --text: #dde6f8; --text-dim: #8fa3cc; --text-bright: #f0f5ff;
+  --accent1: #3d8bff; --accent2: #18d4ff; --accent3: #3dffa0; --accent4: #c084fc;
+  --yellow: #ffd166; --code-bg: #070c18;
+  --font-display: 'Inter', sans-serif; --font-mono: 'Geist Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-display); font-size: 15px; line-height: 1.75; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+
+#stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.star { position: absolute; border-radius: 50%; background: white; animation: twinkle var(--dur) ease-in-out infinite alternate; opacity: 0; }
+@keyframes twinkle { from { opacity: var(--min-op); } to { opacity: var(--max-op); } }
+
+#neuralCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+#app { position: relative; z-index: 1; }
+
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 56px; background: rgba(5,8,16,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
+.nav-brand { font-weight: 800; font-size: 1.05rem; color: var(--text-bright); letter-spacing: -0.02em; }
+.nav-brand span { color: var(--accent1); }
+.nav-links { display: flex; gap: 0.25rem; list-style: none; }
+.nav-links a { color: var(--text-dim); text-decoration: none; font-size: 0.8rem; font-weight: 500; padding: 0.35rem 0.85rem; border-radius: 6px; transition: color 0.2s, background 0.2s; }
+.nav-links a:hover { color: var(--text-bright); background: var(--bg3); }
+.back-link { color: var(--accent2) !important; }
+
+.page-hero { padding: 7rem 2rem 2rem; max-width: 900px; margin: 0 auto; text-align: center; }
+.page-hero .project-number { font-size: 0.68rem; letter-spacing: 0.22em; color: var(--accent3); text-transform: uppercase; margin-bottom: 0.75rem; font-weight: 500; }
+.page-hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; color: var(--text-bright); letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 1rem; }
+.page-hero h1 span { color: var(--accent3); }
+.page-hero .project-desc { color: #a8bde0; font-size: 0.92rem; max-width: 640px; line-height: 1.85; border-left: 2px solid var(--accent3); padding-left: 1rem; margin: 0 auto 2rem; text-align: left; }
+
+.why-box { max-width: 900px; margin: 0 auto 2rem; padding: 0 2rem; }
+.why-inner { background: linear-gradient(135deg, rgba(61,255,160,0.05), rgba(192,132,252,0.05)); border: 1px solid rgba(61,255,160,0.25); border-radius: 12px; padding: 1.75rem 2rem; }
+.why-inner h2 { font-size: 1rem; font-weight: 700; color: var(--accent3); margin-bottom: 0.75rem; letter-spacing: 0.02em; }
+.why-inner p { font-size: 0.88rem; color: #a8bde0; line-height: 1.85; margin-bottom: 0.75rem; }
+.why-inner p:last-child { margin-bottom: 0; }
+.why-inner strong { color: var(--text-bright); }
+
+.tech-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; margin: 1.5rem auto; padding: 0 2rem; max-width: 900px; }
+.tech-item { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem 1rem; }
+.tech-item .tech-label { font-size: 0.65rem; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.25rem; }
+.tech-item .tech-val { font-size: 0.8rem; color: var(--text-bright); font-weight: 600; }
+
+.section-divider { width: 100%; height: 1px; background: linear-gradient(90deg, transparent, var(--border2), transparent); margin: 1rem 0; }
+
+.chapter { padding: 0 2rem 4rem; max-width: 900px; margin: 0 auto; }
+.chapter-title { font-size: 1.4rem; font-weight: 700; color: var(--text-bright); letter-spacing: -0.02em; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; }
+.chapter-num { font-size: 0.67rem; color: var(--accent3); letter-spacing: 0.15em; text-transform: uppercase; font-family: var(--font-mono); font-weight: 500; }
+h4 { font-size: 0.98rem; font-weight: 700; color: var(--accent3); margin: 1.75rem 0 0.75rem; letter-spacing: -0.01em; }
+p { color: var(--text); font-size: 0.9rem; line-height: 1.9; margin-bottom: 1rem; }
+p strong { color: var(--text-bright); font-weight: 600; }
+
+.callout { border-radius: 8px; padding: 1rem 1.25rem; margin: 1.25rem 0; font-size: 0.82rem; line-height: 1.7; display: flex; gap: 0.75rem; align-items: flex-start; }
+.callout-tip  { background: rgba(61,255,160,0.06); border: 1px solid rgba(61,255,160,0.3); color: var(--accent3); }
+.callout-warn { background: rgba(255,200,64,0.06); border: 1px solid rgba(255,200,64,0.2); color: var(--yellow); }
+.callout-info { background: rgba(26,111,255,0.06); border: 1px solid rgba(26,111,255,0.2); color: #7aacff; }
+.callout-purple { background: rgba(192,132,252,0.06); border: 1px solid rgba(192,132,252,0.25); color: var(--accent4); }
+.callout-icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.1rem; }
+.callout-body { color: var(--text); }
+.callout-body strong { color: inherit; }
+
+pre { background: var(--code-bg); border: 1px solid rgba(61,255,160,0.18); border-radius: 8px; padding: 1.25rem 1.5rem; overflow-x: auto; margin: 1rem 0 1.5rem; position: relative; }
+pre code { font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.75; color: #b8d0f8; }
+.code-lang { position: absolute; top: 0.5rem; right: 0.75rem; font-size: 0.6rem; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; }
+code { font-family: var(--font-mono); background: rgba(61,255,160,0.08); border: 1px solid rgba(61,255,160,0.15); border-radius: 4px; padding: 0.1em 0.4em; font-size: 0.82em; color: #7fffb8; }
+pre code { background: none; border: none; padding: 0; font-size: inherit; color: inherit; }
+
+.table-wrap { overflow-x: auto; margin: 1rem 0 1.5rem; border-radius: 8px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead tr { background: var(--bg3); }
+th { padding: 0.75rem 1rem; text-align: left; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: #8fa3cc; font-weight: 600; border-bottom: 1px solid var(--border); }
+td { padding: 0.7rem 1rem; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: rgba(61,255,160,0.03); }
+td code { font-size: 0.75em; }
+
+.pipeline-flow { display: flex; flex-direction: column; gap: 0.6rem; margin: 1.5rem 0; }
+.pipeline-step { display: flex; align-items: flex-start; gap: 1rem; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.25rem; }
+.pipeline-step:hover { border-color: var(--accent3); }
+.step-num { font-family: var(--font-mono); font-size: 0.65rem; color: var(--accent3); font-weight: 600; letter-spacing: 0.1em; min-width: 2rem; padding-top: 0.1rem; }
+.step-title { font-size: 0.88rem; font-weight: 700; color: var(--text-bright); }
+.step-desc { font-size: 0.8rem; color: var(--text-dim); line-height: 1.55; margin-top: 0.2rem; }
+
+.terminal { background: #020509; border: 1px solid rgba(61,255,160,0.2); border-radius: 8px; padding: 1.25rem 1.5rem; margin: 1rem 0 1.5rem; overflow-x: auto; position: relative; }
+.terminal::before { content: '● ● ●'; position: absolute; top: 0.6rem; left: 1rem; font-size: 0.5rem; color: #3a4a6a; letter-spacing: 0.4em; }
+.terminal code { font-family: var(--font-mono); font-size: 0.78rem; line-height: 1.8; color: #7de3a0; display: block; padding-top: 0.75rem; white-space: pre; }
+.terminal .t-dim { color: #4a6080; }
+.terminal .t-bright { color: #c8f0ff; }
+.terminal .t-warn { color: var(--yellow); }
+.terminal .t-prompt { color: #4a8fff; }
+
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+
+footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--text-dim); font-size: 0.75rem; }
+footer span { color: var(--accent3); }
+footer a { color: var(--accent2); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+
+@media (max-width: 640px) {
+  .nav-links { display: none; }
+  .chapter { padding-left: 1.25rem; padding-right: 1.25rem; }
+}
+</style>
+</head>
+<body>
+<div id="stars"></div>
+<canvas id="neuralCanvas"></canvas>
+
+<div id="app">
+<nav>
+  <div class="nav-brand">r<span>.</span>stahlb</div>
+  <ul class="nav-links">
+    <li><a href="index.html" class="back-link">← Home</a></li>
+    <li><a href="george.html">George AI</a></li>
+    <li><a href="gpt.html">GPT from Scratch</a></li>
+    <li><a href="learning.html">Learning</a></li>
+    <li><a href="https://github.com/rstahlb" target="_blank">GitHub ↗</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="page-hero reveal">
+  <div class="project-number">Project 09 — MLX LLM Lab</div>
+  <h1>🍎 <span>MLX LLM Lab</span> — Deep Dive</h1>
+  <p class="project-desc">A complete line-by-line guide to <code>app/chat.py</code> and its environment. This project is a local AI chatbot that runs entirely on your MacBook — no internet, no subscription, no data sent anywhere. The AI thinks using the same chip that draws your screen. Written for curious humans who want to understand exactly what's happening under the hood — no CS degree required.</p>
+</div>
+
+<!-- WHY BOX -->
+<div class="why-box reveal">
+  <div class="why-inner">
+    <h2>🎯 What This Project Does and Why It Matters</h2>
+    <p>Think of this as having a mini version of ChatGPT living inside your laptop, working only for you. Every message you type travels through a precise chain: <strong>You type → Python reads it → Messages list updated → GPU gets the prompt → Model does math → Token by token output → Response shown → Speed stats calculated.</strong></p>
+    <p>This document covers every part of that chain — from the virtual environment and hidden settings files, all the way down to what the Apple Silicon GPU actually does when you press Enter. Every file, every line, every concept is explained in plain English.</p>
+  </div>
+</div>
+
+<!-- TECH GRID -->
+<div class="tech-grid reveal">
+  <div class="tech-item"><div class="tech-label">Framework</div><div class="tech-val">Apple MLX</div></div>
+  <div class="tech-item"><div class="tech-label">Models</div><div class="tech-val">Qwen2.5, Phi-2</div></div>
+  <div class="tech-item"><div class="tech-label">Quantization</div><div class="tech-val">4-bit weights</div></div>
+  <div class="tech-item"><div class="tech-label">GPU</div><div class="tech-val">Metal (Apple Silicon)</div></div>
+  <div class="tech-item"><div class="tech-label">Interface</div><div class="tech-val">rich CLI</div></div>
+  <div class="tech-item"><div class="tech-label">Speed</div><div class="tech-val">80–150 TPS (tiny)</div></div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- PART 1: ENVIRONMENT -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Part 01</span> The Environment — What Surrounds the Code</h3>
+
+  <p>Understanding the <em>environment</em> means understanding all the invisible tools and systems that make <code>chat.py</code> work. Think of it like a kitchen: the code is the recipe, but the environment is the oven, the ingredients, and the cookbook shelf.</p>
+
+  <h4>The Virtual Environment (venv)</h4>
+  <p>A virtual environment is an <strong>isolated bubble</strong> for Python. Imagine each Python project as a restaurant — a virtual environment gives that restaurant its own private pantry, so the ingredients (libraries) from one restaurant don't contaminate another. Without it, installing <code>mlx-lm</code> might break another script on your Mac that needs a different version of the same library.</p>
+
+  <pre><code><span class="code-lang">bash</span>if [ ! -d "venv" ]; then
+    python3 -m venv venv    # Create the isolated bubble
+fi
+source venv/bin/activate    # Step inside it</code></pre>
+
+  <div class="callout callout-info">
+    <span class="callout-icon">📦</span>
+    <div class="callout-body"><strong>What lives inside venv/:</strong> A private copy of Python, all installed packages (<code>mlx-lm</code>, <code>rich</code>, <code>typer</code>, <code>python-dotenv</code>), and isolation scripts (<code>activate</code>, <code>deactivate</code>).</div>
+  </div>
+
+  <h4>The .env File — Secret Settings</h4>
+  <p>The dot (<code>.</code>) at the start of the filename makes it hidden on Mac — you won't see it in Finder unless you press <code>Cmd+Shift+.</code>. It holds a single environment variable that sets the default AI model to load.</p>
+
+  <pre><code><span class="code-lang">.env</span>DEFAULT_MODEL=tiny</code></pre>
+
+  <p>This line means: <em>"Unless the user asks for something different, start with the tiny model."</em> <code>os.environ.setdefault()</code> is careful — it won't overwrite a variable that's already set, so if you export <code>DEFAULT_MODEL=medium</code> in your terminal first, that setting wins.</p>
+
+  <h4>The requirements.txt — Shopping List</h4>
+  <p>When <code>runme.sh</code> runs <code>pip install -r requirements.txt</code>, it's like handing this list to a store clerk who fetches everything.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Package</th><th>What It Does</th></tr></thead>
+      <tbody>
+        <tr><td><code>mlx-lm</code></td><td>The core AI brain — talks to your Mac's GPU to run language models</td></tr>
+        <tr><td><code>rich</code></td><td>Makes the terminal look beautiful: colored text, boxes, spinners</td></tr>
+        <tr><td><code>typer</code></td><td>Turns Python functions into proper command-line tools with <code>--flags</code></td></tr>
+        <tr><td><code>python-dotenv</code></td><td>Reads the <code>.env</code> file and loads its settings automatically</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h4>Apple Silicon & The Metal GPU</h4>
+  <p><strong>Traditional computers</strong> have two separate memory pools — RAM for the CPU and VRAM for the GPU — and data must travel between them through PCIe (slow). <strong>Apple Silicon</strong> uses Unified Memory Architecture: one shared pool of RAM used by both CPU and GPU simultaneously. No data travel needed. The result is model loading that is 3–5× faster than on a traditional PC.</p>
+
+  <div class="callout callout-tip">
+    <span class="callout-icon">⚡</span>
+    <div class="callout-body"><strong>Metal</strong> is Apple's GPU programming language (like NVIDIA's CUDA). When <code>mlx-lm</code> runs your model, it executes Metal "shaders" — tiny math programs running in parallel across thousands of GPU cores.</div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- PART 2: CODE BREAKDOWN -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Part 02</span> Line-by-Line Code Breakdown</h3>
+
+  <h4>The Imports — Gathering the Toolboxes (Lines 5–15)</h4>
+  <p>Python loads external tools into memory. Think of this like opening apps before you need them. Why not just <code>print()</code>? Python's built-in print is plain text — no colors, no boxes, no styles. <code>rich</code> transforms the terminal into a proper UI.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Import</th><th>Origin</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><code>os</code></td><td>Built-in</td><td>Reads system settings, environment variables</td></tr>
+        <tr><td><code>sys</code></td><td>Built-in</td><td>Accesses Python runtime, handles exits</td></tr>
+        <tr><td><code>time</code></td><td>Built-in</td><td>Measures elapsed seconds (for tokens/sec calculation)</td></tr>
+        <tr><td><code>typer</code></td><td>Installed</td><td>Turns <code>main()</code> into a real CLI command with <code>--flags</code></td></tr>
+        <tr><td><code>Console</code></td><td>rich</td><td>The master printer — handles all colored terminal output</td></tr>
+        <tr><td><code>Panel</code></td><td>rich</td><td>Draws the pretty bordered boxes around text</td></tr>
+        <tr><td><code>Prompt</code></td><td>rich</td><td>The styled <code>You:</code> input prompt</td></tr>
+        <tr><td><code>Live</code></td><td>rich</td><td>Allows updating the terminal in real-time</td></tr>
+        <tr><td><code>Path</code></td><td>Built-in</td><td>A smart, cross-platform way to handle file paths</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h4>The MODELS Dictionary — The Brain Menu (Lines 36–42)</h4>
+  <p>A Python dictionary is a lookup table that maps short friendly names to full Hugging Face model IDs. Let's decode <code>mlx-community/Qwen2.5-0.5B-Instruct-4bit</code>:</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Part</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>mlx-community</code></td><td>The Hugging Face org that prepared these models for MLX</td></tr>
+        <tr><td><code>Qwen2.5</code></td><td>The model family name (made by Alibaba)</td></tr>
+        <tr><td><code>0.5B</code></td><td>500 million parameters — the "size" of the brain</td></tr>
+        <tr><td><code>Instruct</code></td><td>Fine-tuned to follow instructions (vs. just completing text)</td></tr>
+        <tr><td><code>4bit</code></td><td>Compressed from 16-bit numbers to 4-bit — 4× smaller on disk</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout callout-warn">
+    <span class="callout-icon">🗜️</span>
+    <div class="callout-body"><strong>4-bit Quantization:</strong> Imagine measuring a distance to the nearest millimeter (16-bit) vs. the nearest foot (4-bit). You lose some precision, but the model is 4× smaller and loads 4× faster — with only a small quality drop most users can't notice.</div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Model</th><th>Parameters</th><th>Full Size</th><th>4-bit Size</th><th>RAM Needed</th></tr></thead>
+      <tbody>
+        <tr><td>tiny</td><td>500M</td><td>~1.2GB</td><td>~300MB</td><td>~512MB</td></tr>
+        <tr><td>small</td><td>1.5B</td><td>~3.6GB</td><td>~900MB</td><td>~1.5GB</td></tr>
+        <tr><td>medium</td><td>3B</td><td>~7.2GB</td><td>~1.8GB</td><td>~3GB</td></tr>
+        <tr><td>phi</td><td>2.7B</td><td>~6.5GB</td><td>~1.6GB</td><td>~2.5GB</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h4>load_model() — Waking Up the Brain (Lines 49–55)</h4>
+  <p>This function accepts a model ID string and does enormous work in a single line. The <code>with console.status()</code> block shows a spinning animation while weights load — it automatically stops when the block finishes. The import of <code>mlx_lm</code> is <strong>inside the function</strong> intentionally: delaying it avoids slowing down startup if the model is never used.</p>
+
+  <pre><code><span class="code-lang">python</span>model, tokenizer = load(model_id)</code></pre>
+
+  <p>That one line: checks the Hugging Face cache, downloads weights if missing, reads <code>config.json</code>, builds the Python model object, prepares Metal GPU kernels, and returns both the neural network and the tokenizer.</p>
+
+  <div class="callout callout-info">
+    <span class="callout-icon">🔤</span>
+    <div class="callout-body"><strong>The Tokenizer:</strong> Language models don't understand words — they understand numbers. The tokenizer is a two-way dictionary. <code>"Hello, world!"</code> → <code>[9906, 11, 1917, 0]</code> (encoding) and back again (decoding). Each number is a <strong>token</strong>, usually ~4 characters. The model generates one token at a time.</div>
+  </div>
+
+  <h4>stream_response() — The Thinking Engine (Lines 58–85)</h4>
+  <p>Different AI models expect conversations formatted differently. The function first checks if the tokenizer has a <code>chat_template</code> and uses it if available. Qwen models format conversation like this under the hood:</p>
+
+  <pre><code><span class="code-lang">text</span>&lt;|im_start|&gt;system
+You are a helpful assistant.&lt;|im_end|&gt;
+&lt;|im_start|&gt;user
+What is MLX?&lt;|im_end|&gt;
+&lt;|im_start|&gt;assistant</code></pre>
+
+  <p>If there is no template (fallback), it builds a simple <code>User: ... \nAssistant:</code> format. The final <code>\nAssistant:</code> tells the model "now it's your turn to respond."</p>
+
+  <p>After generation, TPS (Tokens Per Second) is calculated as <code>tokens ÷ elapsed</code>. This is your Mac's AI speed score — higher is better. The <code>if elapsed &gt; 0 else 0</code> prevents a division-by-zero crash if the response was instantaneous.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Model</th><th>Typical TPS on M1</th></tr></thead>
+      <tbody>
+        <tr><td>tiny</td><td>80–150 tokens/sec</td></tr>
+        <tr><td>small</td><td>40–80 tokens/sec</td></tr>
+        <tr><td>medium</td><td>20–40 tokens/sec</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- PART 3: GPU MATH -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Part 03</span> Under the Hood — The GPU Math</h3>
+
+  <p>When you press Enter, here is the actual sequence of operations at the hardware level:</p>
+
+  <div class="pipeline-flow">
+    <div class="pipeline-step"><span class="step-num">01</span><div><div class="step-title">Tokenization</div><div class="step-desc">Your text is split into tokens and converted to integer IDs. <code>"How does MLX work?" → [4340, 1587, 92027, 990, 30]</code></div></div></div>
+    <div class="pipeline-step"><span class="step-num">02</span><div><div class="step-title">Embedding Lookup</div><div class="step-desc">Each token ID is looked up in an embedding table — a matrix of ~768 numbers per token. This converts tokens into dense mathematical vectors that capture meaning.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">03</span><div><div class="step-title">Transformer Attention — The Core "Thinking"</div><div class="step-desc">The model runs tokens through many attention layers. Each layer computes Query, Key, and Value matrices, calculates how much each token should attend to every other token, mixes information between tokens, and applies feed-forward neural network layers. This happens 12–32 times per response.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">04</span><div><div class="step-title">KV Cache</div><div class="step-desc">After processing your conversation history once, the Key and Value matrices are stored in the KV Cache — a section of GPU RAM. On the next turn, only the new tokens need processing. This is why responses get faster as a conversation progresses.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">05</span><div><div class="step-title">Logits and Sampling</div><div class="step-desc">The final layer outputs "logits" — a score for every possible next token (~32,000 options for Qwen models). The token with the highest score (or a probabilistically sampled one) is selected, decoded back to text, and added to the response.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">06</span><div><div class="step-title">Auto-regressive Loop</div><div class="step-desc">Steps 4–5 repeat for every token in the response. Generating "The quick brown fox" requires 4 separate GPU passes.</div></div></div>
+  </div>
+
+  <div class="callout callout-purple">
+    <span class="callout-icon">🧠</span>
+    <div class="callout-body"><strong>Unified Memory advantage:</strong> Because Apple Silicon shares one RAM pool between CPU and GPU, loading model weights from disk directly into GPU memory skips the PCIe bus entirely. That's why a 300MB model can be ready to respond in under 2 seconds on an M1.</div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- PART 4: DATA FLOW -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Part 04</span> Data Flow — The Complete Picture</h3>
+
+  <p>Here is how all the pieces connect, from the first file read to the final printed response:</p>
+
+  <div class="pipeline-flow">
+    <div class="pipeline-step"><span class="step-num">A</span><div><div class="step-title">.env + requirements.txt → Startup</div><div class="step-desc"><code>runme.sh</code> creates the venv, activates it, installs packages from requirements.txt, loads <code>.env</code> settings, then launches <code>python3 app/chat.py</code>.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">B</span><div><div class="step-title">typer parses --flags → main()</div><div class="step-desc">The <code>@app.command()</code> decorator makes <code>main()</code> accept <code>--model</code>, <code>--system</code>, and <code>--max-tokens</code> flags from the command line.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">C</span><div><div class="step-title">load_model() → GPU Ready</div><div class="step-desc">Hugging Face cache → SSD → Unified Memory RAM → Metal GPU kernels ready. Model and tokenizer objects returned.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">D</span><div><div class="step-title">Chat Loop → user input</div><div class="step-desc"><code>Prompt.ask()</code> captures your message. Slash commands like <code>/help</code> and <code>/exit</code> are handled first. Valid input gets appended to the messages list.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">E</span><div><div class="step-title">stream_response() → GPU math</div><div class="step-desc">Chat template applied, <code>mlx_lm.generate()</code> called, Metal GPU runs attention layers × N, KV cache read/write, tokens sampled, decoded to text, TPS calculated.</div></div></div>
+    <div class="pipeline-step"><span class="step-num">F</span><div><div class="step-title">Display & Update State</div><div class="step-desc">rich Panel renders the response with tokens + TPS in the subtitle. The messages list is updated with the assistant's reply. The loop restarts for your next message.</div></div></div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- PART 5: EXTENDING -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Part 05</span> How to Extend This Project</h3>
+
+  <h4>Adding a New Model</h4>
+  <p>Add a line to the <code>MODELS</code> dictionary in <code>chat.py</code>, then use the shortcut name with <code>--model</code>:</p>
+  <pre><code><span class="code-lang">python</span>MODELS = {
+    "tiny":   "mlx-community/Qwen2.5-0.5B-Instruct-4bit",
+    "small":  "mlx-community/Qwen2.5-1.5B-Instruct-4bit",
+    "medium": "mlx-community/Qwen2.5-3B-Instruct-4bit",
+    "phi":    "mlx-community/phi-2-hf-4bit-mlx",
+    "llama":  "mlx-community/Llama-3.2-3B-Instruct-4bit",   # ← new line
+}</code></pre>
+
+  <h4>Changing the Default Model</h4>
+  <p>Edit the <code>.env</code> file — no code change needed:</p>
+  <pre><code><span class="code-lang">.env</span>DEFAULT_MODEL=medium</code></pre>
+
+  <h4>Making the AI a Specialist</h4>
+  <p>Pass a custom system prompt to anchor the AI's behavior to a specific domain:</p>
+  <pre><code><span class="code-lang">bash</span>python app/chat.py --system "You are a Python expert. Answer only with code examples."</code></pre>
+
+  <h4>Increasing Response Length</h4>
+  <pre><code><span class="code-lang">bash</span>python app/chat.py --max-tokens 1024</code></pre>
+
+  <div class="callout callout-warn">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-body"><strong>Warning:</strong> More tokens = more GPU time = longer wait. The default of 512 is a good balance for conversational use.</div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- PART 6: GLOSSARY -->
+<div class="chapter reveal">
+  <h3 class="chapter-title"><span class="chapter-num">Part 06</span> Glossary</h3>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Term</th><th>Plain English Explanation</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Token</strong></td><td>A chunk of text (~4 characters). Models think in tokens, not words.</td></tr>
+        <tr><td><strong>TPS</strong></td><td>Tokens Per Second — how fast your GPU generates text. Higher = faster.</td></tr>
+        <tr><td><strong>Quantization</strong></td><td>Compressing model weights from 16-bit to 4-bit to save memory.</td></tr>
+        <tr><td><strong>Metal</strong></td><td>Apple's GPU programming language (like CUDA for NVIDIA).</td></tr>
+        <tr><td><strong>Unified Memory</strong></td><td>Apple Silicon's shared RAM pool accessible by CPU and GPU simultaneously.</td></tr>
+        <tr><td><strong>KV Cache</strong></td><td>A GPU memory buffer storing past conversation math to avoid recalculation.</td></tr>
+        <tr><td><strong>Transformer</strong></td><td>The neural network architecture all modern LLMs use.</td></tr>
+        <tr><td><strong>Attention</strong></td><td>The mechanism that lets the model relate words across long distances.</td></tr>
+        <tr><td><strong>System Prompt</strong></td><td>An invisible first message that sets the AI's personality and rules.</td></tr>
+        <tr><td><strong>Hugging Face</strong></td><td>A website and library hub where AI models are shared and downloaded.</td></tr>
+        <tr><td><strong>Virtual Environment</strong></td><td>An isolated Python installation bubble — keeps project dependencies separate.</td></tr>
+        <tr><td><strong>Logits</strong></td><td>Raw scores the model gives every possible next token before picking one.</td></tr>
+        <tr><td><strong>Auto-regressive</strong></td><td>Generating text one token at a time, each token influenced by all previous ones.</td></tr>
+        <tr><td><strong>Decorator</strong></td><td>A <code>@</code> annotation that wraps a function with extra behavior.</td></tr>
+        <tr><td><strong>Context Manager</strong></td><td>A <code>with</code> block that automatically cleans up when done.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<footer>
+  <p>Built by <span>r.stahlb</span> · Apple MLX · Local LLM · <a href="https://github.com/rstahlb" target="_blank">GitHub ↗</a></p>
+  <p style="margin-top:0.5rem">Qwen2.5-0.5B-Instruct-4bit · Runs entirely on Apple Silicon · No internet required after first download</p>
+</footer>
+</div>
+
+<script>
+// Stars
+(function(){
+  var c = document.getElementById('stars');
+  for (var i = 0; i < 120; i++) {
+    var s = document.createElement('div');
+    s.className = 'star';
+    var size = Math.random() * 2 + 0.5;
+    s.style.cssText = [
+      'width:' + size + 'px', 'height:' + size + 'px',
+      'left:' + Math.random()*100 + '%', 'top:' + Math.random()*100 + '%',
+      '--dur:' + (Math.random()*4+2) + 's',
+      '--min-op:' + (Math.random()*0.1).toFixed(2),
+      '--max-op:' + (Math.random()*0.5+0.1).toFixed(2)
+    ].join(';');
+    c.appendChild(s);
+  }
+})();
+
+// Neural canvas
+(function(){
+  var canvas = document.getElementById('neuralCanvas');
+  var ctx = canvas.getContext('2d');
+  var W, H;
+
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  var LAYER_COLORS = [[61,255,160],[24,212,255],[61,139,255],[192,132,252],[255,209,102]];
+
+  function rnd(a,b){ return a + Math.random()*(b-a); }
+
+  function Node() { this.reset(true); }
+  Node.prototype.reset = function(fromRandom) {
+    this.x = rnd(0, W); this.y = fromRandom ? rnd(0, H) : -20;
+    this.vx = rnd(-0.12, 0.12); this.vy = rnd(0.04, 0.15);
+    this.r = rnd(2, 5); this.layer = Math.floor(Math.random()*LAYER_COLORS.length);
+    this.pulse = rnd(0, Math.PI*2); this.pulseSpeed = rnd(0.01, 0.03);
+    this.alpha = rnd(0.15, 0.5);
+  };
+  Node.prototype.update = function() {
+    this.x += this.vx; this.y += this.vy; this.pulse += this.pulseSpeed;
+    if (this.y - this.r > H) this.reset(false);
+    if (this.x < 0 || this.x > W) this.vx *= -1;
+  };
+  Node.prototype.draw = function() {
+    var c = LAYER_COLORS[this.layer];
+    var a = this.alpha * (0.7 + 0.3*Math.sin(this.pulse));
+    var pr = this.r * (0.9 + 0.1*Math.sin(this.pulse));
+    var g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, pr*3);
+    g.addColorStop(0, 'rgba('+c[0]+','+c[1]+','+c[2]+','+a+')');
+    g.addColorStop(0.5, 'rgba('+c[0]+','+c[1]+','+c[2]+','+(a*0.3)+')');
+    g.addColorStop(1, 'rgba('+c[0]+','+c[1]+','+c[2]+',0)');
+    ctx.beginPath(); ctx.arc(this.x, this.y, pr*3, 0, Math.PI*2);
+    ctx.fillStyle = g; ctx.fill();
+    ctx.beginPath(); ctx.arc(this.x, this.y, pr, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba('+c[0]+','+c[1]+','+c[2]+','+a+')'; ctx.fill();
+  };
+
+  function Synapse(a, b) { this.a = a; this.b = b; this.t = rnd(0,1); this.speed = rnd(0.003,0.009); this.alpha = rnd(0.1,0.4); this.col = LAYER_COLORS[a.layer]; }
+  Synapse.prototype.update = function() { this.t += this.speed; if (this.t > 1) this.t = 0; };
+  Synapse.prototype.draw = function() {
+    var dx = this.b.x - this.a.x, dy = this.b.y - this.a.y;
+    var dist = Math.sqrt(dx*dx+dy*dy);
+    if (dist > 250) return;
+    var c = this.col, la = this.alpha*(1-dist/250)*0.6;
+    ctx.beginPath(); ctx.moveTo(this.a.x, this.a.y); ctx.lineTo(this.b.x, this.b.y);
+    ctx.strokeStyle = 'rgba('+c[0]+','+c[1]+','+c[2]+','+la+')';
+    ctx.lineWidth = 0.6; ctx.stroke();
+    var px = this.a.x+dx*this.t, py = this.a.y+dy*this.t;
+    var pg = ctx.createRadialGradient(px,py,0,px,py,5);
+    pg.addColorStop(0,'rgba(255,255,255,'+(this.alpha*0.9)+')');
+    pg.addColorStop(0.4,'rgba('+c[0]+','+c[1]+','+c[2]+','+(this.alpha*0.7)+')');
+    pg.addColorStop(1,'rgba('+c[0]+','+c[1]+','+c[2]+',0)');
+    ctx.beginPath(); ctx.arc(px,py,5,0,Math.PI*2);
+    ctx.fillStyle = pg; ctx.fill();
+  };
+
+  var nodes = []; for (var i=0;i<40;i++) nodes.push(new Node());
+  var synapses = [];
+  for (var i=0;i<60;i++){
+    var a=nodes[Math.floor(Math.random()*nodes.length)];
+    var b=nodes[Math.floor(Math.random()*nodes.length)];
+    if(a!==b) synapses.push(new Synapse(a,b));
+  }
+
+  function loop(){
+    ctx.clearRect(0,0,W,H);
+    synapses.forEach(function(s){s.update();s.draw();});
+    nodes.forEach(function(n){n.update();n.draw();});
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+
+// Scroll reveal
+var observer = new IntersectionObserver(function(entries){
+  entries.forEach(function(e){ if(e.isIntersecting){e.target.classList.add('visible'); observer.unobserve(e.target);} });
+}, {threshold: 0.08});
+document.querySelectorAll('.reveal').forEach(function(el){ observer.observe(el); });
+</script>
+</body>
+</html>
