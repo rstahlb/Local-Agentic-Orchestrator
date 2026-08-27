@@ -20,7 +20,7 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
-            padding: 20px;
+            padding: 40px 20px;
             display: flex;
             justify-content: center;
         }
@@ -30,174 +30,306 @@
         }
         header {
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 20px;
-            margin-bottom: 25px;
+            padding-bottom: 25px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .header-main {
+            flex: 1;
+            min-width: 300px;
         }
         h1 {
             color: #ffffff;
             margin: 0 0 5px 0;
-            font-size: 2.2rem;
+            font-size: 2.4rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
         }
         .subtitle {
             color: var(--accent-color);
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             font-weight: 600;
             margin-bottom: 15px;
+            font-family: ui-monospace, SFMono-Regular, monospace;
         }
         .bio {
             color: var(--text-muted);
             line-height: 1.6;
-            margin-bottom: 15px;
+            font-size: 1.05rem;
         }
-        .links a {
-            color: var(--terminal-blue);
-            text-decoration: none;
-            margin-right: 15px;
+        .cta-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #21262d;
+            border: 1px solid var(--border-color);
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 6px;
             font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
         }
-        .links a:hover {
-            text-decoration: underline;
+        .btn:hover {
+            background-color: #30363d;
+            border-color: #8b949e;
+        }
+        .btn-primary {
+            background-color: #238636;
+            border-color: rgba(240,246,252,0.1);
+        }
+        .btn-primary:hover {
+            background-color: #2ea44f;
+            border-color: rgba(240,246,252,0.1);
         }
         .terminal-box {
             background-color: #010409;
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            padding: 15px;
-            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+            padding: 20px;
+            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, monospace;
             font-size: 0.9rem;
-            margin-bottom: 30px;
-            overflow-x: auto;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
         }
         .terminal-header {
-            color: var(--accent-color);
+            color: var(--text-muted);
             border-bottom: 1px dashed var(--border-color);
-            padding-bottom: 8px;
-            margin-bottom: 12px;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+        }
+        .terminal-prompt {
+            color: var(--terminal-green);
+        }
+        .terminal-output {
+            margin-top: 12px;
+            white-space: pre;
+            color: var(--text-main);
+            line-height: 1.4;
+        }
+        .terminal-input-line {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+            background: transparent;
+        }
+        .terminal-input-line input {
+            background: transparent;
+            border: none;
+            color: var(--terminal-blue);
+            font-family: inherit;
+            font-size: inherit;
+            flex: 1;
+            outline: none;
+            padding-left: 8px;
+        }
+        .section-title {
+            color: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-top: 40px;
+            margin-bottom: 25px;
+            font-size: 1.6rem;
+            font-weight: 600;
+        }
+        .project-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
         }
         .project-card {
             background-color: var(--panel-bg);
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            padding: 20px;
-            margin-bottom: 20px;
+            padding: 24px;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .project-card:hover {
+            border-color: #8b949e;
         }
         .project-title {
             color: #ffffff;
-            font-size: 1.3rem;
-            margin: 0 0 10px 0;
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 0 0 12px 0;
             display: flex;
             align-items: center;
         }
         .project-title span {
-            color: var(--accent-color);
-            margin-right: 10px;
+            margin-right: 12px;
+            font-size: 1.6rem;
+        }
+        .tag-container {
+            margin-bottom: 15px;
         }
         .tag {
             display: inline-block;
             background-color: #21262d;
             border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 3px 8px;
+            color: var(--terminal-blue);
+            padding: 4px 10px;
             border-radius: 12px;
-            font-size: 0.75rem;
-            margin-right: 5px;
-            margin-bottom: 10px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-right: 6px;
+            margin-bottom: 8px;
+            font-family: ui-monospace, SFMono-Regular, monospace;
         }
+        .tag-sec { color: var(--accent-color); }
         .project-desc {
-            font-size: 0.95rem;
-            line-height: 1.5;
+            font-size: 1rem;
+            line-height: 1.6;
             color: var(--text-main);
-        }
-        .section-title {
-            color: #ffffff;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 8px;
-            margin-top: 40px;
-            margin-bottom: 20px;
-            font-size: 1.5rem;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Robin Stahlbaum</h1>
-            <div class="subtitle">Senior Systems Architect & Edge AI Engineer</div>
-            <div class="bio">
-                Specializing in high-performance local LLM orchestration, model training pipelines (LoRA/RLHF), and low-level computer graphics. Over a decade of infrastructure administration experience spanning hypervisor debugging and scalable platform automation.
+            <div class="header-main">
+                <h1>Robin Stahlbaum</h1>
+                <div class="subtitle"># senior_infrastructure_architect --edge-ai</div>
+                <div class="bio">
+                    Over two decades of production systems execution spanning high-stakes enterprise virtualization, hypervisor kernel debugging, and automated pipeline configuration controls. Currently engineering local multi-agent cognition routers and hardware-constrained transformer alignment loops.
+                </div>
             </div>
-            <div class="links">
-                <a href="https://github.com">GitHub Profile</a>
+            <div class="cta-panel">
+                <a href="Robin_Stahlbaum_Resume.pdf" class="btn btn-primary" target="_blank">📄 Download PDF Resume</a>
+                <a href="https://github.com/rstahlb" class="btn" target="_blank">🔗 GitHub Profile</a>
             </div>
         </header>
 
         <div class="terminal-box">
-            <div class="terminal-header"># Initialization Context Loaded Successfully</div>
-            <div><span style="color: var(--terminal-green);">rstahlb@Robins-MacBook-Pro:~ $</span> python3 ai_router.py</div>
-            <div style="margin-top: 8px; white-space: pre; color: var(--text-main);">╔══════════════════════════════════════════════╗
+            <div class="terminal-header">
+                <span>SYSTEM CORE: ONLINE</span>
+                <span>M1_MAC_PRO_16GB</span>
+            </div>
+            <div><span class="terminal-prompt">rstahlb@Robins-MacBook-Pro:~ $</span> python3 ai_router.py</div>
+            <div id="terminal-display" class="terminal-output">╔══════════════════════════════════════════════╗
 ║  AI Router Chat                               ║
 ║  General  →  llama3                          ║
 ║  Coding   →  qwen2.5-coder:7b                ║
 ║  🧠 Memory loaded from previous sessions      ║
 ╚══════════════════════════════════════════════╝
-  Commands: /bye  /clear  /history  /memory  /forget</div>
-            <div style="margin-top: 8px;"><span style="color: var(--terminal-blue);">[Routing System]</span> Active orchestration monitoring initialized. Ready at the edge.</div>
+  Commands: /history  /memory  /forget  /clear</div>
+            <div class="terminal-input-line">
+                <span class="terminal-prompt">rstahlb@Robins-MacBook-Pro:~ $</span>
+                <input type="text" id="terminal-input" placeholder="Type a command or ask a prompt..." autocomplete="off" autofocus>
+            </div>
         </div>
 
         <div class="section-title">Core AI & Production Pipelines</div>
+        
+        <div class="project-grid">
+            <div class="project-card">
+                <div class="project-title"><span>🤖</span> George — Local Agentic Orchestrator</div>
+                <div class="tag-container">
+                    <span class="tag">Multi-Agent</span>
+                    <span class="tag">Temporal Memory</span>
+                    <span class="tag">Apple MLX</span>
+                    <span class="tag">SwiftUI</span>
+                </div>
+                <div class="project-desc">
+                    A voice-first personal companion utilizing a three-agent cognitive layout (Past/Present/Future) to coordinate real-time operations, localized context-fact mining, and autonomous system execution pipelines natively on Apple Silicon.
+                </div>
+            </div>
 
-        <div class="project-card">
-            <div class="project-title"><span>🤖</span> George — Local Agentic Orchestrator</div>
-            <div>
-                <span class="tag">Multi-Agent</span>
-                <span class="tag">Local LLM</span>
-                <span class="tag">Swift</span>
-                <span class="tag">Python</span>
-                <span class="tag">MLX</span>
+            <div class="project-card">
+                <div class="project-title"><span>🛡️</span> SecWatch — Enterprise Cybersecurity Matrix</div>
+                <div class="tag-container">
+                    <span class="tag tag-sec">CISA KEV Catalog</span>
+                    <span class="tag tag-sec">Vulnerability Analytics</span>
+                    <span class="tag">WidgetKit</span>
+                    <span class="tag">Keychain API</span>
+                </div>
+                <div class="project-desc">
+                    A native cross-platform monitoring interface tracking global CVE databases. Integrates multi-pane data grids to evaluate tech stack dependency risk and automate active visual escalation alerts for overdue regulatory remediation timelines.
+                </div>
             </div>
-            <div class="project-desc">
-                A voice-first personal AI with local temporal multi-agent coordination. Features controlled reasoning loops, on-device contextual caching, and direct operating system automation loops running entirely within a local Apple Silicon footprint.
-            </div>
-        </div>
 
-        <div class="project-card">
-            <div class="project-title"><span>🛡️</span> SecWatch — Enterprise Cyber-Security Platform</div>
-            <div>
-                <span class="tag">SwiftUI</span>
-                <span class="tag">WidgetKit</span>
-                <span class="tag">CISA KEV API</span>
-                <span class="tag">Vulnerability Analytics</span>
+            <div class="project-card">
+                <div class="project-title"><span>📦</span> Intent Router & Transformer Infrastructure</div>
+                <div class="tag-container">
+                    <span class="tag">Python</span>
+                    <span class="tag">LoRA Adaptation</span>
+                    <span class="tag">RLHF Alignment</span>
+                    <span class="tag">PyTorch MPS</span>
+                </div>
+                <div class="project-desc">
+                    A multi-agent semantic routing runtime parsing prompt contexts to divide compute payloads. Combines Hugging Face ingestion workflows with local parameter updates to optimize text-classification weights within an M1 RAM footprint.
+                </div>
             </div>
-            <div class="project-desc">
-                A native cross-platform security engine tracking live CVE instances and monitoring corporate compliance thresholds. Automates visual escalation tracks on interactive iPadOS/macOS desk utilities for overdue CISA remediation timelines.
-            </div>
-        </div>
 
-        <div class="project-card">
-            <div class="project-title"><span>📦</span> Multi-Agent Router & Local Fine-Tuning Stack</div>
-            <div>
-                <span class="tag">Python</span>
-                <span class="tag">PyTorch</span>
-                <span class="tag">LoRA</span>
-                <span class="tag">RLHF Alignment</span>
-            </div>
-            <div class="project-desc">
-                An intelligent intent-parsing gateway routing semantic tasks to distinct specialized engines. Combines automated data engineering via Hugging Face with edge adapter updates achieving a 95% SMS threat classification accuracy rating.
-            </div>
-        </div>
-
-        <div class="project-card">
-            <div class="project-title"><span>📐</span> 3D Graphics Engine Pipeline (Blender POC)</div>
-            <div>
-                <span class="tag">Modern C++</span>
-                <span class="tag">Raytracing Core</span>
-                <span class="tag">Jolt Physics SDK</span>
-                <span class="tag">Objective-C++ Bridge</span>
-            </div>
-            <div class="project-desc">
-                A standalone desktop graphics environment proving language-interoperability techniques. Builds low-overhead bridges between Apple execution runtimes and custom multi-threaded 4K raytraced viewport loops with real-time rigid body dynamics.
+            <div class="project-card">
+                <div class="project-title"><span>📐</span> 3D Graphics Core Pipeline (Blender POC)</div>
+                <div class="tag-container">
+                    <span class="tag">Modern C++20</span>
+                    <span class="tag">Raytracing Core</span>
+                    <span class="tag">Jolt Physics SDK</span>
+                    <span class="tag">Objective-C++</span>
+                </div>
+                <div class="project-desc">
+                    A standalone desktop rendering engine engineering language interoperability constraints. Maps low-overhead Objective-C++ execution boundaries to interface native multi-threaded 4K viewports with real-time rigid body dynamics.
+                </div>
             </div>
         </div>
     </div>
+
+    <script>
+        const terminalInput = document.getElementById('terminal-input');
+        const terminalDisplay = document.getElementById('terminal-display');
+        
+        const defaultBanner = `╔══════════════════════════════════════════════╗
+║  AI Router Chat                               ║
+║  General  →  llama3                          ║
+║  Coding   →  qwen2.5-coder:7b                ║
+║  🧠 Memory loaded from previous sessions      ║
+╚══════════════════════════════════════════════╝
+  Commands: /history  /memory  /forget  /clear`;
+
+        terminalInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const cmd = terminalInput.value.trim();
+                if (!cmd) return;
+
+                let outputText = `\n\n<span class="terminal-prompt">rstahlb@Robins-MacBook-Pro:~ $</span> \${cmd}\n`;
+
+                if (cmd === '/clear') {
+                    terminalDisplay.innerHTML = defaultBanner;
+                    terminalInput.value = '';
+                    return;
+                } else if (cmd === '/memory') {
+                    outputText += `[SYSTEM] Extracting local memory context segments...\n  - User Location: Mississauga, ON\n  - Tech Stack Profile: RHEL, Modern C++, Python (PyTorch), Swift\n  - Security Posture: Hardened Bastion/Jump Hosts configured.`;
+                } else if (cmd === '/history') {
+                    outputText += `[LOG] Last 2 routing trajectories:\n  - Inbound: "optimize matrix paths" -> Routed to qwen2.5-coder:7b\n  - Inbound: "compliance report alert" -> Routed to llama3`;
+                } else if (cmd === '/forget') {
+                    outputText += `[WARN] Flushing cache matrix buffers... Session state memory cleared.`;
+                } else if (cmd.toLowerCase().includes('code') || cmd.toLowerCase().includes('python') || cmd.toLowerCase().includes('c++')) {
+                    outputText += `\n<span style="color: var(--terminal-blue);">[Routing System]</span> ⚡ Code pattern identified. Directing query context -> qwen2.5-coder:7b\n[qwen2.5-coder:7b]: Processing technical layout constraints locally on GPU cores...`;
+                } else {
+                    outputText += `\n<span style="color: var(--terminal-blue);">[Routing System]</span> ⚡ General semantic prompt. Directing query context -> llama3\n[llama3]: Ingesting token context streams offline...`;
+                }
+
+                terminalDisplay.innerHTML += outputText;
+                terminalInput.value = '';
+                
+                window.scrollTo(0, document.body.scrollHeight);
+            }
+        });
+    </script>
 </body>
 </html>
