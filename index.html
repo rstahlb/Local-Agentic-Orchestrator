@@ -1,337 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>r.stahlb — Portfolio</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Geist+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg: #050810; --bg2: #080d1a; --bg3: #0d1425;
-  --border: #1e2d4a; --border2: #28385e;
-  --text: #dde6f8; --text-dim: #8fa3cc; --text-bright: #f0f5ff;
-  --accent1: #3d8bff; --accent2: #18d4ff; --accent3: #ff7a47; --accent4: #3dffa0;
-  --yellow: #ffd166; --font-display: 'Inter', sans-serif; --font-mono: 'Geist Mono', monospace;
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body { background: var(--bg); color: var(--text); font-family: var(--font-display); font-size: 15px; line-height: 1.75; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
-
-#stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
-.star { position: absolute; border-radius: 50%; background: white; animation: twinkle var(--dur) ease-in-out infinite alternate; opacity: 0; }
-@keyframes twinkle { from { opacity: var(--min-op); } to { opacity: var(--max-op); } }
-#bubbleCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
-#app { position: relative; z-index: 1; }
-
-nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 2rem; height: 56px;
-  background: rgba(5,8,16,0.85); backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
-}
-.nav-brand { font-weight: 800; font-size: 1.05rem; color: var(--text-bright); letter-spacing: -0.02em; }
-.nav-brand span { color: var(--accent1); }
-.nav-links { display: flex; gap: 0.25rem; list-style: none; }
-.nav-links a { color: var(--text-dim); text-decoration: none; font-size: 0.8rem; font-weight: 500; padding: 0.35rem 0.85rem; border-radius: 6px; transition: color 0.2s, background 0.2s; }
-.nav-links a:hover { color: var(--text-bright); background: var(--bg3); }
-
-.hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 6rem 2rem 4rem; }
-.hero-orb {
-  width: 200px; height: 200px; border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #4a9fff, #1a6fff 50%, #0a2060);
-  box-shadow: 0 0 60px rgba(26,111,255,0.5), 0 0 120px rgba(26,111,255,0.2);
-  animation: orb-breathe 3s ease-in-out infinite alternate; position: relative; margin-bottom: 0;
-}
-.hero-orb::after { content: ''; position: absolute; inset: -8px; border-radius: 50%; border: 1.5px solid rgba(26,111,255,0.3); animation: orb-ring 3s ease-in-out infinite alternate; }
-@keyframes orb-breathe {
-  from { transform: scale(1); box-shadow: 0 0 60px rgba(26,111,255,0.5), 0 0 120px rgba(26,111,255,0.2); }
-  to   { transform: scale(1.07); box-shadow: 0 0 80px rgba(26,111,255,0.7), 0 0 160px rgba(26,111,255,0.3); }
-}
-@keyframes orb-ring { from { transform: scale(1); opacity: 0.3; } to { transform: scale(1.12); opacity: 0.8; } }
-@keyframes pulseRing { 0%,100% { transform:scale(1); opacity:0.5; } 50% { transform:scale(1.1); opacity:1; } }
-
-.hero-label { font-size: 0.72rem; letter-spacing: 0.22em; color: var(--accent2); text-transform: uppercase; margin-bottom: 1rem; font-weight: 500; }
-.hero h1 { font-size: clamp(2.4rem, 6vw, 4.5rem); font-weight: 800; color: var(--text-bright); line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 1.25rem; }
-.hero h1 em { font-style: normal; color: var(--accent1); }
-.hero-sub { max-width: 540px; color: #a8bde0; font-size: 0.95rem; line-height: 1.85; margin-bottom: 2.5rem; }
-.badge-row { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 3rem; }
-.badge { display: inline-flex; align-items: center; padding: 0.3rem 0.75rem; border-radius: 4px; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; border: 1px solid; }
-.badge-swift  { color: #FA7343; border-color: rgba(250,115,67,0.3);  background: rgba(250,115,67,0.06); }
-.badge-python { color: #4B9EE5; border-color: rgba(75,158,229,0.3);  background: rgba(75,158,229,0.06); }
-.badge-torch  { color: #EE4C2C; border-color: rgba(238,76,44,0.3);   background: rgba(238,76,44,0.06); }
-.badge-apple  { color: #aaaaaa; border-color: rgba(170,170,170,0.3); background: rgba(170,170,170,0.06); }
-.badge-flask  { color: var(--accent4); border-color: rgba(57,255,138,0.3); background: rgba(57,255,138,0.06); }
-
-/* ── PROJECT CARDS GRID ── */
-.project-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1.25rem;
-  max-width: 1100px;
-  width: 100%;
-}
-.proj-card {
-  background: var(--bg2); border: 1px solid var(--border); border-radius: 12px;
-  padding: 1.75rem; text-align: left; text-decoration: none;
-  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s; display: block;
-}
-.proj-card:hover { border-color: var(--accent1); transform: translateY(-3px); box-shadow: 0 8px 40px rgba(26,111,255,0.12); }
-.proj-card.coming { border-style: dashed; opacity: 0.55; cursor: default; pointer-events: none; }
-.proj-card.coming:hover { transform: none; box-shadow: none; border-color: var(--border); }
-.proj-card-icon { font-size: 1.8rem; margin-bottom: 0.75rem; }
-.proj-card h3 { font-size: 1.05rem; font-weight: 700; color: var(--text-bright); margin-bottom: 0.5rem; }
-.proj-card p { color: #9ab0d4; font-size: 0.85rem; line-height: 1.65; }
-.proj-card-tag { display: inline-block; margin-top: 1rem; font-size: 0.65rem; color: var(--accent1); letter-spacing: 0.1em; text-transform: uppercase; }
-.proj-card.coming .proj-card-tag { color: var(--text-dim); }
-
-footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; color: var(--text-dim); font-size: 0.75rem; }
-footer span { color: var(--accent1); }
-
-@media (max-width: 640px) { .nav-links { display: none; } .hero h1 { font-size: 2rem; } }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robin Stahlbaum | Systems Architect & Edge AI Engineer</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --panel-bg: #161b22;
+            --accent-color: #ff7b72;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --border-color: #30363d;
+            --terminal-green: #7ee787;
+            --terminal-blue: #79c0ff;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+        header {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+        h1 {
+            color: #ffffff;
+            margin: 0 0 5px 0;
+            font-size: 2.2rem;
+        }
+        .subtitle {
+            color: var(--accent-color);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .bio {
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .links a {
+            color: var(--terminal-blue);
+            text-decoration: none;
+            margin-right: 15px;
+            font-size: 0.95rem;
+        }
+        .links a:hover {
+            text-decoration: underline;
+        }
+        .terminal-box {
+            background-color: #010409;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px;
+            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+        .terminal-header {
+            color: var(--accent-color);
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+        }
+        .project-card {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .project-title {
+            color: #ffffff;
+            font-size: 1.3rem;
+            margin: 0 0 10px 0;
+            display: flex;
+            align-items: center;
+        }
+        .project-title span {
+            color: var(--accent-color);
+            margin-right: 10px;
+        }
+        .tag {
+            display: inline-block;
+            background-color: #21262d;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            margin-right: 5px;
+            margin-bottom: 10px;
+        }
+        .project-desc {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: var(--text-main);
+        }
+        .section-title {
+            color: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+    </style>
 </head>
 <body>
-<div id="stars"></div>
-<canvas id="bubbleCanvas"></canvas>
+    <div class="container">
+        <header>
+            <h1>Robin Stahlbaum</h1>
+            <div class="subtitle">Senior Systems Architect & Edge AI Engineer</div>
+            <div class="bio">
+                Specializing in high-performance local LLM orchestration, model training pipelines (LoRA/RLHF), and low-level computer graphics. Over a decade of infrastructure administration experience spanning hypervisor debugging and scalable platform automation.
+            </div>
+            <div class="links">
+                <a href="https://github.com">GitHub Profile</a>
+            </div>
+        </header>
 
-<div id="app">
-<nav id="top">
-  <div class="nav-brand">r<span>.</span>stahlb</div>
-  <ul class="nav-links">
-    <li><a href="george.html">George AI</a></li>
-    <li><a href="gpt.html">GPT from Scratch</a></li>
-    <li><a href="learning.html">Learning</a></li>
-    <li><a href="llm_guide.html">LLM Guide</a></li>
-    <li><a href="lidar_deep_dive.html">LiDAR</a></li>
-    <li><a href="rag_engineering.html">George RAG</a></li>
-    <li><a href="huggingface_guide.html">HF Guide</a></li>
-    <li><a href="workflow_training_lora_sms_llm.html">LoRA SMS</a></li>
-    <li><a href="mlx_llm_lab.html">MLX Lab</a></li>
-    <li><a href="rfid_deep_dive.html">RFID</a></li>
-    <li><a href="neural_ir.html">Neural IR</a></li>
-    <li><a href="https://github.com/rstahlb" target="_blank">GitHub ↗</a></li>
-  </ul>
-</nav>
+        <div class="terminal-box">
+            <div class="terminal-header"># Initialization Context Loaded Successfully</div>
+            <div><span style="color: var(--terminal-green);">rstahlb@Robins-MacBook-Pro:~ $</span> python3 ai_router.py</div>
+            <div style="margin-top: 8px; white-space: pre; color: var(--text-main);">╔══════════════════════════════════════════════╗
+║  AI Router Chat                               ║
+║  General  →  llama3                          ║
+║  Coding   →  qwen2.5-coder:7b                ║
+║  🧠 Memory loaded from previous sessions      ║
+╚══════════════════════════════════════════════╝
+  Commands: /bye  /clear  /history  /memory  /forget</div>
+            <div style="margin-top: 8px;"><span style="color: var(--terminal-blue);">[Routing System]</span> Active orchestration monitoring initialized. Ready at the edge.</div>
+        </div>
 
-<section class="hero">
-  <!-- George orb with video player -->
-  <div id="heroWrap" style="position:relative;width:200px;height:200px;margin-bottom:2rem;">
-    <div class="hero-orb" id="heroOrb" style="position:absolute;top:0;left:0;width:200px;height:200px;margin-bottom:0;"></div>
-    <video id="vid1"  playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_yyes.mp4"  type="video/mp4"></video>
-    <video id="vid2"  playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_yes.mp4"   type="video/mp4"></video>
-    <video id="vid3"  playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_01.mp4"   type="video/mp4"></video>
-    <video id="vid4"  playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_02.mp4"   type="video/mp4"></video>
-    <video id="vid5"  playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_03.mp4"   type="video/mp4"></video>
-    <video id="vid6"  playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_04.mp4"   type="video/mp4"></video>
-    <video id="vid7"  playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_05.mp4"   type="video/mp4"></video>
-    <video id="vid8"  playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_06.mp4"   type="video/mp4"></video>
-    <video id="vid9"  playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_07.mp4"   type="video/mp4"></video>
-    <video id="vid10" playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="george_08.mp4"   type="video/mp4"></video>
-    <video id="vid11" playsinline preload="auto" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;object-fit:cover;opacity:0;transition:opacity 0.4s;box-shadow:0 0 60px rgba(61,139,255,0.5);"><source src="ai/george_inter.mp4" type="video/mp4"></video>
-    <div id="hearOverlay" style="position:absolute;top:0;left:0;width:200px;height:200px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;z-index:99;background:rgba(5,8,16,0.5);backdrop-filter:blur(2px);transition:opacity 0.4s;">
-      <div style="font-size:1.4rem;margin-bottom:0.3rem;">🔊</div>
-      <div style="font-family:var(--font-display);font-size:0.58rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#f0f5ff;text-align:center;line-height:1.5;padding:0 0.5rem;">click to<br>hear george</div>
-      <div style="position:absolute;inset:-6px;border-radius:50%;border:1.5px solid rgba(61,139,255,0.6);animation:pulseRing 1.8s ease-in-out infinite;"></div>
+        <div class="section-title">Core AI & Production Pipelines</div>
+
+        <div class="project-card">
+            <div class="project-title"><span>🤖</span> George — Local Agentic Orchestrator</div>
+            <div>
+                <span class="tag">Multi-Agent</span>
+                <span class="tag">Local LLM</span>
+                <span class="tag">Swift</span>
+                <span class="tag">Python</span>
+                <span class="tag">MLX</span>
+            </div>
+            <div class="project-desc">
+                A voice-first personal AI with local temporal multi-agent coordination. Features controlled reasoning loops, on-device contextual caching, and direct operating system automation loops running entirely within a local Apple Silicon footprint.
+            </div>
+        </div>
+
+        <div class="project-card">
+            <div class="project-title"><span>🛡️</span> SecWatch — Enterprise Cyber-Security Platform</div>
+            <div>
+                <span class="tag">SwiftUI</span>
+                <span class="tag">WidgetKit</span>
+                <span class="tag">CISA KEV API</span>
+                <span class="tag">Vulnerability Analytics</span>
+            </div>
+            <div class="project-desc">
+                A native cross-platform security engine tracking live CVE instances and monitoring corporate compliance thresholds. Automates visual escalation tracks on interactive iPadOS/macOS desk utilities for overdue CISA remediation timelines.
+            </div>
+        </div>
+
+        <div class="project-card">
+            <div class="project-title"><span>📦</span> Multi-Agent Router & Local Fine-Tuning Stack</div>
+            <div>
+                <span class="tag">Python</span>
+                <span class="tag">PyTorch</span>
+                <span class="tag">LoRA</span>
+                <span class="tag">RLHF Alignment</span>
+            </div>
+            <div class="project-desc">
+                An intelligent intent-parsing gateway routing semantic tasks to distinct specialized engines. Combines automated data engineering via Hugging Face with edge adapter updates achieving a 95% SMS threat classification accuracy rating.
+            </div>
+        </div>
+
+        <div class="project-card">
+            <div class="project-title"><span>📐</span> 3D Graphics Engine Pipeline (Blender POC)</div>
+            <div>
+                <span class="tag">Modern C++</span>
+                <span class="tag">Raytracing Core</span>
+                <span class="tag">Jolt Physics SDK</span>
+                <span class="tag">Objective-C++ Bridge</span>
+            </div>
+            <div class="project-desc">
+                A standalone desktop graphics environment proving language-interoperability techniques. Builds low-overhead bridges between Apple execution runtimes and custom multi-threaded 4K raytraced viewport loops with real-time rigid body dynamics.
+            </div>
+        </div>
     </div>
-  </div>
-
-  <div class="hero-label">AI/Random Projects Portfolio</div>
-  <h1 style="font-size: 1.8rem;">
-Lead developer of George—a Hugging Face-retrained model validated for performance gains.
-  <br><br>
-  <em style="font-size: 1.8rem;"> Work in Progress</em>
-</h1>
-  <p class="hero-sub">"Harnessing Apple Silicon M1 16GB ram to build high-performance AI: projects include a voice-enabled chess and RL agent, a custom GPT transformer trained from scratch, and a growing library of experimental designs and builds."</p>
-  <div class="badge-row">
-    <span class="badge badge-swift">Swift 5.9</span>
-    <span class="badge badge-python">Python 3.12</span>
-    <span class="badge badge-torch">PyTorch MPS</span>
-    <span class="badge badge-apple">Apple Silicon</span>
-    <span class="badge badge-flask">Flask</span>
-  </div>
-
-  <div class="project-cards">
-    <!-- ── REAL PROJECTS ── -->
-    <a class="proj-card" href="george.html">
-      <div class="proj-card-icon">🤖</div>
-      <h3>George AI</h3>
-      <p>A floating AI orb for macOS. Voice-first, privacy-focused, local LLM + cloud fallback, chess engine, RL Arkanoid agent, persistent memory.</p>
-      <span class="proj-card-tag">Swift + Python →</span>
-    </a>
-    <a class="proj-card" href="gpt.html">
-      <div class="proj-card-icon">🧠</div>
-      <h3>GPT from Scratch</h3>
-      <p>A GPT-style transformer trained from zero on TinyStories. Custom BPE tokenizer, full training pipeline, chat UI, LoRA fine-tuning.</p>
-      <span class="proj-card-tag">PyTorch + Flask →</span>
-    </a>
-    <a class="proj-card" href="learning.html">
-      <div class="proj-card-icon">🧪</div>
-      <h3>Learning & Random Projects</h3>
-      <p>Animations, 3D sculpts, game experiments, and one-off builds — the scratchpad where ideas get tested.</p>
-      <span class="proj-card-tag">Experiments →</span>
-    </a>
-
-    <!-- ── COMING SOON (8 placeholders) ── -->
-    <a class="proj-card" href="llm_guide.html">
-      <div class="proj-card-icon">🧬</div>
-      <h3>Fine-Tuning LLMs on M1</h3>
-      <p>In 2026, you don't build an LLM — you train one that already knows the world. A complete guide to LoRA fine-tuning, validation, and deploying a custom model in Ollama on Apple Silicon.</p>
-      <span class="proj-card-tag">MLX + LoRA + Ollama →</span>
-    </a>
-    <a class="proj-card" href="lidar_deep_dive.html">
-      <div class="proj-card-icon">📡</div>
-      <h3>LiDAR Scanner Deep Dive</h3>
-      <p>Complete technical guide to the LiDAR Scanner Xcode project — time-of-flight physics, ARKit scene reconstruction, Swift mesh capture, and USDZ/OBJ/PLY export on iPad Pro M4.</p>
-      <span class="proj-card-tag">ARKit · RealityKit · SwiftUI →</span>
-    </a>
-    <a class="proj-card" href="rfid_deep_dive.html">
-      <div class="proj-card-icon">📦</div>
-      <h3>RFID Inventory System</h3>
-      <p>End-to-end loss prevention using UHF RFID — tag technology comparison, hardware catalog, iPad + Windows app architecture, real-time theft detection, and automated quarterly shrinkage reports.</p>
-      <span class="proj-card-tag">Swift · Flask · LLRP →</span>
-    </a>
-    <a class="proj-card" href="neural_ir.html">
-      <div class="proj-card-icon">🎸</div>
-      <h3>Neural IR — Storm VST3</h3>
-      <p>6-stage plan to capture the SoloDallas Storm pedal as a neural impulse response — recording 27 measurements, training a TCN in PyTorch, exporting to ONNX, and shipping a VST3 via JUCE.</p>
-      <span class="proj-card-tag">PyTorch · ONNX · JUCE →</span>
-    </a>
-    <a class="proj-card" href="rag_engineering.html">
-      <div class="proj-card-icon">🧠</div>
-      <h3>George RAG Component</h3>
-      <p>Engineering deep dive into the TF-IDF Retrieval-Augmented Generation pipeline added to George — replacing a 6,000-char static dump with sub-millisecond targeted context retrieval. 35 tests · 100% accuracy · 0.98ms latency.</p>
-      <span class="proj-card-tag">Python · Swift · scikit-learn →</span>
-    </a>
-    <a class="proj-card" href="huggingface_guide.html">
-      <div class="proj-card-icon">🤗</div>
-      <h3>Hugging Face LLM Guide</h3>
-      <p>Complete beginner's guide to choosing, downloading, and fine-tuning a Hugging Face LLM locally — questions to ask, environment setup, LoRA training, data strategies, and real-world use cases.</p>
-      <span class="proj-card-tag">Python · transformers · LoRA →</span>
-    </a>
-    <a class="proj-card" href="workflow_training_lora_sms_llm.html">
-      <div class="proj-card-icon">🛡️</div>
-      <h3>LoRA SMS Spam Classifier</h3>
-      <p>Full LoRA fine-tuning workflow on Apple MLX — balanced dataset engineering, loss diagnostics, stress testing, model fusion, and a live spam filter that catches phishing attacks without flagging your friends.</p>
-      <span class="proj-card-tag">MLX · LoRA · Mistral-7B →</span>
-    </a>
-    <a class="proj-card" href="mlx_llm_lab.html">
-      <div class="proj-card-icon">🍎</div>
-      <h3>MLX LLM Lab</h3>
-      <p>A complete line-by-line deep dive into running local AI on Apple Silicon — virtual environments, Metal GPU math, tokenization, KV cache, and the full data flow from keypress to response.</p>
-      <span class="proj-card-tag">MLX · Python · Apple Silicon →</span>
-    </a>
-    <div class="proj-card coming">
-      <div class="proj-card-icon">🛠️</div>
-      <h3>Coming Soon</h3>
-      <p>Next project in progress...</p>
-      <span class="proj-card-tag">Coming Soon</span>
-    </div>
-    <div class="proj-card coming">
-      <div class="proj-card-icon">🛠️</div>
-      <h3>Coming Soon</h3>
-      <p>Next project in progress...</p>
-      <span class="proj-card-tag">Coming Soon</span>
-    </div>
-    <div class="proj-card coming">
-      <div class="proj-card-icon">🛠️</div>
-      <h3>Coming Soon</h3>
-      <p>Next project in progress...</p>
-      <span class="proj-card-tag">Coming Soon</span>
-    </div>
-    <div class="proj-card coming">
-      <div class="proj-card-icon">🛠️</div>
-      <h3>Coming Soon</h3>
-      <p>Next project in progress...</p>
-      <span class="proj-card-tag">Coming Soon</span>
-    </div>
-    <div class="proj-card coming">
-      <div class="proj-card-icon">🛠️</div>
-      <h3>Coming Soon</h3>
-      <p>Next project in progress...</p>
-      <span class="proj-card-tag">Coming Soon</span>
-    </div>
-    <div class="proj-card coming">
-      <div class="proj-card-icon">🛠️</div>
-      <h3>Coming Soon</h3>
-      <p>Next project in progress...</p>
-      <span class="proj-card-tag">Coming Soon</span>
-    </div>
-  </div>
-</section>
-
-<footer>
-  <p>Built with <span>♥</span> on an M1 MacBook Pro &nbsp;·&nbsp; All projects run entirely on Apple Silicon</p>
-</footer>
-</div>
-
-<script>
-// Starfield
-const container = document.getElementById('stars');
-for (let i = 0; i < 120; i++) {
-  const s = document.createElement('div'); s.className = 'star';
-  const size = Math.random() * 2 + 0.5;
-  s.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--dur:${2+Math.random()*4}s;--min-op:${0.05+Math.random()*0.1};--max-op:${0.3+Math.random()*0.5};animation-delay:${Math.random()*5}s;`;
-  container.appendChild(s);
-}
-
-// Bubbles
-(function(){
-  var canvas=document.getElementById('bubbleCanvas'),ctx=canvas.getContext('2d'),W,H;
-  function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
-  resize(); window.addEventListener('resize',resize);
-  var COLORS=[[160,200,255],[200,160,255],[160,255,220],[255,210,160],[160,240,255],[255,170,210]];
-  function rnd(a,b){return a+Math.random()*(b-a);}
-  function Bubble(){this.reset(true);}
-  Bubble.prototype.reset=function(fromRandom){
-    var size=Math.random();
-    if(size<0.5)this.r=rnd(8,18);else if(size<0.82)this.r=rnd(18,36);else this.r=rnd(36,60);
-    this.x=rnd(this.r,W-this.r);this.y=fromRandom?rnd(-200,H):-this.r-rnd(10,80);
-    this.vy=rnd(0.18,0.65)*(1-this.r/120);this.vx=rnd(-0.25,0.25);
-    this.drift=rnd(0.003,0.012);this.driftOff=rnd(0,Math.PI*2);
-    this.hue=Math.floor(rnd(0,COLORS.length));this.shimmer=rnd(0,Math.PI*2);
-    this.shimmerS=rnd(0.012,0.03);this.alpha=rnd(0.06,0.16);
-  };
-  Bubble.prototype.update=function(){
-    this.shimmer+=this.shimmerS;this.driftOff+=this.drift;
-    this.x+=this.vx+Math.sin(this.driftOff)*0.35;this.y+=this.vy;
-    if(this.y-this.r>H)this.reset(false);
-    if(this.x-this.r<0||this.x+this.r>W){this.vx*=-1;this.x=Math.max(this.r,Math.min(W-this.r,this.x));}
-  };
-  Bubble.prototype.draw=function(){
-    var r=this.r,x=this.x,y=this.y,sh=Math.sin(this.shimmer),c=COLORS[this.hue],a=this.alpha;
-    var g1=ctx.createRadialGradient(x,y,r*0.1,x,y,r);
-    g1.addColorStop(0,'rgba(255,255,255,0)');g1.addColorStop(0.45,'rgba('+c[0]+','+c[1]+','+c[2]+','+(a*0.5+0.02*sh)+')');
-    g1.addColorStop(0.8,'rgba('+c[0]+','+c[1]+','+c[2]+','+(a*1.1)+')');g1.addColorStop(1,'rgba('+c[0]+','+c[1]+','+c[2]+','+(a*1.8)+')');
-    ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=g1;ctx.fill();
-    ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.strokeStyle='rgba(255,255,255,'+(a*1.6+0.04*sh)+')';ctx.lineWidth=0.8;ctx.stroke();
-    var sx=x-r*0.3,sy=y-r*0.35,sr=r*0.28,gs=ctx.createRadialGradient(sx,sy,0,sx,sy,sr);
-    gs.addColorStop(0,'rgba(255,255,255,'+(a*3.5)+')');gs.addColorStop(0.5,'rgba(255,255,255,'+(a*1.2)+')');gs.addColorStop(1,'rgba(255,255,255,0)');
-    ctx.beginPath();ctx.ellipse(sx,sy,sr,sr*0.55,-0.4,0,Math.PI*2);ctx.fillStyle=gs;ctx.fill();
-  };
-  var bubbles=[];for(var i=0;i<35;i++)bubbles.push(new Bubble());
-  var lastT=0;
-  function loop(ts){var dt=Math.min((ts-lastT)/1000,0.05);lastT=ts;ctx.clearRect(0,0,W,H);
-    bubbles.forEach(function(b){b.update(dt);});
-    bubbles.slice().sort(function(a,b){return a.r-b.r;}).forEach(function(b){b.draw();});
-    requestAnimationFrame(loop);}
-  requestAnimationFrame(function(t){lastT=t;requestAnimationFrame(loop);});
-})();
-
-// George video orb
-(function(){
-  var orb=document.getElementById('heroOrb'),overlay=document.getElementById('hearOverlay');
-  var allVids=[];for(var i=1;i<=11;i++)allVids.push(document.getElementById('vid'+i));
-  var unlocked=false,shuffled=[],shuffleIdx=0;
-  function shuffle(arr){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
-  function nextVid(){if(shuffleIdx>=shuffled.length){var last=shuffled[shuffled.length-1];shuffled=shuffle(allVids);if(shuffled[0]===last)shuffled.push(shuffled.shift());shuffleIdx=0;}return shuffled[shuffleIdx++];}
-  overlay.addEventListener('click',function(e){e.stopPropagation();unlocked=true;overlay.style.opacity='0';overlay.style.pointerEvents='none';allVids.forEach(function(v){if(!v.paused){v.muted=false;v.volume=1;}});});
-  function play(vid,cb){orb.style.opacity='0';allVids.forEach(function(v){v.style.opacity='0';});vid.currentTime=0;vid.muted=!unlocked;vid.volume=1;vid.style.opacity='1';vid.onended=cb;vid.play().catch(function(){vid.muted=true;vid.play();});}
-  function playNext(){play(nextVid(),function(){playNext();});}
-  window.addEventListener('load',function(){shuffled=shuffle(allVids);shuffleIdx=0;setTimeout(playNext,800);});
-})();
-</script>
 </body>
 </html>
