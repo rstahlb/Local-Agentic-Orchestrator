@@ -1,13 +1,12 @@
 # 🚀 High-Performance Local AI Orchestration & Systems Core
 **Robin Stahlbaum** · Senior SRE & Edge AI Systems Architect 
-📍 Mississauga, ON | 🌐 [Live Interactive Portal Dashboard](https://github.io)
+📍 Mississauga, ON
 
 ---
 
 ## 📄 Verified Engineering Assets
 * **Master Professional Resume (Markdown Format):** [View Resume Source Code](./Robin_Stahlbaum_Resume.md)
 * **Download Compiled Vector Document (Print Ready):** [Robin_Stahlbaum_Resume.pdf](./Robin_Stahlbaum_Resume.pdf)
-* **Interactive Live Portfolio Dashboard (Web UI):** [Launch Live Interface](https://github.io)
 
 ---
 
